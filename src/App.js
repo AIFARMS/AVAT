@@ -89,6 +89,7 @@ var Fabric = createReactClass({
 
 var player_add;
 
+
 var NewObjects = createReactClass({
 	mixins: [reactor.ReactMixin],
   getDataBindings() {
@@ -103,23 +104,16 @@ var NewObjects = createReactClass({
       //<input type="file" id="video_submit" value="none"/> //onClick={this.addKanalImg}/>
       return (
       <div style={{float: "right"}}>
-        <br></br>
         <button onClick={this.addSquare} style={{position:"relative"}}>Add Square</button>
-        <br></br>
         <button onClick={this.remove} style={{position:"relative"}}>Remove</button>
-        <br></br>
-        
       </div>
       );
     } else {
     	// an object is selected so lets interact with it
     	return (
         <div style={{float: "right"}}>
-          <br></br>
           <button onClick={this.addSquare} style={{position:"relative"}}>Add Square</button>
-          <br></br>
           <button onClick={this.remove} style={{position:"relative"}}>Remove</button>
-          <br></br>
         </div>
       );
     }//else {
@@ -139,6 +133,8 @@ var NewObjects = createReactClass({
       opacity: '.4',
       top: fabricCanvas.height / 2,
       left: fabricCanvas.width / 2,
+    }, function(drop){
+        console.log(drop)
     })
   	fabricCanvas.add(bounding_box);
     fabricCanvas.setActiveObject(bounding_box);
@@ -272,7 +268,7 @@ function App() {
       <ReactPlayer onProgress={handleSetCurrentFrame} ref={handleSetPlayer} onDuration={handleSetDuration} url={videoFilePath} width="90%" height="90%" playing={playing} controls={false} style={{position:'realtive', float:'left'}}/>
       <Fabric/>
       <input
-        slider-width={fabricCanvas.width}
+        width="100%"
         type='range' min={0} max={0.999999} step='any'
         value={sliderPercent}
         onMouseDown={handleSeekMouseDown}
