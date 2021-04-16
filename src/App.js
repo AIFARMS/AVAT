@@ -7,6 +7,9 @@ const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
 const createReactClass = require('create-react-class');
 
+var frame_rate = 15;
+var current_annotation_data = []
+
 var keyMirror = function(obj) {
   var ret = {};
   var key;
@@ -26,6 +29,7 @@ var keys = keyMirror({ fabricData: null, activeObject: null });
 
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas();
+var canvas_DOM;
 
 // A place to put fabric data
 var fabricStore = Nuclear.Store({
@@ -56,11 +60,12 @@ reactor.registerStores({
 var Fabric = createReactClass({
 	componentDidMount() {
   	var el = ReactDOM.findDOMNode(this);
+    canvas_DOM = el
     
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
-    	height: window.innerHeight * .75,
-      width: window.innerWidth-200 * .75,
+    	height: window.innerHeight*.95,
+      width: ((window.innerHeight * .9)/9)*16,
       backgroundColor : null,
     });
     
@@ -102,6 +107,8 @@ var NewObjects = createReactClass({
         <button onClick={this.addSquare} style={{position:"relative"}}>Add Square</button>
         <br></br>
         <button onClick={this.remove} style={{position:"relative"}}>Remove</button>
+        <br></br>
+        
       </div>
       );
     } else {
@@ -112,6 +119,7 @@ var NewObjects = createReactClass({
           <button onClick={this.addSquare} style={{position:"relative"}}>Add Square</button>
           <br></br>
           <button onClick={this.remove} style={{position:"relative"}}>Remove</button>
+          <br></br>
         </div>
       );
     }//else {
@@ -152,11 +160,11 @@ var ActiveObject = createReactClass({
   },
   render: function() {
     //return null;
-    console.log(fabricCanvas.getActiveObject())
+    console.log(this.state.activeObject)
   	if (this.state.fabricObject) {
     	// if an object exists in state we can acess the data from any where in the app
     	var fill = this.state.fabricObject.get('fill');
-      console.log((fabricCanvas.getObjects()))
+      console.log((fabricCanvas.getActiveObject()))
       return (<div>
         <div><b>Active Object</b></div>
         <div>fill: <span style={{ color: fill}}>{this.state.fabricObject.get('fill')}</span></div>
@@ -173,26 +181,112 @@ var ActiveObject = createReactClass({
   },
 });
 
+
+//Current frame counter
 function App() {
   const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
     setVideoFileURL(URL.createObjectURL(event.target.files[0]));
     };
+
+
   const [videoFilePath1, setVideoFileURL1] = useState(null);
   const handleVideoUpload1 = (event) => {
-    setVideoFileURL(URL.createObjectURL(event.target.files[0]));
+    setVideoFileURL1(URL.createObjectURL(event.target.files[0]));
     };
+  
+
+  const [playing, setPlaying] = useState(false);
+  const handlePlaying = (event) => {
+    setPlaying(!playing)
+  }
+
+  const [seeking, setSeeking] = useState(false)
+  const [sliderPercent, setSliderPercent] = useState(0)
+
+  const handleSeekChange = e => {
+    setSliderPercent(parseFloat(e.target.value))
+  }
+
+  const handleSeekMouseDown = e => {
+    setSeeking(true)
+  }
+
+  const handleSeekMouseUp = e => {
+    setSeeking(false)
+    player.seekTo(parseFloat(e.target.value))
+  }
+
+  const [player, setPlayer] = useState(null)
+  const handleSetPlayer = val => {
+    setPlayer(val)
+  }
+
+  const [duration, setDuration] = useState(0);
+  const handleSetDuration = val => {
+    setDuration(parseInt(val))
+    console.log(val)
+  }
+
+  const [currentFrame, setCurrentFrame] = useState(0)
+  const handleSetCurrentFrame = val => {
+    console.log(val)
+    var total_frames = duration * frame_rate
+    setCurrentFrame(val['played']*total_frames)
+  }
+
+  const skip_frame_forward = e =>{
+    var total_frames = duration * frame_rate
+    player.seekTo((((player.getCurrentTime()/duration)*total_frames)+1)/(total_frames))
+  }
+
+  const skip_frame_backward = e => {
+    var total_frames = duration * frame_rate
+    player.seekTo((((player.getCurrentTime()/duration)*total_frames)-1)/(total_frames))
+  }
+
+  const downloadFile = async () => {
+    const fileName = "generated_annotations";
+    const json = JSON.stringify(fabricCanvas.getObjects());
+    const blob = new Blob([json],{type:'application/json'});
+    const href = await URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = fileName + ".json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   return (
     <div className="App">
       <div style={{ float: 'right' , position:'relative'}}>
-    		<ActiveObject />
+        <button onClick={skip_frame_backward}>Prev Frame</button>
+        <button onClick={handlePlaying}>Pause</button>
+        <button onClick={skip_frame_forward}>Next Frame</button>
+        <button onClick={downloadFile}>GENERATE JSON</button>
+        Frame # {parseInt(currentFrame)}
     		<NewObjects />
       </div>
       <input type="file" onChange={handleVideoUpload} />
-      <ReactPlayer url={videoFilePath} width="75%" height="75%" controls={false} style={{position:'absolute'}}/>
+      <ReactPlayer onProgress={handleSetCurrentFrame} ref={handleSetPlayer} onDuration={handleSetDuration} url={videoFilePath} width="90%" height="90%" playing={playing} controls={false} style={{position:'realtive', float:'left'}}/>
       <Fabric/>
+      <input
+        slider-width={fabricCanvas.width}
+        type='range' min={0} max={0.999999} step='any'
+        value={sliderPercent}
+        onMouseDown={handleSeekMouseDown}
+        onChange={handleSeekChange}
+        onMouseUp={handleSeekMouseUp}
+      />
     </div>
   );
 }
+      //<ActiveObject />
+      //<input type="file" onChange={handleVideoUpload1} />
+      //<div>
+        //<ReactPlayer url={videoFilePath1} width="50%" height="50%" controls={true} style={{position:'relative', float:'left'}}/>
+        //<Fabric/>
+      //</div>
 
 export default App;
