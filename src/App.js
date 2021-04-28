@@ -124,6 +124,8 @@ var NewObjects = createReactClass({
   addSquare() {
     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
     var bounding_box = new fabric.Rect({
+      hasRotatingPoint: false,
+      uniScaleTransform: true,
     	height: 50,
     	width: 50,
       originX: 'center',
@@ -177,19 +179,22 @@ var ActiveObject = createReactClass({
   },
 });
 
+var frame_data = [];
+var upload = false;
 
 //Current frame counter
 function App() {
   const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
     setVideoFileURL(URL.createObjectURL(event.target.files[0]));
-    };
+    upload = true;
+  };
 
 
   const [videoFilePath1, setVideoFileURL1] = useState(null);
   const handleVideoUpload1 = (event) => {
     setVideoFileURL1(URL.createObjectURL(event.target.files[0]));
-    };
+  };
   
 
   const [playing, setPlaying] = useState(false);
@@ -216,6 +221,12 @@ function App() {
   const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
     setPlayer(val)
+    var total_frames = duration * frame_rate
+    if(upload == true && player != null){      
+      console.log("RESET VALUES")
+      frame_data = new Array(7200)
+      upload = false;
+    }
   }
 
   const [duration, setDuration] = useState(0);
@@ -228,11 +239,14 @@ function App() {
   const handleSetCurrentFrame = val => {
     console.log(val)
     var total_frames = duration * frame_rate
-    setCurrentFrame(val['played']*total_frames)
+    setCurrentFrame(Math.round(val['played']*total_frames))
   }
 
   const skip_frame_forward = e =>{
     var total_frames = duration * frame_rate
+    frame_data[currentFrame] = fabricCanvas.toJSON()
+    console.log(currentFrame)
+    console.log(frame_data)
     player.seekTo((((player.getCurrentTime()/duration)*total_frames)+1)/(total_frames))
   }
 
@@ -243,7 +257,8 @@ function App() {
 
   const downloadFile = async () => {
     const fileName = "generated_annotations";
-    const json = JSON.stringify(fabricCanvas.getObjects());
+    //const json = JSON.stringify(fabricCanvas.getObjects());
+    const json = JSON.stringify(frame_data);
     const blob = new Blob([json],{type:'application/json'});
     const href = await URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -265,7 +280,20 @@ function App() {
     		<NewObjects />
       </div>
       <input type="file" onChange={handleVideoUpload} />
-      <ReactPlayer onProgress={handleSetCurrentFrame} ref={handleSetPlayer} onDuration={handleSetDuration} url={videoFilePath} width="90%" height="90%" playing={playing} controls={false} style={{position:'realtive', float:'left'}}/>
+      <ReactPlayer 
+        onProgress={handleSetCurrentFrame} 
+        ref={handleSetPlayer} 
+        onDuration={handleSetDuration} 
+        url={videoFilePath} 
+        width="90%" height="90%" 
+        playing={playing} 
+        controls={false} 
+        style={{position:'realtive', float:'left'}}
+        volume={0}
+        muted={true}
+        pip={false}
+        
+      />
       <Fabric/>
       <input
         width="100%"
