@@ -1,22 +1,25 @@
 {
   "files": {
-    "main.css": "/pig-annotation-tool/static/css/main.5f361e03.chunk.css",
-    "main.js": "/pig-annotation-tool/static/js/main.2c86e5e6.chunk.js",
-    "main.js.map": "/pig-annotation-tool/static/js/main.2c86e5e6.chunk.js.map",
+    "main.css": "/pig-annotation-tool/static/css/main.7f904051.chunk.css",
+    "main.js": "/pig-annotation-tool/static/js/main.5972b17c.chunk.js",
+    "main.js.map": "/pig-annotation-tool/static/js/main.5972b17c.chunk.js.map",
     "runtime-main.js": "/pig-annotation-tool/static/js/runtime-main.aae850be.js",
     "runtime-main.js.map": "/pig-annotation-tool/static/js/runtime-main.aae850be.js.map",
-    "static/js/2.be8580f4.chunk.js": "/pig-annotation-tool/static/js/2.be8580f4.chunk.js",
-    "static/js/2.be8580f4.chunk.js.map": "/pig-annotation-tool/static/js/2.be8580f4.chunk.js.map",
+    "static/css/2.9233ae65.chunk.css": "/pig-annotation-tool/static/css/2.9233ae65.chunk.css",
+    "static/js/2.32fa1bec.chunk.js": "/pig-annotation-tool/static/js/2.32fa1bec.chunk.js",
+    "static/js/2.32fa1bec.chunk.js.map": "/pig-annotation-tool/static/js/2.32fa1bec.chunk.js.map",
     "index.html": "/pig-annotation-tool/index.html",
-    "precache-manifest.d5f6efa76b96240b72a35533ebdf0f2b.js": "/pig-annotation-tool/precache-manifest.d5f6efa76b96240b72a35533ebdf0f2b.js",
+    "precache-manifest.972f039773fb17af6cd79732b234cfe8.js": "/pig-annotation-tool/precache-manifest.972f039773fb17af6cd79732b234cfe8.js",
     "service-worker.js": "/pig-annotation-tool/service-worker.js",
-    "static/css/main.5f361e03.chunk.css.map": "/pig-annotation-tool/static/css/main.5f361e03.chunk.css.map",
-    "static/js/2.be8580f4.chunk.js.LICENSE.txt": "/pig-annotation-tool/static/js/2.be8580f4.chunk.js.LICENSE.txt"
+    "static/css/2.9233ae65.chunk.css.map": "/pig-annotation-tool/static/css/2.9233ae65.chunk.css.map",
+    "static/css/main.7f904051.chunk.css.map": "/pig-annotation-tool/static/css/main.7f904051.chunk.css.map",
+    "static/js/2.32fa1bec.chunk.js.LICENSE.txt": "/pig-annotation-tool/static/js/2.32fa1bec.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.aae850be.js",
-    "static/js/2.be8580f4.chunk.js",
-    "static/css/main.5f361e03.chunk.css",
-    "static/js/main.2c86e5e6.chunk.js"
+    "static/css/2.9233ae65.chunk.css",
+    "static/js/2.32fa1bec.chunk.js",
+    "static/css/main.7f904051.chunk.css",
+    "static/js/main.5972b17c.chunk.js"
   ]
 }
