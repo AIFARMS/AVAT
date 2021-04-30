@@ -3,12 +3,19 @@ import ReactDOM from 'react-dom'
 import './App.css';
 import ReactPlayer from 'react-player'
 
+import Button from 'react-bootstrap/Button'
+import Navbar from 'react-bootstrap/Navbar'
+import Nav from 'react-bootstrap/Nav'
+import Modal from 'react-bootstrap/Modal'
+import Form from 'react-bootstrap/Form'
+
+import Custon_Nav_Bar from './ui_elements/nav_bar'
+
 const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
 const createReactClass = require('create-react-class');
 
 var frame_rate = 15;
-var current_annotation_data = []
 
 var keyMirror = function(obj) {
   var ret = {};
@@ -29,7 +36,6 @@ var keys = keyMirror({ fabricData: null, activeObject: null });
 
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas();
-var canvas_DOM;
 
 // A place to put fabric data
 var fabricStore = Nuclear.Store({
@@ -60,12 +66,11 @@ reactor.registerStores({
 var Fabric = createReactClass({
 	componentDidMount() {
   	var el = ReactDOM.findDOMNode(this);
-    canvas_DOM = el
     
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
     	height: window.innerHeight*.95,
-      width: ((window.innerHeight * .9)/9)*16,
+      width: window.innerWidth * .95,
       backgroundColor : null,
     });
     
@@ -87,7 +92,6 @@ var Fabric = createReactClass({
   }
 });
 
-var player_add;
 
 
 var NewObjects = createReactClass({
@@ -99,21 +103,21 @@ var NewObjects = createReactClass({
     };
   },
   render: function() {
-  	if (this.state.fabricData.get('objects').size == 0) {
+  	if (this.state.fabricData.get('objects').size === 0) {
     	// no object is on the canvas so show interface to add one
       //<input type="file" id="video_submit" value="none"/> //onClick={this.addKanalImg}/>
       return (
       <div style={{float: "right"}}>
-        <button onClick={this.addSquare} style={{position:"relative"}}>Add Square</button>
-        <button onClick={this.remove} style={{position:"relative"}}>Remove</button>
+        <Button onClick={this.addSquare} style={{position:"relative"}}>Add Square</Button>{' '}
+        <Button onClick={this.remove} style={{position:"relative"}}>Remove</Button>{' '}
       </div>
       );
     } else {
     	// an object is selected so lets interact with it
     	return (
         <div style={{float: "right"}}>
-          <button onClick={this.addSquare} style={{position:"relative"}}>Add Square</button>
-          <button onClick={this.remove} style={{position:"relative"}}>Remove</button>
+          <Button onClick={this.addSquare} style={{position:"relative"}}>Add Square</Button>{' '}
+          <Button onClick={this.remove} style={{position:"relative"}}>Remove</Button>{' '}
         </div>
       );
     }//else {
@@ -221,8 +225,7 @@ function App() {
   const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
     setPlayer(val)
-    var total_frames = duration * frame_rate
-    if(upload == true && player != null){      
+    if(upload === true && player != null){      
       console.log("RESET VALUES")
       frame_data = new Array(7200)
       upload = false;
@@ -235,12 +238,16 @@ function App() {
     console.log(val)
   }
 
+  var tot = 0
+
   const [currentFrame, setCurrentFrame] = useState(0)
   const handleSetCurrentFrame = val => {
     console.log(val)
     var total_frames = duration * frame_rate
+    tot = total_frames
     setCurrentFrame(Math.round(val['played']*total_frames))
   }
+
 
   const skip_frame_forward = e =>{
     var total_frames = duration * frame_rate
@@ -254,6 +261,8 @@ function App() {
     var total_frames = duration * frame_rate
     player.seekTo((((player.getCurrentTime()/duration)*total_frames)-1)/(total_frames))
   }
+
+  
 
   const downloadFile = async () => {
     const fileName = "generated_annotations";
@@ -269,17 +278,45 @@ function App() {
     document.body.removeChild(link);
   }
 
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
   return (
-    <div className="App">
+    <div>
+      <Navbar bg="dark" variant="dark">
+          <Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
+          <Nav className="mr-auto">
+              <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
+          </Nav>
+          <div>
+            <Button variant="secondary" disabled="true">Frame # {parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}</Button>
+            <Form style={{float: "left"}}>
+              <Form.File id="file" label="Annotation Upload" custom type="file"/>
+            </Form>
+            <Form style={{float: "left"}}>
+              <Form.File id="file" label="Video Upload" custom type="file" onChange={handleVideoUpload} />
+            </Form>
+            <Button variant="primary" onClick={skip_frame_backward}>Prev Frame</Button>{' '}
+            <Button variant="primary" onClick={handlePlaying}>Pause</Button>{' '}
+            <Button variant="primary" onClick={skip_frame_forward}>Next Frame</Button>{' '}
+            <Button variant="primary" onClick={downloadFile}>GENERATE JSON</Button>{' '}
+            <NewObjects />
+          </div>
+      </Navbar>
+      <Modal show={show} onHide={handleClose}>
+          <Modal.Header closeButton>
+          <Modal.Title>Instructions</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>TODO: Add instructions</Modal.Body>
+          <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>Close</Button>
+          </Modal.Footer>
+      </Modal>
       <div style={{ float: 'right' , position:'relative'}}>
-        <button onClick={skip_frame_backward}>Prev Frame</button>
-        <button onClick={handlePlaying}>Pause</button>
-        <button onClick={skip_frame_forward}>Next Frame</button>
-        <button onClick={downloadFile}>GENERATE JSON</button>
-        Frame # {parseInt(currentFrame)}
-    		<NewObjects />
+
       </div>
-      <input type="file" onChange={handleVideoUpload} />
       <ReactPlayer 
         onProgress={handleSetCurrentFrame} 
         ref={handleSetPlayer} 
