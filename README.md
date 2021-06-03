@@ -38,15 +38,14 @@ If the goal is to simply access the website then go to the ```build``` folder to
 ### Deployment
 * - [x] Have testing build pre-compiled
 * - [ ] Live website
-* - [ ] Dev website
+* - [x] Dev website
 
 ### View
-* - [ ] Button for uploading video
+* - [x] Button for uploading video
 * - [x] Add bounding boxes
 * - [x] Bounding boxes have differennt colors
 * - [ ] Have two videos playing simultaneously
 * - [ ] Show current annotaionns on the side
-* - [ ] Add 
 
 ### Data Management
 * - [ ] Global ID
