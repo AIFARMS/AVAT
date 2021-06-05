@@ -355,9 +355,9 @@ function MainUpload() {
             <Form style={{float: "left", width: 80}}>
               <Form.File id="file" label="Video Upload" custom type="file" onChange={handleVideoUpload} />
             </Form>
-            <Button variant="primary" onClick={skip_frame_backward}>Prev Frame</Button>{' '}
+            <Button variant="primary" onClick={skip_frame_backward}>Prev</Button>{' '}
             <Button variant="primary" onClick={handlePlaying}>{play_button_text}</Button>{' '}
-            <Button variant="primary" onClick={skip_frame_forward}>Next Frame</Button>{' '}
+            <Button variant="primary" onClick={skip_frame_forward}>Next</Button>{' '}
             <NewObjects />
           </div>
       </Navbar>
