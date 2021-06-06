@@ -17,6 +17,12 @@ const columns = [{
 },{
     dataField: "is_hidden",
     text: "Hidden"
+},{
+    dataField: "x_cor",
+    text: "X"
+},{
+    dataField: "y_cor",
+    text: "Y"
 }]
 
 function json_to_table(data){
@@ -26,10 +32,10 @@ function json_to_table(data){
     }
     console.log(data['objects'])
     for(var i = 0; i < data['objects'].length; i++){
-        var curr = []
         const elem_id = i + 1
-        curr.push({id: parseInt(elem_id), behavior: "None", is_hidden: "False"})        
-        ret.push(curr)
+        var curr_obj = data['objects'][i]
+        console.log(curr_obj['left'])
+        ret.push({id: elem_id.toString(), behavior: "None", is_hidden: "False", x_cor: curr_obj['left'], y_cor: curr_obj['top']})        
     }
     console.log(ret)
     return ret

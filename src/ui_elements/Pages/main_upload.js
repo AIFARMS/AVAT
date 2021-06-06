@@ -16,6 +16,8 @@ import Annotation from '../../backend_processing/annotation'
 import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
+import { BoundingBox } from '../../backend_processing/bounding_box'
+
 const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
 const createReactClass = require('create-react-class');
@@ -116,7 +118,7 @@ var NewObjects = createReactClass({
       //<input type="file" id="video_submit" value="none"/> //onClick={this.addKanalImg}/>
       return (
       <div style={{float: "right"}}>
-        <Button onClick={this.addSquare} style={{position:"relative"}}>Add Square</Button>{' '}
+        <Button onClick={this.addGroup} style={{position:"relative"}}>Add Square</Button>{' '}
         <Button onClick={this.remove} style={{position:"relative"}}>Remove</Button>{' '}
       </div>
       );
@@ -124,7 +126,7 @@ var NewObjects = createReactClass({
     	// an object is selected so lets interact with it
     	return (
         <div style={{float: "right"}}>
-          <Button onClick={this.addSquare} style={{position:"relative"}}>Add Square</Button>{' '}
+          <Button onClick={this.addGroup} style={{position:"relative"}}>Add Square</Button>{' '}
           <Button onClick={this.remove} style={{position:"relative"}}>Remove</Button>{' '}
         </div>
       );
@@ -152,6 +154,13 @@ var NewObjects = createReactClass({
     })
   	fabricCanvas.add(bounding_box);
     fabricCanvas.setActiveObject(bounding_box);
+    fabricCanvas.fire('saveData');
+  },
+  addGroup(){
+    var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
+    var new_bbox = new BoundingBox(fabricCanvas, color, 1, "id: 1").generate()
+    fabricCanvas.add(new_bbox);
+    fabricCanvas.setActiveObject(new_bbox);
     fabricCanvas.fire('saveData');
   },
   remove() {
@@ -300,7 +309,7 @@ function MainUpload() {
     player.seekTo((((player.getCurrentTime()/duration)*total_frames)-1)/(total_frames))
   }
 
-  
+  frame_data[currentFrame] = fabricCanvas.toJSON()
 
   const downloadFile = async () => {
     const fileName = "generated_annotations";
