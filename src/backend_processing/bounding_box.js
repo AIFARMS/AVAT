@@ -1,22 +1,22 @@
 const fabric = require("fabric").fabric;
 
 class BoundingBox {
-    constructor(fabricCanvas, color, id, name) {
-        this.top = fabricCanvas.height / 2;
-        this.left = fabricCanvas.width / 2;
+    constructor(top, left, width, height, color, id, behavior) {
+        this.top = top;
+        this.left = left;
         this.id = id;
-        this.name = name;
-        this.color = color
+        this.behavior = behavior;
+        this.color = color;
+        this.width = width;
+        this.height = height;
     }
 
     rectangle(){
         return new fabric.Rect({
             hasRotatingPoint: false,
             uniScaleTransform: true,
-            height: 50,
-            width: 50,
-            originX: 'center',
-            originY: 'center',
+            height: this.width,
+            width: this.height,
             fill: this.color,
             borderColor: '#000',
             opacity: '.4',
@@ -26,25 +26,23 @@ class BoundingBox {
     } 
 
     //TODO Add text scaling
-    rectangle_id(){
-        return new fabric.Text(this.name.toString(), {
+    id_text(){
+        return new fabric.Text(this.id.toString(), {
             fontSize: 10,
-            originX: 'center',
-            originY: 'center',
             top: this.top,
             left: this.left,
             uniScaleTransform: false,
           });
     }
 
-    rectangle_behavior(){
+    behavior(){
 
     }
 
     generate_no_behavior(){
-        return new fabric.Group([this.rectangle() , this.rectangle_id() ], {
-            left: 150,
-            top: 100,
+        return new fabric.Group([this.rectangle() , this.id_text() ], {
+            left: this.left,
+            top: this.top,
           });
     }
 
@@ -53,17 +51,6 @@ class BoundingBox {
     }
 }
 
-var text = new fabric.Text('hello world', {
-  fontSize: 30,
-  originX: 'center',
-  originY: 'center'
-});
-
-/**var group = new fabric.Group([ , text ], {
-  left: 150,
-  top: 100,
-  angle: -10
-});**/
 
 function genetate_bounding_box(){
 

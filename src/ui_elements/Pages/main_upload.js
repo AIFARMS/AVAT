@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useEffect, useState } from "react"; 
 import ReactDOM from 'react-dom'
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,6 +18,7 @@ import { NavDropdown } from "react-bootstrap";
 
 import { BoundingBox } from '../../backend_processing/bounding_box'
 import { wait } from "@testing-library/dom";
+import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
 
 const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
@@ -160,7 +161,7 @@ var NewObjects = createReactClass({
   },
   addGroup(){
     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-    var new_bbox = new BoundingBox(fabricCanvas, color, 1, "id: 1").generate_no_behavior()
+    var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, 1, "id: 1").generate_no_behavior()
     fabricCanvas.add(new_bbox);
     fabricCanvas.setActiveObject(new_bbox);
     fabricCanvas.fire('saveData');
@@ -216,6 +217,9 @@ var global_currFrame = 0;
 
 //Current frame counter
 function MainUpload() {
+
+
+
   const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
     //console.log(oldAnnotation)
@@ -234,11 +238,22 @@ function MainUpload() {
   const handleOldAnnotation = (event) => {
       var promise = downloadOldAnnotation(event)
       promise.then(function (result) {
-        setOldAnnotation(result)
-        var test_Annotation = new Annotation(result)
-        console.log(test_Annotation.getAllObjectByFrame(2));
+        if(result != null){
+          setOldAnnotation(new Annotation(result));
+        }else{
+          console.log("ERROR in upload old_annotation")
+        }
       })
   }
+
+  useEffect(() => {
+    //TODO Find a more elegant solution. This is a temporay patch work.
+    if(oldAnnotation == null){
+      return;
+    }
+    console.log(oldAnnotation)
+    console.log(oldAnnotation.getAllObjectByFrame(2));
+  }, oldAnnotation);
 
   const downloadOldAnnotation = (file) => {
     return new Promise((resolve, reject) => {
@@ -305,6 +320,19 @@ function MainUpload() {
     setSliderPercent(currentFrame/total_frames)
     setCurrentFrame(Math.round(val['played']*total_frames))
     global_currFrame = currentFrame
+
+    if(oldAnnotation != null){ 
+      fabricCanvas.clear();
+      var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), fabricCanvas.width, fabricCanvas.height).generate_frame()
+      for(var i = 0; i < bbox.length; i++){
+        var curr_obj = bbox[i]
+        console.log(curr_obj)
+        fabricCanvas.add(curr_obj);
+        fabricCanvas.setActiveObject(curr_obj);
+        fabricCanvas.fire('saveData');
+      }
+    }
+
   }
 
   const [numBoundingBox, setNumBoundingBox] = useState(0)
@@ -350,7 +378,7 @@ function MainUpload() {
 
   return (
     <div>
-      <Navbar bg="dark" variant="dark" class="bg-5">
+      <Navbar bg="dark" variant="dark" className="bg-5">
           <Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
           <Nav className="mr-auto">
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
