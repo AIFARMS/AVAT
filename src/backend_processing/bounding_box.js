@@ -25,13 +25,15 @@ class BoundingBox {
         });
     } 
 
+    //TODO Add text scaling
     rectangle_id(){
         return new fabric.Text(this.name.toString(), {
-            fontSize: 15,
+            fontSize: 10,
             originX: 'center',
             originY: 'center',
-            top: 0,
-            left: 0
+            top: this.top,
+            left: this.left,
+            uniScaleTransform: false,
           });
     }
 
@@ -39,7 +41,7 @@ class BoundingBox {
 
     }
 
-    generate_without_behavior(){
+    generate_no_behavior(){
         return new fabric.Group([this.rectangle() , this.rectangle_id() ], {
             left: 150,
             top: 100,
@@ -47,7 +49,7 @@ class BoundingBox {
     }
 
     generate_with_behavior(){
-        
+
     }
 }
 

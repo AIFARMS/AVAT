@@ -13,10 +13,10 @@ const columns = [{
     text: "ID"
 },{
     dataField: "behavior",
-    text: "Behavior"
+    text: "Be"
 },{
     dataField: "is_hidden",
-    text: "Hidden"
+    text: "Hid"
 },{
     dataField: "x_cor",
     text: "X"
@@ -30,14 +30,12 @@ function json_to_table(data){
     if(data == null){
         return []
     }
-    console.log(data['objects'])
     for(var i = 0; i < data['objects'].length; i++){
         const elem_id = i + 1
         var curr_obj = data['objects'][i]
         console.log(curr_obj['left'])
         ret.push({id: elem_id.toString(), behavior: "None", is_hidden: "False", x_cor: curr_obj['left'], y_cor: curr_obj['top']})        
     }
-    console.log(ret)
     return ret
 }
 

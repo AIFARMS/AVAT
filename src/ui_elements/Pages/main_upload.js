@@ -17,6 +17,7 @@ import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
 import { BoundingBox } from '../../backend_processing/bounding_box'
+import { wait } from "@testing-library/dom";
 
 const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
@@ -86,6 +87,7 @@ var Fabric = createReactClass({
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
+      frame_data[global_currFrame] = fabricCanvas.toJSON()
       reactor.dispatch(keys.fabricData, fabricCanvas.toObject());
       reactor.dispatch(keys.activeObject, !!fabricCanvas.getActiveObject());
     });
@@ -158,7 +160,7 @@ var NewObjects = createReactClass({
   },
   addGroup(){
     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-    var new_bbox = new BoundingBox(fabricCanvas, color, 1, "id: 1").generate()
+    var new_bbox = new BoundingBox(fabricCanvas, color, 1, "id: 1").generate_no_behavior()
     fabricCanvas.add(new_bbox);
     fabricCanvas.setActiveObject(new_bbox);
     fabricCanvas.fire('saveData');
@@ -210,6 +212,7 @@ function parse_file(file){
 
 var frame_data = [];
 var upload = false;
+var global_currFrame = 0;
 
 //Current frame counter
 function MainUpload() {
@@ -229,15 +232,23 @@ function MainUpload() {
   //ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
   const [oldAnnotation, setOldAnnotation] = useState(null)
   const handleOldAnnotation = (event) => {
+      var promise = downloadOldAnnotation(event)
+      promise.then(function (result) {
+        setOldAnnotation(result)
+        var test_Annotation = new Annotation(result)
+        console.log(test_Annotation.getAllObjectByFrame(2));
+      })
+  }
+
+  const downloadOldAnnotation = (file) => {
     return new Promise((resolve, reject) => {
       var reader = new FileReader();
       reader.onload = function(e) {
-         resolve(setOldAnnotation(JSON.parse(e.target.result)));
+         resolve((JSON.parse(e.target.result)));
       }
-      reader.readAsText(event.target.files[0])
+      reader.readAsText(file.target.files[0])
     })
   }
-    
   
 
   const [playing, setPlaying] = useState(false);
@@ -293,6 +304,13 @@ function MainUpload() {
     tot = total_frames
     setSliderPercent(currentFrame/total_frames)
     setCurrentFrame(Math.round(val['played']*total_frames))
+    global_currFrame = currentFrame
+  }
+
+  const [numBoundingBox, setNumBoundingBox] = useState(0)
+  const handleNumBoundingBox = val => {
+    setNumBoundingBox(numBoundingBox + 1);
+    
   }
 
 

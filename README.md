@@ -49,7 +49,7 @@ If the goal is to simply access the website then go to the ```build``` folder to
 
 ### Data Management
 * - [ ] Global ID
-* - [ ] Export data as CSV or JSON
+* - [x] Export data as CSV or JSON
 * - [ ] Import JSON data from Matlab tool
 * - [ ] Import previous annotation data to continue annotations
 
@@ -69,7 +69,7 @@ If the goal is to simply access the website then go to the ```build``` folder to
 
 ## Authors
 
-* **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - Website Developmennt
+* **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - Web-tool Developmennt
 * **JiangongLi** [jli153](jli153@illinois.edu) - Matlab Tool Development
 
 ## Resources Used
