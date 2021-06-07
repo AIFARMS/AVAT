@@ -15,8 +15,8 @@ class BoundingBox {
         return new fabric.Rect({
             hasRotatingPoint: false,
             uniScaleTransform: true,
-            height: this.width,
-            width: this.height,
+            height: this.height,
+            width: this.width,
             fill: this.color,
             borderColor: '#000',
             opacity: '.4',

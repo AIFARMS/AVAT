@@ -20,7 +20,9 @@ class FrameBoundingBox {
         return bounding_boxes
     }
 
-
+    getID(data){
+        return data['id']
+    }
 
     getWidth(data){
         return Math.floor((data['bbox']['width']/this.windowWidth)*this.canvas_width)
@@ -31,11 +33,11 @@ class FrameBoundingBox {
     }
 
     getTop(data){
-        return Math.floor((data['bbox']['x']/this.windowWidth)*this.canvas_height)
+        return Math.floor((data['bbox']['y']/this.windowHeight)*this.canvas_height)
     }
 
     getLeft(data){
-        return Math.floor((data['bbox']['y']/this.windowHeight)*this.canvas_height)
+        return Math.floor((data['bbox']['x']/this.windowWidth)*this.canvas_width)
     }
 
 
