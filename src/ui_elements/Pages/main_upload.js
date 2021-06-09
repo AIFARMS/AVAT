@@ -426,13 +426,14 @@ function MainUpload() {
           </Modal.Footer>
       </Modal>
       <div style={{display: "flex"}}>
-        <div style={{position: "relative"}}>
+        <div style={{position: "relative", width: window.innerWidth * scaling_factor, height: window.innerHeight * scaling_factor}}>
           <ReactPlayer 
             onProgress={handleSetCurrentFrame} 
             ref={handleSetPlayer} 
             onDuration={handleSetDuration} 
             url={videoFilePath} 
-            width={window.innerWidth * scaling_factor} height={window.innerHeight * scaling_factor}
+            width='100%'
+            height='99.999%'
             playing={playing} 
             controls={false} 
             style={{position:'realtive', float:'left'}}

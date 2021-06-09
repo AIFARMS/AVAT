@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "https://aifarms.github.io/pig-annotation-tool/",
   "dependencies": {
-    "@reduxjs/toolkit": "^1.5.1",
+    "@reduxjs/toolkit": "^1.6.0",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
@@ -14,19 +14,19 @@
     "file-saver": "^2.0.5",
     "nuclear-js": "^1.4.0",
     "react": "^16.13.1",
-    "react-bootstrap": "^1.5.2",
+    "react-bootstrap": "^1.6.1",
     "react-bootstrap-table-next": "^4.0.3",
     "react-dom": "^16.13.1",
     "react-player": "^2.9.0",
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.3"
+    "react-scripts": "^3.4.4"
   },
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "start": "NODE_ENV=production node_modules/react-scripts/bin/react-scripts.js start",
-    "build": "react-scripts build",
+    "build": "NODE_ENV=production node_modules/react-scripts/bin/react-scripts.js build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -46,6 +46,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^3.1.0"
+    "gh-pages": "^3.2.0"
   }
 }
