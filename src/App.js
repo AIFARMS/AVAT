@@ -1,3 +1,7 @@
+/**
+ * @author Pradeep Senthil (pks3@illinois.edu)
+ */
+
 import React, { useState } from "react"; 
 import ReactDOM from 'react-dom'
 import './App.css';

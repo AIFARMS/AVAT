@@ -16,6 +16,7 @@
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.1",
     "react-bootstrap-table-next": "^4.0.3",
+    "react-bootstrap-table2-editor": "^1.4.0",
     "react-dom": "^16.13.1",
     "react-player": "^2.9.0",
     "react-redux": "^7.2.4",

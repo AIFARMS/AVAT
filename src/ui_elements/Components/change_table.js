@@ -1,28 +1,33 @@
 import React, { useState } from "react"; 
-import ReactDOM from 'react-dom'
-import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Table from 'react-bootstrap/Table'
-
 import BootstrapTable from 'react-bootstrap-table-next';
+import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+
+import {behaviors} from '../../static_data/behaviors'
+import {posture} from '../../static_data/posture'
 
 const columns = [{
     dataField: "id",
     text: "ID"
 },{
     dataField: "behavior",
-    text: "Be"
+    text: "Beh",
+    editor: {
+        type: Type.SELECT,
+        options: behaviors
+      }
 },{
     dataField: "is_hidden",
     text: "Hid"
 },{
-    dataField: "x_cor",
-    text: "X"
-},{
-    dataField: "y_cor",
-    text: "Y"
+    dataField: "posture",
+    text: "Pos",
+    editor: {
+        type: Type.SELECT,
+        options: {posture}
+      }
 }]
 
 function json_to_table(data){
@@ -34,7 +39,7 @@ function json_to_table(data){
         const elem_id = i + 1
         var curr_obj = data['objects'][i]
         console.log(curr_obj['left'])
-        ret.push({id: elem_id.toString(), behavior: "None", is_hidden: "False", x_cor: curr_obj['left'], y_cor: curr_obj['top']})        
+        ret.push({id: elem_id.toString(), behavior: "None", is_hidden: "False", posture: "None"})        
     }
     return ret
 }
@@ -44,7 +49,7 @@ function ChangeTable(input){
     const data = json_to_table(input.data)
     return (
         <div style={{width: "15%"}}>
-            <BootstrapTable condensed={true} keyField='id' data={data} columns={ columns } />
+            <BootstrapTable condensed={true} keyField='id' data={data} columns={ columns } cellEdit={ cellEditFactory({ mode: 'click', blurToSave: true }) }/>
         </div>
     )
 }

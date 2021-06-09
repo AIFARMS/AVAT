@@ -12,7 +12,7 @@ import Table from 'react-bootstrap/Table'
 
 //import Custon_Nav_Bar from '../backend_processing/nav_bar'
 
-import Annotation from '../../backend_processing/annotation'
+import AnnotationProcessing from '../../backend_processing/annotation-processing'
 import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
@@ -239,7 +239,7 @@ function MainUpload() {
       var promise = downloadOldAnnotation(event)
       promise.then(function (result) {
         if(result != null){
-          setOldAnnotation(new Annotation(result));
+          setOldAnnotation(new AnnotationProcessing(result));
         }else{
           console.log("ERROR in upload old_annotation")
         }

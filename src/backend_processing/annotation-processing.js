@@ -1,4 +1,4 @@
-export default class Annotation {
+export default class AnnotationProcessing {
     constructor(annotation_json){
         this.objects = annotation_json['objects']
         console.log(this.objects)
