@@ -74,7 +74,7 @@ reactor.registerStores({
 var Fabric = createReactClass({
 	componentDidMount() {
   	var el = ReactDOM.findDOMNode(this);
-    
+    {alert("Please use the upload functionality. This is a Alpha version and some features may be missing or broken. The video upload option should have the latest features and bug fixes. This sign will be updated when the youtube option is functional. ")}
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
     	height: window.innerHeight* scaling_factor,
@@ -96,6 +96,7 @@ var Fabric = createReactClass({
     });
   }, 
   render() {
+    
     return <canvas></canvas>
   }
 });
@@ -323,6 +324,7 @@ function MainYoutube() {
 
   return (
     <div>
+      
       <Navbar bg="dark" variant="dark" class="bg-5">
           <Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
           <Nav className="mr-auto">

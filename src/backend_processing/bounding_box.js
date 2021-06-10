@@ -28,7 +28,7 @@ class BoundingBox {
     //TODO Add text scaling
     id_text(){
         return new fabric.Text(this.id.toString(), {
-            fontSize: 10,
+            fontSize: 20,
             top: this.top,
             left: this.left,
             uniScaleTransform: false,
@@ -43,6 +43,7 @@ class BoundingBox {
         return new fabric.Group([this.rectangle() , this.id_text() ], {
             left: this.left,
             top: this.top,
+            uniScaleTransform: true
           });
     }
 

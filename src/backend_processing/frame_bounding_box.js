@@ -6,7 +6,7 @@ class FrameBoundingBox {
         this.canvas_width = canvas_width;
         this.canvas_height = canvas_height;
         this.windowWidth = 3840;
-        this.windowHeight = 2160;
+        this.windowHeight = 2178;
     }
 
     generate_frame(){

@@ -4,9 +4,11 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
+import MainUpload from './ui_elements/Pages/main_upload'
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <MainUpload></MainUpload>
   </React.StrictMode>,
   document.getElementById('root')
 );
