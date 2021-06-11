@@ -135,7 +135,7 @@ function MainUpload() {
     }
 
     if (annotationType === 0){
-      annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
+      annotation_data[currentFrame].push({id: boxCount, global_id: -1,behavior: "None", is_hidden: 0, posture: "None"})
       var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
       //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       //fabricCanvas.add(new_bbox)
@@ -289,23 +289,34 @@ function MainUpload() {
 
   const skip_frame_forward = e =>{
     var total_frames = duration * frame_rate
-    player.seekTo((((player.getCurrentTime()/duration)*total_frames)+skip_value)/(total_frames))
+    player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
   }
 
   const skip_frame_backward = e => {
     var total_frames = duration * frame_rate
-    player.seekTo((((player.getCurrentTime()/duration)*total_frames)-skip_value)/(total_frames))
+    player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
   }
 
   //frame_data[currentFrame] = fabricCanvas.toJSON()
 
   const downloadFile = async () => {
-    const fileName = "generated_annotations";
+    var fileName = "generated_annotations";
     //const json = JSON.stringify(fabricCanvas.getObjects());
-    const json = JSON.stringify(frame_data);
-    const blob = new Blob([json],{type:'application/json'});
-    const href = await URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    var json = JSON.stringify(frame_data);
+    var blob = new Blob([json],{type:'application/json'});
+    var href = await URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = href;
+    link.download = fileName + ".json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    fileName = "generated_data";
+    json = JSON.stringify(annotation_data);
+    blob = new Blob([json],{type:'application/json'});
+    href = await URL.createObjectURL(blob);
+    link = document.createElement('a');
     link.href = href;
     link.download = fileName + ".json";
     document.body.appendChild(link);
@@ -376,6 +387,9 @@ function MainUpload() {
   
   useEffect(() => {
     fabricCanvas.clear()
+    if(frame_data[currentFrame] === [] | frame_data[currentFrame] == null){
+      annotation_data[currentFrame] = []
+    }
     console.log(currentFrame)
     fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
       console.log(frame_data[currentFrame])
