@@ -14,10 +14,12 @@ import AnnotationProcessing from '../../backend_processing/annotation-processing
 import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
+//Custom implemented classes
 import { BoundingBox } from '../../backend_processing/bounding_box'
 import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
 import { KeyPoint } from '../../backend_processing/key_point'
 import { FrameData } from '../../backend_processing/frame_data'
+import { Segmentation } from '../../backend_processing/segmentation'
 
 const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
@@ -66,15 +68,27 @@ var global_currFrame = 0;
 
 //Current frame counter
 function MainUpload() {
-
+  
+  const [annotationType, setAnnotationType] = useState(0)
+  const handleAnnotationType = (event) => {
+    console.log(event.target.value)
+  }
+  
   const [boxCount, setBoxCount] = useState(0)
-  const addGroup = () =>{
+  const addToCanvas = () =>{
     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-    var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, 1, "id: 1").generate_no_behavior()
+    
+    if (annotationType === 0){
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, 1, "id: 1").generate_no_behavior()+
+      fabricCanvas.add(new_bbox)
+      fabricCanvas.setActiveObject(new_bbox);
+    }else if (annotationType === 1){
+      var test = new KeyPoint().generate_stick(fabricCanvas)
+    }else if (annotationType === 2){
+      var test1 = new Segmentation().generate_polygon(fabricCanvas)
+    }
+
     setBoxCount(boxCount + 1);
-    var test = new KeyPoint().generate_stick(fabricCanvas)
-    fabricCanvas.add(new_bbox);
-    fabricCanvas.setActiveObject(new_bbox);
     fabricCanvas.fire('saveData');
   }
 
@@ -244,6 +258,18 @@ function MainUpload() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const handleSquareBox = () => {
+    setAnnotationType(0);
+  }
+
+  const handleKeyPoint = () => {
+    setAnnotationType(1);
+  }
+
+  const handleSegmentation = () => {
+    setAnnotationType(2);
+  }
+
   return (
     <div>
       <Navbar bg="dark" variant="dark" className="bg-5">
@@ -252,11 +278,11 @@ function MainUpload() {
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 
               <NavDropdown title="Annotation Type" id="basic-nav-dropdown">
-                <NavDropdown.Item >Square Box</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleSquareBox} >Square Box</NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item >Key Point</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleKeyPoint}>Key Point</NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item >Wire Frame</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleSegmentation}>Segmentation</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="Export" id="basic-nav-dropdown">
@@ -283,7 +309,7 @@ function MainUpload() {
             <Button variant="primary" onClick={skip_frame_forward}>Next</Button>{' '}
             
             <div style={{float: "right"}}>
-              <Button onClick={addGroup} style={{position:"relative"}}>Add</Button>{' '}
+              <Button onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
               <Button onClick={remove} style={{position:"relative"}}>Remove</Button>{' '}
             </div>
 
@@ -318,7 +344,7 @@ function MainUpload() {
         <div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
           <Fabric/>
         </div>
-        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
 
           <input
             style={{width: scaling_factor_width}}
@@ -330,12 +356,12 @@ function MainUpload() {
           />
         </div>
         <div style={{gridColumn: 2, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-          <ChangeTable data={frame_data[currentFrame]} style={{ float: "right"}}/>
         </div>
       </div>
     </div>
   );
 }
 
+//<ChangeTable data={frame_data[currentFrame]} style={{ float: "right"}}/>
 
 export default MainUpload;
