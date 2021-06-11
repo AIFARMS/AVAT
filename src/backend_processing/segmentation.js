@@ -2,7 +2,7 @@ const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
 class Segmentation {
-    generate_polygon(canvas){
+    generate_polygon(canvas, id){
         var min = 99;
         var max = 999999;
         var polygonMode = true;
@@ -19,7 +19,7 @@ class Segmentation {
                 canvas.selection = false;
         
                 canvas.on('mouse:down', function (options) {
-                    if(options.target && options.target.id == pointArray[0].id){
+                    if(options.target && options.target.id === pointArray[0].id){
                         prototypefabric.polygon.generatePolygon(pointArray);
                     }
                     if(polygonMode){
@@ -74,7 +74,7 @@ class Segmentation {
                     id:id,
                         objectCaching:false
                 });
-                if(pointArray.length == 0){
+                if(pointArray.length === 0){
                     circle.set({
                         fill:'red'
                     })
@@ -142,7 +142,7 @@ class Segmentation {
                 canvas.selection = false;
             },
             generatePolygon : function(pointArray){
-                /*var points = new Array();
+                var points = new Array();
                 $.each(pointArray,function(index,point){
                     points.push({
                         x:point.left,
@@ -153,26 +153,42 @@ class Segmentation {
                 $.each(lineArray,function(index,line){
                     canvas.remove(line);
                 });
-                canvas.remove(activeShape).remove(activeLine);
-                var polygon = new fabric.Polygon(points,{
-                    stroke:'#333333',
-                    strokeWidth:0.5,
-                    fill: 'red',
-                    opacity: 1,
-                    hasBorders: false,
-                    hasControls: false
-                });
-                canvas.add(polygon);*/
+
+                console.log(pointArray)
+                console.log(lineArray)
+
+
+                var group = new fabric.Group()
+                for (var i = 0; i < pointArray.length; i++){
+                    group.addWithUpdate(pointArray[i])
+                    group.addWithUpdate(lineArray[i])
+                }
+                
+                /*group.addWithUpdate(new fabric.Text(id.toString(), {
+                    fontSize: 20,
+                    centerX: "center",
+                    top: pointArray[0].top,
+                    left: pointArray[0].left, 
+                    uniScaleTransform: false,
+                  }));
+                */
+                  canvas.add(group)
+                  
+                canvas.remove(activeLine);
+                canvas.remove(activeShape)
+                //canvas.add(polygon);
         
                 activeLine = null;
                 activeShape = null;
                 polygonMode = false;
                 canvas.selection = true;
+
+                return group
             }
         };
         
         
-        prototypefabric.polygon.drawPolygon();
+        //return prototypefabric.polygon.drawPolygon();
     }
 }
 

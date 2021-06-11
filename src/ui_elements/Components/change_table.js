@@ -26,11 +26,11 @@ const columns = [{
     text: "Pos",
     editor: {
         type: Type.SELECT,
-        options: {posture}
+        options: posture
       }
 }]
 
-function json_to_table(data){
+function json_to_table_ANIKET(data){
     var ret = []
     if(data == null){
         return []
@@ -41,6 +41,19 @@ function json_to_table(data){
         console.log(curr_obj['left'])
         ret.push({id: elem_id.toString(), behavior: "None", is_hidden: "False", posture: "None"})        
     }
+    return ret
+}
+
+function json_to_table(data){
+    var ret = []
+    if (data == null){
+        return []
+    }
+    for(var i = 0; i < data.length; i++){
+        ret.push(data[i].generate_row())
+    }
+    
+
     return ret
 }
 

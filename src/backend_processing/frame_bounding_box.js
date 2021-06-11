@@ -1,12 +1,12 @@
 import { BoundingBox } from "./bounding_box"
 
 class FrameBoundingBox {
-    constructor(frame_data, canvas_width, canvas_height){
+    constructor(frame_data, canvas_width, canvas_height, video_height, vide_width){
         this.frame_data = frame_data;
         this.canvas_width = canvas_width;
         this.canvas_height = canvas_height;
-        this.windowWidth = 3840;
-        this.windowHeight = 2178;
+        this.windowWidth = vide_width;
+        this.windowHeight = video_height;
     }
 
     generate_frame(){

@@ -1,4 +1,4 @@
-import React, { useState } from "react"; 
+import React, { useEffect, useState } from "react"; 
 import ReactDOM from 'react-dom'
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -8,13 +8,17 @@ import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
-import Table from 'react-bootstrap/Table'
 
-//import Custon_Nav_Bar from '../backend_processing/nav_bar'
 
-import Annotation from '../../backend_processing/annotation-processing'
+import AnnotationProcessing from '../../backend_processing/annotation-processing'
 import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
+
+//Custom implemented classes
+import { BoundingBox } from '../../backend_processing/bounding_box'
+import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
+import { KeyPoint } from '../../backend_processing/key_point'
+import { Segmentation } from '../../backend_processing/segmentation'
 
 const fabric = require("fabric").fabric;
 const Nuclear = require("nuclear-js");
@@ -23,188 +27,78 @@ const createReactClass = require('create-react-class');
 
 //TODO ADD DYNAMIC SOLUTION 
 var frame_rate = 15;
-var scaling_factor = .8
-
-var keyMirror = function(obj) {
-  var ret = {};
-  var key;
-  if (!(obj instanceof Object && !Array.isArray(obj))) {
-    throw new Error('keyMirror(...): Argument must be an object.');
-  }
-  for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      ret[key] = key;
-    }
-  }
-  return ret;
-};
-
-var reactor = new Nuclear.Reactor({ debug: true });
-var keys = keyMirror({ fabricData: null, activeObject: null });
+var num_frames = 7200;
+const scaling_factor_height = 1080;
+const scaling_factor_width = 1920;
 
 // globally accessable fabricCanvas instance
-var fabricCanvas = new fabric.Canvas();
+var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
 
-// A place to put fabric data
-var fabricStore = Nuclear.Store({
-  getInitialState() {
-    return Nuclear.toImmutable({
-    	fabricData: {
-      	objects: [],
-      },
-      activeObject: false,
-    })
-  },
-  initialize() {
-    this.on(keys.fabricData, this.saveFabricData)
-    this.on(keys.activeObject, this.saveActiveObject)
-  },
-  saveFabricData(state, fabricData) {
-		return state.set('fabricData', Nuclear.toImmutable(fabricData));
-	},
-  saveActiveObject(state, value) {
-		return state.set('activeObject',value);
-	}
-});
-
-reactor.registerStores({
-  'fabricStore': fabricStore,
-});
 
 var Fabric = createReactClass({
 	componentDidMount() {
   	var el = ReactDOM.findDOMNode(this);
-    {alert("Please use the upload functionality. This is a Alpha version and some features may be missing or broken. The video upload option should have the latest features and bug fixes. This sign will be updated when the youtube option is functional. ")}
+    
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
-    	height: window.innerHeight* scaling_factor,
-      width: window.innerWidth * scaling_factor,
+    	height: 1080,
+      width: 1920,
       backgroundColor : null,
     });
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
-      reactor.dispatch(keys.fabricData, fabricCanvas.toObject());
-      reactor.dispatch(keys.activeObject, !!fabricCanvas.getActiveObject());
+      frame_data[global_currFrame] = fabricCanvas.toJSON()
     });
+
     
     // an event we will fire when we want to save state
     fabricCanvas.on('saveData', () => {
-    	reactor.dispatch(keys.fabricData, fabricCanvas.toObject());
-      reactor.dispatch(keys.activeObject, !!fabricCanvas.getActiveObject());
       fabricCanvas.renderAll(); // programatic changes we make will not trigger a render in fabric
     });
   }, 
   render() {
-    
     return <canvas></canvas>
   }
 });
 
-
-
-var NewObjects = createReactClass({
-	mixins: [reactor.ReactMixin],
-  getDataBindings() {
-  	return {
-    	fabricData: ['fabricStore', 'fabricData'],
-    	activeObject: ['fabricStore', 'activeObject'],
-    };
-  },
-  render: function() {
-  	if (this.state.fabricData.get('objects').size === 0) {
-    	// no object is on the canvas so show interface to add one
-      //<input type="file" id="video_submit" value="none"/> //onClick={this.addKanalImg}/>
-      return (
-      <div style={{float: "right"}}>
-        <Button onClick={this.addSquare} style={{position:"relative"}}>Add Square</Button>{' '}
-        <Button onClick={this.remove} style={{position:"relative"}}>Remove</Button>{' '}
-      </div>
-      );
-    } else {
-    	// an object is selected so lets interact with it
-    	return (
-        <div style={{float: "right"}}>
-          <Button onClick={this.addSquare} style={{position:"relative"}}>Add Square</Button>{' '}
-          <Button onClick={this.remove} style={{position:"relative"}}>Remove</Button>{' '}
-        </div>
-      );
-    }//else {
-    	// if there is an object but it is not selected then remove the buttons
-    	//return null;
-    //}
-  },
-  addSquare() {
-    var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-    var bounding_box = new fabric.Rect({
-      hasRotatingPoint: false,
-      uniScaleTransform: true,
-    	height: 50,
-    	width: 50,
-      originX: 'center',
-      originY: 'center',
-      fill: color,
-      borderColor: '#000',
-      opacity: '.4',
-      top: fabricCanvas.height / 2,
-      left: fabricCanvas.width / 2,
-    }, function(drop){
-        console.log(drop)
-    })
-  	fabricCanvas.add(bounding_box);
-    fabricCanvas.setActiveObject(bounding_box);
-    fabricCanvas.fire('saveData');
-  },
-  remove() {
-    fabricCanvas.remove(fabricCanvas.getActiveObject());
-    fabricCanvas.fire('saveData');
-  }
-});
-
-var ActiveObject = createReactClass({
-	mixins: [reactor.ReactMixin],
-  getDataBindings() {
-  	return {
-    	fabricObject: ['fabricStore', 'fabricData', 'objects', 0],
-      activeObject: ['fabricStore', 'activeObject']
-    };
-  },
-  render: function() {
-    //return null;
-    console.log(this.state.activeObject)
-  	if (this.state.fabricObject) {
-    	// if an object exists in state we can acess the data from any where in the app
-    	var fill = this.state.fabricObject.get('fill');
-      console.log((fabricCanvas.getActiveObject()))
-      return (<div>
-        <div><b>Active Object</b></div>
-        <div>fill: <span style={{ color: fill}}>{this.state.fabricObject.get('fill')}</span></div>
-        <div>top: {this.state.fabricObject.get('top')}</div>
-        <div>left: {this.state.fabricObject.get('left')}</div>
-        <div>angle: {this.state.fabricObject.get('angle')}</div>
-        <div>scaleX: {this.state.fabricObject.get('scaleX')}</div>
-        <div>scaleY: {this.state.fabricObject.get('scaleY')}</div>
-      </div>);
-    } else {
-      console.log(fabricCanvas.getActiveObject())
-    	return null;
-    }
-  },
-});
-
-function draw_annotation(x, y, width, height){
-
-}
-
-function parse_file(file){
-  
-}
-
 var frame_data = [];
+var annotation_data = [];
 var upload = false;
+var global_currFrame = 0;
 
 //Current frame counter
 function MainYoutube() {
+  
+  const [annotationType, setAnnotationType] = useState(0)
+  const handleAnnotationType = (event) => {
+    console.log(event.target.value)
+  }
+  
+  const [boxCount, setBoxCount] = useState(0)
+  const addToCanvas = () =>{
+    var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
+    
+    if (annotationType === 0){
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None").generate_no_behavior()
+      fabricCanvas.add(new_bbox)
+      fabricCanvas.setActiveObject(new_bbox);
+    }else if (annotationType === 1){
+      var test = new KeyPoint().generate_stick(fabricCanvas)
+    }else if (annotationType === 2){
+      var test1 = new Segmentation().generate_polygon(fabricCanvas, boxCount)
+    }
+
+    setBoxCount(boxCount + 1);
+    fabricCanvas.fire('saveData');
+  }
+
+  const remove = () => {
+    setBoxCount(boxCount + 1)
+    fabricCanvas.remove(fabricCanvas.getActiveObject());
+    fabricCanvas.fire('saveData');
+  }
+
   const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
     //console.log(oldAnnotation)
@@ -221,15 +115,34 @@ function MainYoutube() {
   //ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
   const [oldAnnotation, setOldAnnotation] = useState(null)
   const handleOldAnnotation = (event) => {
+      var promise = downloadOldAnnotation(event)
+      promise.then(function (result) {
+        if(result != null){
+          setOldAnnotation(new AnnotationProcessing(result));
+        }else{
+          console.log("ERROR in upload old_annotation")
+        }
+      })
+  }
+
+  useEffect(() => {
+    //TODO Find a more elegant solution. This is a temporay patch work.
+    if(oldAnnotation == null){
+      return;
+    }
+    console.log(oldAnnotation)
+    console.log(oldAnnotation.getAllObjectByFrame(2));
+  }, oldAnnotation);
+
+  const downloadOldAnnotation = (file) => {
     return new Promise((resolve, reject) => {
       var reader = new FileReader();
       reader.onload = function(e) {
-         resolve(setOldAnnotation(JSON.parse(e.target.result)));
+         resolve((JSON.parse(e.target.result)));
       }
-      reader.readAsText(event.target.files[0])
+      reader.readAsText(file.target.files[0])
     })
   }
-    
   
 
   const [playing, setPlaying] = useState(false);
@@ -265,7 +178,12 @@ function MainYoutube() {
     setPlayer(val)
     if(upload === true && player != null){      
       console.log("RESET VALUES")
-      frame_data = new Array(7200)
+      frame_data = new Array(num_frames)
+      annotation_data = new Array(num_frames)
+      //TODO Update this later
+      for (var i = 0; i < 7200; i++){
+        frame_data[i] = []
+      }
       upload = false;
     }
   }
@@ -285,12 +203,32 @@ function MainYoutube() {
     tot = total_frames
     setSliderPercent(currentFrame/total_frames)
     setCurrentFrame(Math.round(val['played']*total_frames))
+    global_currFrame = currentFrame
+
+    if(oldAnnotation != null){ 
+      fabricCanvas.clear();
+      var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), scaling_factor_width, scaling_factor_height).generate_frame()
+      for(var i = 0; i < bbox.length; i++){
+        var curr_obj = bbox[i]
+        console.log(curr_obj)
+        fabricCanvas.add(curr_obj);
+        fabricCanvas.setActiveObject(curr_obj);
+        fabricCanvas.fire('saveData');
+      }
+    }
+
+  }
+
+  const [numBoundingBox, setNumBoundingBox] = useState(0)
+  const handleNumBoundingBox = val => {
+    setNumBoundingBox(numBoundingBox + 1);
+    
   }
 
 
   const skip_frame_forward = e =>{
     var total_frames = duration * frame_rate
-    frame_data[currentFrame] = fabricCanvas.toJSON()
+    //frame_data[currentFrame] = fabricCanvas.toJSON()
     console.log(currentFrame)
     console.log(frame_data)
     player.seekTo((((player.getCurrentTime()/duration)*total_frames)+1)/(total_frames))
@@ -301,7 +239,7 @@ function MainYoutube() {
     player.seekTo((((player.getCurrentTime()/duration)*total_frames)-1)/(total_frames))
   }
 
-  
+  //frame_data[currentFrame] = fabricCanvas.toJSON()
 
   const downloadFile = async () => {
     const fileName = "generated_annotations";
@@ -322,20 +260,48 @@ function MainYoutube() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const handleSquareBox = () => {
+    setAnnotationType(0);
+  }
+
+  const handleKeyPoint = () => {
+    setAnnotationType(1);
+  }
+
+  const handleSegmentation = () => {
+    setAnnotationType(2);
+  }
+  
+  const onKeyPress = (event) =>{
+    if(event.key === "s") {
+      handleSegmentation()
+    }else if (event.key === "b"){
+      handleSquareBox()
+    }else if (event.key === "k"){
+      handleKeyPoint()
+    }else if (event.key === "a"){
+      addToCanvas()
+    }
+  }  
+ 
+  useEffect(() => {
+    document.addEventListener("keydown", onKeyPress);
+    return () => document.removeEventListener("keydown", onKeyPress);
+  }, [onKeyPress]);
+
   return (
     <div>
-      
-      <Navbar bg="dark" variant="dark" class="bg-5">
+      <Navbar bg="dark" variant="dark" className="bg-5">
           <Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
           <Nav className="mr-auto">
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 
               <NavDropdown title="Annotation Type" id="basic-nav-dropdown">
-                <NavDropdown.Item >Square Box</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleSquareBox} >Square Box</NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item >Key Point</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleKeyPoint}>Key Point</NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item >Wire Frame</NavDropdown.Item>
+                <NavDropdown.Item onClick={handleSegmentation}>Segmentation</NavDropdown.Item>
               </NavDropdown>
 
               <NavDropdown title="Export" id="basic-nav-dropdown">
@@ -346,7 +312,11 @@ function MainYoutube() {
 
               <NavDropdown title="Settings" id="basic-nav-dropdown">
                 <NavDropdown.Divider />
-                <NavDropdown.Item disabled={true}>Input Frame-Rate: <input type="text"></input></NavDropdown.Item>
+                Frame Rate: <input type="text" value="15"></input>
+                <NavDropdown.Divider />
+                Horizontal Res: <input type='text>' value="3840"></input>
+                <NavDropdown.Divider />
+                Vertical Res: <input type='text>' value="2178"></input>
               </NavDropdown>
           </Nav>
           <div>
@@ -355,12 +325,17 @@ function MainYoutube() {
               <Form.File id="file" label="Annotation Upload" custom type="file" onChange={handleOldAnnotation}/>
             </Form>
             <Form style={{float: "left", width: 80}}>
-              <Form.File id="file" label="Video Upload" custom type="file" onChange={handleVideoUpload} />
+              <Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={handleVideoUpload} />
             </Form>
-            <Button variant="primary" onClick={skip_frame_backward}>Prev Frame</Button>{' '}
+            <Button variant="primary" onClick={skip_frame_backward}>Prev</Button>{' '}
             <Button variant="primary" onClick={handlePlaying}>{play_button_text}</Button>{' '}
-            <Button variant="primary" onClick={skip_frame_forward}>Next Frame</Button>{' '}
-            <NewObjects />
+            <Button variant="primary" onClick={skip_frame_forward}>Next</Button>{' '}
+            
+            <div style={{float: "right"}}>
+              <Button onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
+              <Button onClick={remove} style={{position:"relative"}}>Remove</Button>{' '}
+            </div>
+
           </div>
       </Navbar>
       <Modal show={show} onHide={handleClose}>
@@ -372,24 +347,30 @@ function MainYoutube() {
           <Button variant="secondary" onClick={handleClose}>Close</Button>
           </Modal.Footer>
       </Modal>
-      <div style={{display: "flex"}}>
-        <div style={{position: "relative"}}>
+      <div style={{display: "grid"}}>
+        <div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
           <ReactPlayer 
             onProgress={handleSetCurrentFrame} 
             ref={handleSetPlayer} 
             onDuration={handleSetDuration} 
             url={"https://www.youtube.com/watch?v=MF6J2H983HY"} 
-            width={window.innerWidth * scaling_factor} height={window.innerHeight * scaling_factor}
+            width='100%'
+            height='99.999%'
             playing={playing} 
             controls={false} 
-            style={{position:'realtive', float:'left'}}
+            style={{position:'absolute', float:'left', top:0, left:0}}
             volume={0}
             muted={true}
             pip={false}
           />
+        </div>
+        <div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
           <Fabric/>
+        </div>
+        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
+
           <input
-            style={{width: window.innerWidth * scaling_factor}}
+            style={{width: scaling_factor_width}}
             type='range' min={0} max={0.999999} step='any'
             value={sliderPercent}
             onMouseDown={handleSeekMouseDown}
@@ -397,16 +378,13 @@ function MainYoutube() {
             onMouseUp={handleSeekMouseUp}
           />
         </div>
-        <ChangeTable data={frame_data[currentFrame]} style={{ float: "right"}}/>
+        <div style={{gridColumn: 2, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+        </div>
       </div>
     </div>
   );
 }
-      //<ActiveObject />
-      //<input type="file" onChange={handleVideoUpload1} />
-      //<div>
-        //<ReactPlayer url={videoFilePath1} width="50%" height="50%" controls={true} style={{position:'relative', float:'left'}}/>
-        //<Fabric/>
-      //</div>
+
+//<ChangeTable data={frame_data[currentFrame]} style={{ float: "right"}}/>
 
 export default MainYoutube;

@@ -18,18 +18,49 @@ import { NavDropdown } from "react-bootstrap";
 import { BoundingBox } from '../../backend_processing/bounding_box'
 import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
 import { KeyPoint } from '../../backend_processing/key_point'
-import { FrameData } from '../../backend_processing/frame_data'
 import { Segmentation } from '../../backend_processing/segmentation'
+import { Annotation } from '../../backend_processing/annotation'
+
+import BootstrapTable from 'react-bootstrap-table-next';
+import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import {behaviors} from '../../static_data/behaviors'
+import {posture} from '../../static_data/posture'
+
+
+const columns = [{
+  dataField: "id",
+  text: "ID"
+},{
+  dataField: "behavior",
+  text: "Beh",
+  editor: {
+      type: Type.SELECT,
+      options: behaviors
+    }
+},{
+  dataField: "is_hidden",
+  text: "Hid"
+},{
+  dataField: "posture",
+  text: "Pos",
+  editor: {
+      type: Type.SELECT,
+      options: posture
+    }
+}]
+
 
 const fabric = require("fabric").fabric;
-const Nuclear = require("nuclear-js");
 const createReactClass = require('create-react-class');
 
 
 //TODO ADD DYNAMIC SOLUTION 
 var frame_rate = 15;
+var num_frames = 7200;
 const scaling_factor_height = 1080;
 const scaling_factor_width = 1920;
+var skip_value = 1;
 
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
@@ -62,8 +93,10 @@ var Fabric = createReactClass({
   }
 });
 
-var frame_data = [];
+var frame_data = [[]];
+var annotation_data = [[]];
 var upload = false;
+var disable_buttons = true;
 var global_currFrame = 0;
 
 //Current frame counter
@@ -78,14 +111,22 @@ function MainUpload() {
   const addToCanvas = () =>{
     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
     
+    if(annotation_data[currentFrame] == null){
+      annotation_data[currentFrame] = []
+    }
+
     if (annotationType === 0){
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, 1, "id: 1").generate_no_behavior()+
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None").generate_no_behavior()
+      //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
+      annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
       fabricCanvas.add(new_bbox)
       fabricCanvas.setActiveObject(new_bbox);
     }else if (annotationType === 1){
-      var test = new KeyPoint().generate_stick(fabricCanvas)
+      var keyp = new KeyPoint().generate_stick(fabricCanvas)
+      annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,1, keyp))
     }else if (annotationType === 2){
-      var test1 = new Segmentation().generate_polygon(fabricCanvas)
+      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount)
+      annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,2, segment))
     }
 
     setBoxCount(boxCount + 1);
@@ -153,7 +194,7 @@ function MainUpload() {
   if(playing === true){
     play_button_text = "Pause"
   }else{
-    play_button_text = "Play"
+  play_button_text = "Play"
   }
 
   const [seeking, setSeeking] = useState(false)
@@ -177,12 +218,15 @@ function MainUpload() {
     setPlayer(val)
     if(upload === true && player != null){      
       console.log("RESET VALUES")
-      frame_data = new Array(7200)
+      frame_data = new Array(num_frames)
+      annotation_data = new Array(num_frames)
       //TODO Update this later
       for (var i = 0; i < 7200; i++){
         frame_data[i] = []
+        annotation_data[i] = []
       }
       upload = false;
+      disable_buttons = false
     }
   }
 
@@ -192,16 +236,18 @@ function MainUpload() {
     console.log(val)
   }
 
-  var tot = 0
 
   const [currentFrame, setCurrentFrame] = useState(0)
   const handleSetCurrentFrame = val => {
-    console.log(val)
+    frame_data[currentFrame] = fabricCanvas.toJSON()
+    console.log(currentFrame)
+
     var total_frames = duration * frame_rate
-    tot = total_frames
     setSliderPercent(currentFrame/total_frames)
     setCurrentFrame(Math.round(val['played']*total_frames))
     global_currFrame = currentFrame
+
+
 
     if(oldAnnotation != null){ 
       fabricCanvas.clear();
@@ -217,24 +263,14 @@ function MainUpload() {
 
   }
 
-  const [numBoundingBox, setNumBoundingBox] = useState(0)
-  const handleNumBoundingBox = val => {
-    setNumBoundingBox(numBoundingBox + 1);
-    
-  }
-
-
   const skip_frame_forward = e =>{
     var total_frames = duration * frame_rate
-    //frame_data[currentFrame] = fabricCanvas.toJSON()
-    console.log(currentFrame)
-    console.log(frame_data)
-    player.seekTo((((player.getCurrentTime()/duration)*total_frames)+1)/(total_frames))
+    player.seekTo((((player.getCurrentTime()/duration)*total_frames)+skip_value)/(total_frames))
   }
 
   const skip_frame_backward = e => {
     var total_frames = duration * frame_rate
-    player.seekTo((((player.getCurrentTime()/duration)*total_frames)-1)/(total_frames))
+    player.seekTo((((player.getCurrentTime()/duration)*total_frames)-skip_value)/(total_frames))
   }
 
   //frame_data[currentFrame] = fabricCanvas.toJSON()
@@ -269,6 +305,43 @@ function MainUpload() {
   const handleSegmentation = () => {
     setAnnotationType(2);
   }
+  
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const onKeyPress = (event) =>{
+    if(event.key === "s") {
+      handleSegmentation()
+    }else if (event.key === "b"){
+      handleSquareBox()
+    }else if (event.key === "k"){
+      handleKeyPoint()
+    }else if (event.key === "a"){
+      addToCanvas()
+    }else if (event.key === "r"){
+      remove()
+    }else if (event.key === "q"){
+      skip_frame_backward()
+    }
+    else if (event.key === "w"){
+      handlePlaying()
+    }
+    else if (event.key === "e"){
+      skip_frame_forward()
+    }
+  }  
+ 
+  useEffect(() => {
+    document.addEventListener("keydown", onKeyPress);
+    return () => document.removeEventListener("keydown", onKeyPress);
+  }, [onKeyPress]);
+  
+  useEffect(() => {
+    fabricCanvas.clear()
+    console.log(currentFrame)
+    fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
+      console.log(frame_data[currentFrame])
+      fabricCanvas.renderAll();
+    });
+  }, [currentFrame]);
 
   return (
     <div>
@@ -277,7 +350,7 @@ function MainUpload() {
           <Nav className="mr-auto">
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 
-              <NavDropdown title="Annotation Type" id="basic-nav-dropdown">
+              <NavDropdown disabled={disable_buttons} title="Annotation Type" id="basic-nav-dropdown">
                 <NavDropdown.Item onClick={handleSquareBox} >Square Box</NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleKeyPoint}>Key Point</NavDropdown.Item>
@@ -285,34 +358,36 @@ function MainUpload() {
                 <NavDropdown.Item onClick={handleSegmentation}>Segmentation</NavDropdown.Item>
               </NavDropdown>
 
-              <NavDropdown title="Export" id="basic-nav-dropdown">
+              <NavDropdown disabled={disable_buttons} title="Export" id="basic-nav-dropdown">
                 <NavDropdown.Item onClick={downloadFile}>JSON</NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item >CSV</NavDropdown.Item>
               </NavDropdown>
 
-              <NavDropdown title="Settings" id="basic-nav-dropdown">
+              <NavDropdown disabled={disable_buttons} title="Settings" id="basic-nav-dropdown">
                 <NavDropdown.Divider />
-                <NavDropdown.Item disabled={true}>Input Frame-Rate: <input type="text"></input></NavDropdown.Item>
+                Frame Rate: <input type="number" defaultValue="15"></input>
+                <NavDropdown.Divider />
+                Horizontal Res: <input type='number' defaultValue="3840"></input>
+                <NavDropdown.Divider />
+                Vertical Res: <input type='number' defaultValue="2178"></input>
+                <NavDropdown.Divider />
+                Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = event.target.value}}></input>
               </NavDropdown>
           </Nav>
           <div>
-            <Button variant="secondary" disabled="true">Frame # {parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}</Button>
             <Form style={{float: "left", width: 80}}>
-              <Form.File id="file" label="Annotation Upload" custom type="file" onChange={handleOldAnnotation}/>
+              <Form.File disabled={disable_buttons} id="file" label="Annotation Upload" custom type="file" onChange={handleOldAnnotation}/>
             </Form>
             <Form style={{float: "left", width: 80}}>
-              <Form.File id="file" label="Video Upload" custom type="file" onChange={handleVideoUpload} />
+              <Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={handleVideoUpload} />
             </Form>
-            <Button variant="primary" onClick={skip_frame_backward}>Prev</Button>{' '}
-            <Button variant="primary" onClick={handlePlaying}>{play_button_text}</Button>{' '}
-            <Button variant="primary" onClick={skip_frame_forward}>Next</Button>{' '}
-            
-            <div style={{float: "right"}}>
-              <Button onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
-              <Button onClick={remove} style={{position:"relative"}}>Remove</Button>{' '}
-            </div>
-
+            <Button variant="secondary" disabled={true}>Frame # {parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}</Button>{' '}
+            <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_backward}>Prev</Button>{' '}
+            <Button variant="primary" disabled={disable_buttons} onClick={handlePlaying}>{play_button_text}</Button>{' '}
+            <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_forward}>Next</Button>{' '}
+            <Button variant="success" disabled={disable_buttons} onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
+            <Button variant="success" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}
           </div>
       </Navbar>
       <Modal show={show} onHide={handleClose}>
@@ -356,12 +431,23 @@ function MainUpload() {
           />
         </div>
         <div style={{gridColumn: 2, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+          <div style={{width: "15%"}}>
+              <BootstrapTable 
+                keyField='id' 
+                data={annotation_data[currentFrame]} 
+                columns={ columns } 
+                cellEdit={ 
+                  cellEditFactory({ mode: 'click', blurToSave: true, afterSaveCell: (oldValue, newValue, row, column) => {
+                    annotation_data[currentFrame][row['id']] = row
+                  } }) 
+                }
+              />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-//<ChangeTable data={frame_data[currentFrame]} style={{ float: "right"}}/>
 
 export default MainUpload;
