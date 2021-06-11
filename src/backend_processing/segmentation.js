@@ -172,7 +172,16 @@ class Segmentation {
                     uniScaleTransform: false,
                   }));
                 */
-                  canvas.add(group)
+               //To add custom id
+                group.toObject = (function(toObject) {
+                    return function(propertiesToInclude) {
+                        return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
+                            local_id: id
+                        });
+                    };
+                })(group.toObject);
+
+                canvas.add(group)
                   
                 canvas.remove(activeLine);
                 canvas.remove(activeShape)

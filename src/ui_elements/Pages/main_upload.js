@@ -8,6 +8,7 @@ import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
+import Toast from 'react-bootstrap/Toast'
 
 
 import AnnotationProcessing from '../../backend_processing/annotation-processing'
@@ -31,6 +32,9 @@ import {posture} from '../../static_data/posture'
 const columns = [{
   dataField: "id",
   text: "ID"
+},{
+  dataField: "global_id",
+  text: "Glo"
 },{
   dataField: "behavior",
   text: "Beh",
@@ -58,9 +62,23 @@ const createReactClass = require('create-react-class');
 //TODO ADD DYNAMIC SOLUTION 
 var frame_rate = 15;
 var num_frames = 7200;
-const scaling_factor_height = 1080;
-const scaling_factor_width = 1920;
+var scaling_factor_height = 1080;
+var scaling_factor_width = 1920;
 var skip_value = 1;
+
+console.log(window.screen.width)
+console.log(window.screen.height)
+
+var current_screen_width = window.screen.width;
+var current_screen_height = window.screen.height;
+
+if (current_screen_height >= 1440){
+  scaling_factor_height = 1080;
+  scaling_factor_width = 1920;
+}else if(current_screen_height <= 1024){
+  scaling_factor_height = 648;
+  scaling_factor_width = 1152;
+}
 
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
@@ -72,14 +90,14 @@ var Fabric = createReactClass({
     
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
-    	height: 1080,
-      width: 1920,
+    	height: scaling_factor_height,
+      width: scaling_factor_width,
       backgroundColor : null,
     });
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
-      frame_data[global_currFrame] = fabricCanvas.toJSON()
+      //frame_data[global_currFrame] = fabricCanvas.toJSON()
     });
 
     
@@ -98,6 +116,7 @@ var annotation_data = [[]];
 var upload = false;
 var disable_buttons = true;
 var global_currFrame = 0;
+var toast_text = ""
 
 //Current frame counter
 function MainUpload() {
@@ -116,17 +135,17 @@ function MainUpload() {
     }
 
     if (annotationType === 0){
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None").generate_no_behavior()
-      //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
-      fabricCanvas.add(new_bbox)
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
+      //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
+      //fabricCanvas.add(new_bbox)
       fabricCanvas.setActiveObject(new_bbox);
     }else if (annotationType === 1){
+      annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
       var keyp = new KeyPoint().generate_stick(fabricCanvas)
-      annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,1, keyp))
     }else if (annotationType === 2){
+      annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
       var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount)
-      annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,2, segment))
     }
 
     setBoxCount(boxCount + 1);
@@ -135,6 +154,14 @@ function MainUpload() {
 
   const remove = () => {
     setBoxCount(boxCount + 1)
+    var index = fabricCanvas.getActiveObject().toJSON()['local_id']
+    console.log(fabricCanvas.getActiveObject().toJSON())
+    for(var i = 0; i < annotation_data[currentFrame].length; i++){
+      if (annotation_data[currentFrame][i]['id'] === index){
+        annotation_data[currentFrame].splice(i, 1)
+        break;
+      }
+    }
     fabricCanvas.remove(fabricCanvas.getActiveObject());
     fabricCanvas.fire('saveData');
   }
@@ -239,9 +266,6 @@ function MainUpload() {
 
   const [currentFrame, setCurrentFrame] = useState(0)
   const handleSetCurrentFrame = val => {
-    frame_data[currentFrame] = fabricCanvas.toJSON()
-    console.log(currentFrame)
-
     var total_frames = duration * frame_rate
     setSliderPercent(currentFrame/total_frames)
     setCurrentFrame(Math.round(val['played']*total_frames))
@@ -305,18 +329,30 @@ function MainUpload() {
   const handleSegmentation = () => {
     setAnnotationType(2);
   }
+
+  const [save, changeSave] = useState(false);
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onKeyPress = (event) =>{
-    if(event.key === "s") {
+    if(event.key === "3") {
+      toast_text = "Mode Switch: Segmentation"
+      changeSave(true)
       handleSegmentation()
-    }else if (event.key === "b"){
+    }else if (event.key === "1"){
+      toast_text = "Mode Switch: Bounding Box"
+      changeSave(true)
       handleSquareBox()
-    }else if (event.key === "k"){
+    }else if (event.key === "2"){
+      toast_text = "Mode Switch: Key Point"
+      changeSave(true)
       handleKeyPoint()
     }else if (event.key === "a"){
+      toast_text = "Added Annotation"
+      changeSave(true)
       addToCanvas()
     }else if (event.key === "r"){
+      toast_text = "Removed Annotation"
+      changeSave(true)
       remove()
     }else if (event.key === "q"){
       skip_frame_backward()
@@ -326,6 +362,10 @@ function MainUpload() {
     }
     else if (event.key === "e"){
       skip_frame_forward()
+    }else if (event.key === "s"){
+      toast_text = "Annotation Saved"
+      changeSave(true)
+      frame_data[currentFrame] = fabricCanvas.toJSON()
     }
   }  
  
@@ -375,6 +415,7 @@ function MainUpload() {
                 Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = event.target.value}}></input>
               </NavDropdown>
           </Nav>
+
           <div>
             <Form style={{float: "left", width: 80}}>
               <Form.File disabled={disable_buttons} id="file" label="Annotation Upload" custom type="file" onChange={handleOldAnnotation}/>
@@ -387,9 +428,19 @@ function MainUpload() {
             <Button variant="primary" disabled={disable_buttons} onClick={handlePlaying}>{play_button_text}</Button>{' '}
             <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_forward}>Next</Button>{' '}
             <Button variant="success" disabled={disable_buttons} onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
-            <Button variant="success" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}
+            <Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}
           </div>
       </Navbar>
+      <Toast onClose={() => changeSave(false)} show={save} delay={500} autohide
+          style={{
+            position: 'absolute',
+            top: '00%',
+            left: '50%',
+          }}>
+        <Toast.Header>
+          <strong className="mr-auto">{toast_text}</strong>
+        </Toast.Header>
+      </Toast>
       <Modal show={show} onHide={handleClose}>
           <Modal.Header closeButton>
           <Modal.Title>Instructions</Modal.Title>
@@ -431,7 +482,7 @@ function MainUpload() {
           />
         </div>
         <div style={{gridColumn: 2, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-          <div style={{width: "15%"}}>
+          <div style={{width: "25%"}}>
               <BootstrapTable 
                 keyField='id' 
                 data={annotation_data[currentFrame]} 

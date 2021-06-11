@@ -1,3 +1,5 @@
+import { grep } from "jquery";
+
 const fabric = require("fabric").fabric;
 
 class BoundingBox {
@@ -39,12 +41,23 @@ class BoundingBox {
 
     }
 
-    generate_no_behavior(){
-        return new fabric.Group([this.rectangle() , this.id_text() ], {
-            left: this.left,
-            top: this.top,
-            uniScaleTransform: true
-          });
+    generate_no_behavior(canvas){
+        var group = new fabric.Group();
+        group.addWithUpdate(this.rectangle())
+        group.addWithUpdate(this.id_text())
+        
+        var temp = this.id 
+        group.toObject = (function(toObject) {
+            return function(propertiesToInclude) {
+                return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
+                    local_id: temp
+                });
+            };
+        })(group.toObject);
+        //console.log(group.toJSON())
+
+        canvas.add(group)
+        return group
     }
 
     generate_with_behavior(){

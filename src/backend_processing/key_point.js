@@ -9,8 +9,8 @@ class KeyPoint {
             var c = new fabric.Circle({
             left: left,
             top: top,
-            strokeWidth: 5,
-            radius: 12,
+            strokeWidth: 2.5,
+            radius: 6,
             fill: '#fff',
             stroke: '#666'
             });
@@ -29,12 +29,12 @@ class KeyPoint {
             fill: 'red',
             stroke: 'red',
             strokeWidth: 5,
-            selectable: false,
+            selectable: true,
             evented: false,
             });
         }
 
-        var line = makeLine([ 250, 125, 250, 175 ]),
+        var line = makeLine([ 250, 200, 250, 175 ]),
             line2 = makeLine([ 250, 175, 250, 250 ]),
             line3 = makeLine([ 250, 250, 300, 350]),
             line4 = makeLine([ 250, 250, 200, 350]),
