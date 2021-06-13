@@ -7,7 +7,7 @@ The goal of this project is to create a tool that is easy to use, has a small le
 
 ## Local Deployment (Frontend)
 
-These instructions will get you a copy of the project up and running on your local machine for viweing. This is only for testing the React frontend, for testing both the frontend and backend go to 
+These instructions will get you a copy of the project up and running on your local machine for viweing. 
 
 ### Prerequisites
 
@@ -32,6 +32,23 @@ npm start
 ```
 
 If the goal is to simply access the website then go to the ```build``` folder to ```index.html``` to access the website. 
+
+## Instructions 
+
+### Keybinds
+
+There are preset keybinds setup to make it easier to use the tool without having to click around. If done properly a combination of mouse and keyboard actions speed up the annotation process. 
+
+Keybinds:
+* - "1" = Mode Switch: Bounding Box
+* - "2" = Mode Switch: Key Point
+* - "3" = Mode Switch: Segmentation
+* - "a" = Add annotation
+* - "r" = Remove selected annotation
+* - "q" = Skip backward frame(s)
+* - "s" = Save annotation
+* - "w" = Pause/Play
+* - "e" = Skip forward frame(s)
 
 ## TODO
 

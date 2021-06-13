@@ -136,10 +136,10 @@ function MainUpload() {
 
     if (annotationType === 0){
       annotation_data[currentFrame].push({id: boxCount, global_id: -1,behavior: "None", is_hidden: 0, posture: "None"})
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_mouse_no_behavior(fabricCanvas)
       //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       //fabricCanvas.add(new_bbox)
-      fabricCanvas.setActiveObject(new_bbox);
+      //fabricCanvas.setActiveObject(new_bbox);
     }else if (annotationType === 1){
       annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
       var keyp = new KeyPoint().generate_stick(fabricCanvas)

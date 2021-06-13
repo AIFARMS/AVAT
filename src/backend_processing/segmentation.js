@@ -12,6 +12,10 @@ class Segmentation {
         var activeLine;
         var activeShape = false;
 
+        canvas.forEachObject(function(object){ 
+            object.selectable = false; 
+        });
+
         var prototypefabric = new function () {
                 //canvas = window._canvas = new fabric.Canvas('c');
                 //canvas.setWidth($(window).width());
@@ -191,6 +195,10 @@ class Segmentation {
                 activeShape = null;
                 polygonMode = false;
                 canvas.selection = true;
+
+                canvas.forEachObject(function(object){ 
+                    object.selectable = true; 
+                });
 
                 return group
             }
