@@ -13,11 +13,11 @@ For any feedback, bug repots and feature suggesions please use this form: https:
 
 These instructions will get you a copy of the project up and running on your local machine for viweing. 
 
-### Prerequisites
+### Prerequisites:
 
 You will need to have npm, firefox/chrome and git installed on your system for this to work. 
 
-### Installing and Building
+### Installing and Building:
 
 First you will need to clone the repository to your desired location
 
@@ -41,7 +41,7 @@ If the goal is to simply access the website then go to the ```build``` folder to
 
 Follow these instructions to get the most out of the tool.
 
-### Keybinds
+### Keybinds:
 
 There are preset keybinds setup to make it easier to use the tool without having to click around. If done properly a combination of mouse and keyboard actions speed up the annotation process. 
 
@@ -55,51 +55,51 @@ There are preset keybinds setup to make it easier to use the tool without having
 * <kbd>w</kbd> : Pause/Play
 * <kbd>e</kbd> : Skip forward frame(s)
 
-### Uploading Video
+### Uploading Video:
 
 Ensure that you know the framerate, vertical and horizontal resolution of the video chosen to be annotated. These values should be entered into the settings tab into their respective fields. 
 
 Click on the right side browse button. All other buttons on the screen shuold be disabled until the video has been uploaded. Currenntly ```.mp4``` format is the best choice and tested for. 
 
-### Annotations
+## Annotations
 
 There are currently three kinds of annotations. 
 
-#### Bounding Box
+### Bounding Box:
 
 This forms a square around the desired object. There should be small squares at the edges of the bounding box which can be used to resize the box. The number on the top left of the box is used to identify the placement of the box in the table to the right.
 
-#### Key Point
+### Key Point:
 
 This generates an object with multiple points and lines attached to each other. They should be arranged around the obejct where the singular circle with one connecting line is the head and progress to each of the other limbs. 
 
 ***Note: This feature is currently in development and there will be bugs in using this.***
 
-#### Segmentation
+### Segmentation:
 
 Upon generating this each click on the video generates a point which eventually will transform to a set of interconnected points. To complete the polygon click on the original point generated (which is the red colored point)
 
 ***Note: Unline the Bounding Box, segmentation cant be edited after generated. To fix a mistake remove the annotation and continue from the start.***
 
 
-## Backend Structure
+## Backend Structure:
 
 This is a breif overview with the goals and strucutre that the project was designed around. For more detailed information please look into the respective file's documentation for implementation details. There are many files but the most important ones are outlined below. 
 
-### React Components
+### React Components:
 
 The proect is designed in such a way that if any new features are needed to be added they can be made into react-compomnents. Currently there are 3 main components that being ```main_youtube```, ```main_upload``` and ```change_table```. As more features and needs arise this should be updated to reflect that.
 
 These files are stored under the ```src/ui_elements``` folder.
 
-### Fabric.js Components 
+### Fabric.js Components:
 
 Similar to how the react components are structured, each of the types of annotations are split up into their own respective file. Under the ```backend_processing``` folder there should be ```bounding_box.js```, ```key_point.js``` and ```segmentation.js``` which represent the respective annotation types. To add more types simply add a file to the folder and follow the similar format to what's on there to add it into the main proejct. 
 
 
 ## TODO
 
-### Deployment
+### Deployment:
 * - [x] Have testing build pre-compiled
 * - [x] Dev website
 * - [ ] Live website
