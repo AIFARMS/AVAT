@@ -8,11 +8,17 @@ import MainUpload from './ui_elements/Pages/main_upload'
 import MainYoutube from './ui_elements/Pages/main_youtube'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <MainYoutube></MainYoutube>
-  </React.StrictMode>,
+    <MainUpload></MainUpload>,
   document.getElementById('root')
 );
+
+/**
+ * IF NEED TO RE-ENABLE STRICT MODE THEN UNNCOMMENT AND ADD BACK
+ * 
+ *   <React.StrictMode>
+    <MainUpload></MainUpload>
+  </React.StrictMode>,
+ */
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

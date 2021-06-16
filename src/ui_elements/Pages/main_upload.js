@@ -97,8 +97,12 @@ var Fabric = createReactClass({
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
-      //frame_data[global_currFrame] = fabricCanvas.toJSON()
+      save_data(global_currFrame)
     });
+
+    fabricCanvas.on('object:added', save_data(global_currFrame));
+    fabricCanvas.on('object:removed', save_data(global_currFrame));
+    fabricCanvas.on('object:modified', save_data(global_currFrame));
 
     
     // an event we will fire when we want to save state
@@ -118,6 +122,11 @@ var disable_buttons = true;
 var global_currFrame = 0;
 var toast_text = ""
 
+function save_data(frame_num){
+  frame_data[frame_num] = fabricCanvas.toJSON()
+  console.log("SAVED")
+}
+
 //Current frame counter
 function MainUpload() {
   
@@ -133,10 +142,10 @@ function MainUpload() {
     if(annotation_data[currentFrame] == null){
       annotation_data[currentFrame] = []
     }
-
+    save_data(currentFrame)
     if (annotationType === 0){
       annotation_data[currentFrame].push({id: boxCount, global_id: -1,behavior: "None", is_hidden: 0, posture: "None"})
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_mouse_no_behavior(fabricCanvas)
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
       //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       //fabricCanvas.add(new_bbox)
       //fabricCanvas.setActiveObject(new_bbox);
@@ -168,7 +177,6 @@ function MainUpload() {
 
   const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
-    //console.log(oldAnnotation)
     setVideoFileURL(URL.createObjectURL(event.target.files[0]));
     upload = true;
   };
@@ -244,7 +252,7 @@ function MainUpload() {
   const handleSetPlayer = val => {
     setPlayer(val)
     if(upload === true && player != null){      
-      console.log("RESET VALUES")
+      console.log("Initializing...")
       frame_data = new Array(num_frames)
       annotation_data = new Array(num_frames)
       //TODO Update this later
@@ -266,15 +274,14 @@ function MainUpload() {
 
   const [currentFrame, setCurrentFrame] = useState(0)
   const handleSetCurrentFrame = val => {
+    save_data(currentFrame)
     var total_frames = duration * frame_rate
     setSliderPercent(currentFrame/total_frames)
     setCurrentFrame(Math.round(val['played']*total_frames))
-    global_currFrame = currentFrame
-
-
+    global_currFrame = Math.round(val['played']*total_frames)
 
     if(oldAnnotation != null){ 
-      fabricCanvas.clear();
+      //fabricCanvas.clear();
       var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), scaling_factor_width, scaling_factor_height).generate_frame()
       for(var i = 0; i < bbox.length; i++){
         var curr_obj = bbox[i]
@@ -288,6 +295,13 @@ function MainUpload() {
   }
 
   const skip_frame_forward = e =>{
+    if (frame_data[currentFrame+skip_value].length == 0){
+      console.log(currentFrame)
+      annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
+      frame_data[currentFrame+skip_value] = frame_data[currentFrame];
+      console.log("Carryover annotation")
+    }
+
     var total_frames = duration * frame_rate
     player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
   }
@@ -296,8 +310,6 @@ function MainUpload() {
     var total_frames = duration * frame_rate
     player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
   }
-
-  //frame_data[currentFrame] = fabricCanvas.toJSON()
 
   const downloadFile = async () => {
     var fileName = "generated_annotations";
@@ -379,6 +391,8 @@ function MainUpload() {
       frame_data[currentFrame] = fabricCanvas.toJSON()
     }
   }  
+
+  const [test, changeTest] = useState(false);
  
   useEffect(() => {
     document.addEventListener("keydown", onKeyPress);
@@ -386,13 +400,16 @@ function MainUpload() {
   }, [onKeyPress]);
   
   useEffect(() => {
-    fabricCanvas.clear()
-    if(frame_data[currentFrame] === [] | frame_data[currentFrame] == null){
-      annotation_data[currentFrame] = []
-    }
+    /*if(frame_data[currentFrame]['objects'] != undefined){
+      if(frame_data[currentFrame]['objects'].length === 0)
+        console.log('FIRED')
+        annotation_data[currentFrame] = []
+    }*/
     console.log(currentFrame)
+    console.log(frame_data)
+    console.log(annotation_data)
+
     fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
-      console.log(frame_data[currentFrame])
       fabricCanvas.renderAll();
     });
   }, [currentFrame]);
@@ -503,6 +520,7 @@ function MainUpload() {
                 columns={ columns } 
                 cellEdit={ 
                   cellEditFactory({ mode: 'click', blurToSave: true, afterSaveCell: (oldValue, newValue, row, column) => {
+                    console.log(annotation_data[currentFrame][row['id']])
                     annotation_data[currentFrame][row['id']] = row
                   } }) 
                 }
