@@ -27,6 +27,7 @@ import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import {behaviors} from '../../static_data/behaviors'
 import {posture} from '../../static_data/posture'
+import Instructions from "../Components/instructions";
 
 
 const columns = [{
@@ -472,11 +473,11 @@ function MainUpload() {
           <strong className="mr-auto">{toast_text}</strong>
         </Toast.Header>
       </Toast>
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={show} onHide={handleClose} size='lg'>
           <Modal.Header closeButton>
           <Modal.Title>Instructions</Modal.Title>
           </Modal.Header>
-          <Modal.Body>TODO: Add instructions</Modal.Body>
+          <Modal.Body><Instructions></Instructions></Modal.Body>
           <Modal.Footer>
           <Button variant="secondary" onClick={handleClose}>Close</Button>
           </Modal.Footer>
