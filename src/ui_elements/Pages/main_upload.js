@@ -73,13 +73,8 @@ console.log(window.screen.height)
 var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
 
-if (current_screen_height >= 1440){
-  scaling_factor_height = 1080;
-  scaling_factor_width = 1920;
-}else if(current_screen_height <= 1024){
-  scaling_factor_height = 648;
-  scaling_factor_width = 1152;
-}
+scaling_factor_height = current_screen_height * .7935;
+scaling_factor_width = current_screen_width * .7935;
 
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
