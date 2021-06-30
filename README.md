@@ -123,6 +123,7 @@ Similar to how the react components are structured, each of the types of annotat
 ### Data Management
 * - [x] Export data as CSV or JSON
 * - [x] Global ID
+* - [ ] Load video in chunks for larger file sizes to prevent high RAM usage
 * - [ ] Import JSON data from Matlab tool
 * - [ ] Import previous annotation data to continue annotations
 * - [ ] Seperate file for behavior + posture + column list

@@ -63,8 +63,8 @@ const createReactClass = require('create-react-class');
 //TODO ADD DYNAMIC SOLUTION 
 var frame_rate = 15;
 var num_frames = 7200;
-var scaling_factor_height = 1080;
 var scaling_factor_width = 1920;
+var scaling_factor_height = 1080;
 var skip_value = 1;
 
 console.log(window.screen.width)
@@ -73,12 +73,27 @@ console.log(window.screen.height)
 var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
 
-scaling_factor_height = current_screen_height * .7935;
-scaling_factor_width = current_screen_width * .7935;
+//Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
+if (current_screen_height >= 1440){
+  scaling_factor_width = 1920;
+  scaling_factor_height = 1080;
+}else if(current_screen_height >= 1080){
+  scaling_factor_width = 1280;
+  scaling_factor_height = 720;
+}else if(current_screen_height >= 1024){
+  scaling_factor_width = 1152;
+  scaling_factor_height = 648;
+}else if(current_screen_height >= 768){
+  scaling_factor_width = 1024;
+  scaling_factor_height = 576;
+}
+
 
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
 
+var video_width = 0;
+var video_height = 0;
 
 var Fabric = createReactClass({
 	componentDidMount() {
@@ -146,8 +161,10 @@ function MainUpload() {
       //fabricCanvas.add(new_bbox)
       //fabricCanvas.setActiveObject(new_bbox);
     }else if (annotationType === 1){
-      annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
-      var keyp = new KeyPoint().generate_stick(fabricCanvas)
+      //TODO fix KeyPoint
+      alert("KeyPoint annotation are currently unavailable")
+      //annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
+      //var keyp = new KeyPoint().generate_stick(fabricCanvas)
     }else if (annotationType === 2){
       annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
       var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount)
@@ -247,6 +264,7 @@ function MainUpload() {
   const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
     setPlayer(val)
+    
     if(upload === true && player != null){      
       console.log("Initializing...")
       frame_data = new Array(num_frames)
@@ -258,6 +276,16 @@ function MainUpload() {
       }
       upload = false;
       disable_buttons = false
+    }
+  }
+
+  if(player != null){
+    if(player['player'] != null){
+      if(player['player']['player'] != null){
+        if(player['player']['player'] != null){
+          console.log(player['player']['player']['player'].videoWidth)
+        }
+      }
     }
   }
 
@@ -351,8 +379,16 @@ function MainUpload() {
 
   const [save, changeSave] = useState(false);
   
+  const [keyCheck, changeKeyCheck] = useState(true)
+  const handle_key_check = (event) => {
+    changeKeyCheck(!keyCheck)
+    console.log("Changing keyCheck to: " + keyCheck)
+  }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onKeyPress = (event) =>{
+    //Making sure input for textbox doesnt get counted as a mode change
+
     if(event.key === "3") {
       toast_text = "Mode Switch: Segmentation"
       changeSave(true)
