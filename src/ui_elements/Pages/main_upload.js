@@ -55,6 +55,10 @@ const columns = [{
     }
 }]
 
+const ANNOTATION_FRAME = "1"
+const ANNOTATION_BBOX = "2"
+const ANNOTATION_KEYPOINT = "3"
+const ANNOTATION_SEG = "4"
 
 const fabric = require("fabric").fabric;
 const createReactClass = require('create-react-class');
@@ -389,11 +393,9 @@ function MainUpload() {
   const onKeyPress = (event) =>{
     //Making sure input for textbox doesnt get counted as a mode change
 
-    if(event.key === "3") {
-      toast_text = "Mode Switch: Segmentation"
-      changeSave(true)
-      handleSegmentation()
-    }else if (event.key === "1"){
+    //TODO Add keystroke disabling when typing in values in other parts
+
+    if (event.key === "1"){
       toast_text = "Mode Switch: Bounding Box"
       changeSave(true)
       handleSquareBox()
@@ -401,6 +403,10 @@ function MainUpload() {
       toast_text = "Mode Switch: Key Point"
       changeSave(true)
       handleKeyPoint()
+    }else if(event.key === "3") {
+      toast_text = "Mode Switch: Segmentation"
+      changeSave(true)
+      handleSegmentation()
     }else if (event.key === "a"){
       toast_text = "Added Annotation"
       changeSave(true)
@@ -411,11 +417,9 @@ function MainUpload() {
       remove()
     }else if (event.key === "q"){
       skip_frame_backward()
-    }
-    else if (event.key === "w"){
+    }else if (event.key === "w"){
       handlePlaying()
-    }
-    else if (event.key === "e"){
+    }else if (event.key === "e"){
       skip_frame_forward()
     }else if (event.key === "s"){
       toast_text = "Annotation Saved"
@@ -453,7 +457,7 @@ function MainUpload() {
           <Nav className="mr-auto">
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 
-              <NavDropdown disabled={disable_buttons} title="Annotation Type" id="basic-nav-dropdown">
+              <NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
                 <NavDropdown.Item onClick={handleSquareBox} >Square Box</NavDropdown.Item>
                 <NavDropdown.Divider />
                 <NavDropdown.Item onClick={handleKeyPoint}>Key Point</NavDropdown.Item>
@@ -499,6 +503,7 @@ function MainUpload() {
             position: 'absolute',
             top: '00%',
             left: '50%',
+            zIndex: 100
           }}>
         <Toast.Header>
           <strong className="mr-auto">{toast_text}</strong>
@@ -551,10 +556,16 @@ function MainUpload() {
                 data={annotation_data[currentFrame]} 
                 columns={ columns } 
                 cellEdit={ 
-                  cellEditFactory({ mode: 'click', blurToSave: true, afterSaveCell: (oldValue, newValue, row, column) => {
-                    console.log(annotation_data[currentFrame][row['id']])
-                    annotation_data[currentFrame][row['id']] = row
-                  } }) 
+                  cellEditFactory({ mode: 'click', blurToSave: true, 
+                    afterSaveCell: (oldValue, newValue, row, column) => {
+                      console.log(annotation_data[currentFrame][row['id']])
+                      annotation_data[currentFrame][row['id']] = row
+                      handle_key_check()
+                    },
+                    onStartEdit: (row, column, rowIndex, columnIndex) => {
+                      handle_key_check()
+                    }
+                  }) 
                 }
               />
           </div>

@@ -118,7 +118,6 @@ Similar to how the react components are structured, each of the types of annotat
 ### Extra Features
 * - [ ] Have the frame follow the animal's movement through the frames
 * - [ ] Automatically guesstimate boxes for pigs based on background subtraction
-* - [ ] 
 
 ### Data Management
 * - [x] Export data as CSV or JSON
