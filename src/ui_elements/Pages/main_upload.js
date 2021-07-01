@@ -21,14 +21,17 @@ import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
 import { KeyPoint } from '../../backend_processing/key_point'
 import { Segmentation } from '../../backend_processing/segmentation'
 import { Annotation } from '../../backend_processing/annotation'
+import Instructions from "../Components/instructions";
 
 import BootstrapTable from 'react-bootstrap-table-next';
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import paginationFactory from 'react-bootstrap-table2-paginator';
+
 import {behaviors} from '../../static_data/behaviors'
 import {posture} from '../../static_data/posture'
+import {status} from '../../static_data/status'
 //import {columns} from '../../static_data/columns' //TODO re-add columns
-import Instructions from "../Components/instructions";
 
 
 const columns = [{
@@ -46,15 +49,33 @@ const columns = [{
     }
 },{
   dataField: "is_hidden",
-  text: "Hid"
+  text: "Hid",
+  editor: {
+    type: Type.CHECKBOX,
+    value: 'Start:Stop'
+  }
 },{
   dataField: "posture",
   text: "Pos",
   editor: {
       type: Type.SELECT,
-      options: posture
-    }
-}]
+      options: posture,
+  }
+},{
+  dataField: "remove",
+  text: "Delete",
+  formatter: (cellContent, row) => {
+    return (
+      <button
+        className="btn btn-danger btn-xs"
+        >
+        Delete
+      </button>
+    );
+    //onClick={() => handleDelete(row.id, row.name)}
+  },
+}
+]
 
 const ANNOTATION_FRAME = "1"
 const ANNOTATION_BBOX = "2"
@@ -328,6 +349,9 @@ function MainUpload() {
   }
 
   const skip_frame_forward = e =>{
+    console.log(annotation_data)
+    console.log(parseInt(currentFrame+skip_value))
+    console.log(annotation_data[currentFrame+skip_value])
     if (annotation_data[currentFrame+skip_value].length == 0){
       console.log(currentFrame)
       annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
@@ -486,7 +510,7 @@ function MainUpload() {
                 <NavDropdown.Divider />
                 Vertical Res: <input type='number' defaultValue="2178"></input>
                 <NavDropdown.Divider />
-                Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = event.target.value}}></input>
+                Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = parseInt(event.target.value)}}></input>
               </NavDropdown>
           </Nav>
 
@@ -562,6 +586,7 @@ function MainUpload() {
                 keyField='id' 
                 data={annotation_data[currentFrame]} 
                 columns={ columns } 
+                table
                 cellEdit={ 
                   cellEditFactory({ mode: 'click', blurToSave: true, 
                     afterSaveCell: (oldValue, newValue, row, column) => {
@@ -574,6 +599,7 @@ function MainUpload() {
                     }
                   }) 
                 }
+                pagination={ paginationFactory() }
               />
           </div>
         </div>
