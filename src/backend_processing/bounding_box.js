@@ -57,6 +57,18 @@ class BoundingBox {
         //console.log(group.toJSON())
 
         canvas.add(group)
+
+        function onChange(obj) {
+            var circle = obj.target.item(1),
+                group = obj.target,
+                scaleX = group.width / (group.width * group.scaleX),
+                scaleY = group.height / (group.height * group.scaleY);
+            circle.set('scaleX', scaleX);
+            circle.set('scaleY', scaleY);
+        }
+        canvas.on({
+            'object:scaling': onChange
+        })
         return group
     }
 

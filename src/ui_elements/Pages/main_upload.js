@@ -392,7 +392,9 @@ function MainUpload() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onKeyPress = (event) =>{
     //Making sure input for textbox doesnt get counted as a mode change
-
+    if(keyCheck == false){
+      return;
+    }
     //TODO Add keystroke disabling when typing in values in other parts
 
     if (event.key === "1"){
