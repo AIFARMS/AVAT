@@ -14,7 +14,7 @@ const columns = [{
   text: "Status",
   editor: {
       type: Type.SELECT,
-      options: behaviors
+      options: status
     }
 },{
   dataField: "is_hidden",

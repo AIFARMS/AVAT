@@ -27,6 +27,7 @@ import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import {behaviors} from '../../static_data/behaviors'
 import {posture} from '../../static_data/posture'
+//import {columns} from '../../static_data/columns' //TODO re-add columns
 import Instructions from "../Components/instructions";
 
 
@@ -66,7 +67,7 @@ const createReactClass = require('create-react-class');
 
 //TODO ADD DYNAMIC SOLUTION 
 var frame_rate = 15;
-var num_frames = 7200;
+var num_frames = -1;
 var scaling_factor_width = 1920;
 var scaling_factor_height = 1080;
 var skip_value = 1;
@@ -268,19 +269,6 @@ function MainUpload() {
   const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
     setPlayer(val)
-    
-    if(upload === true && player != null){      
-      console.log("Initializing...")
-      frame_data = new Array(num_frames)
-      annotation_data = new Array(num_frames)
-      //TODO Update this later
-      for (var i = 0; i < 7200; i++){
-        frame_data[i] = []
-        annotation_data[i] = []
-      }
-      upload = false;
-      disable_buttons = false
-    }
   }
 
   if(player != null){
@@ -295,6 +283,23 @@ function MainUpload() {
 
   const [duration, setDuration] = useState(0);
   const handleSetDuration = val => {
+    
+
+    if(upload === true && player != null){      
+      console.log("Initializing...")
+      num_frames = Math.round(val * frame_rate);
+
+      frame_data = new Array(num_frames)
+      annotation_data = new Array(num_frames)
+
+      //TODO Update this later
+      for (var i = 0; i < num_frames; i++){
+        frame_data[i] = []
+        annotation_data[i] = []
+      }
+      upload = false;
+      disable_buttons = false
+    }
     setDuration(parseInt(val))
     console.log(val)
   }
@@ -323,7 +328,7 @@ function MainUpload() {
   }
 
   const skip_frame_forward = e =>{
-    if (frame_data[currentFrame+skip_value].length == 0){
+    if (annotation_data[currentFrame+skip_value].length == 0){
       console.log(currentFrame)
       annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
       frame_data[currentFrame+skip_value] = frame_data[currentFrame];
