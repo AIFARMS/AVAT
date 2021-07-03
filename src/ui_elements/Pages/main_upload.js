@@ -29,7 +29,7 @@ import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import { CSVExport } from 'react-bootstrap-table2-toolkit';
 
-import {behaviors} from '../../static_data/behaviors'
+import {behaviors} from '../../static_data/behaviors_LPS'
 import {posture} from '../../static_data/posture'
 import {status} from '../../static_data/status'
 //import {columns} from '../../static_data/columns' //TODO re-add columns
@@ -48,11 +48,11 @@ const columns = [{
     return { backgroundColor };
   }
 },{
-  dataField: "behavior",
-  text: "Beh",
+  dataField: "status",
+  text: "Status",
   editor: {
       type: Type.SELECT,
-      options: behaviors
+      options: status
     }
 },{
   dataField: "is_hidden",
@@ -62,11 +62,11 @@ const columns = [{
     value: 'Start:Stop'
   }
 },{
-  dataField: "posture",
-  text: "Pos",
+  dataField: "behavior",
+  text: "Behavior",
   editor: {
       type: Type.SELECT,
-      options: posture,
+      options: behaviors,
   }
 },{
   dataField: "remove",
@@ -76,8 +76,8 @@ const columns = [{
       <button
         className="btn btn-danger btn-xs"
           onClick={() => remove_table_index(row.id)}
+          label="Del"
         >
-        Del
       </button>
     );
   },
@@ -89,6 +89,7 @@ function remove_table_index(index){
   console.log(fabricCanvas.getObjects()[index])
   fabricCanvas.remove(fabricCanvas.getObjects()[index].remove());
   fabricCanvas.fire('saveData');
+  
 }
 
 
@@ -139,13 +140,15 @@ var video_height = 0;
 var Fabric = createReactClass({
 	componentDidMount() {
   	var el = ReactDOM.findDOMNode(this);
-    
+
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
     	height: scaling_factor_height,
       width: scaling_factor_width,
       backgroundColor : null,
     });
+
+    fabricCanvas.hoverCursor = "crosshair"
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
@@ -196,7 +199,7 @@ function MainUpload() {
     }
     save_data(currentFrame)
     if (annotationType === 0){
-      annotation_data[currentFrame].push({id: boxCount, global_id: null,behavior: "None", is_hidden: "Start", posture: "None"})
+      annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "None", is_hidden: "Start", behavior: "None"})
       var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
       //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       //fabricCanvas.add(new_bbox)
@@ -204,10 +207,10 @@ function MainUpload() {
     }else if (annotationType === 1){
       //TODO fix KeyPoint
       alert("KeyPoint annotation are currently unavailable")
-      //annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
+      //annotation_data[currentFrame].push({id: boxCount+'k', behavior: "None", is_hidden: 0, posture: "None"})
       //var keyp = new KeyPoint().generate_stick(fabricCanvas)
     }else if (annotationType === 2){
-      annotation_data[currentFrame].push({id: boxCount, behavior: "None", is_hidden: 0, posture: "None"})
+      annotation_data[currentFrame].push({id: boxCount+'s', status: "None", is_hidden: 0, posture: "None"})
       var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount)
     }
 
@@ -363,15 +366,15 @@ function MainUpload() {
 
   }
 
+  const [scrubbing, setScrubbing] = useState(false);
+
   const skip_frame_forward = e =>{
-    console.log(annotation_data)
-    console.log(parseInt(currentFrame+skip_value))
-    console.log(annotation_data[currentFrame+skip_value])
-    if (annotation_data[currentFrame+skip_value].length == 0){
-      console.log(currentFrame)
-      annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
-      frame_data[currentFrame+skip_value] = frame_data[currentFrame];
-      console.log("Carryover annotation")
+    if(scrubbing === false){
+      if (annotation_data[currentFrame+skip_value].length == 0){
+        annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
+        frame_data[currentFrame+skip_value] = frame_data[currentFrame];
+        console.log("Carryover annotation")
+      }
     }
 
     var total_frames = duration * frame_rate
@@ -471,6 +474,17 @@ function MainUpload() {
       toast_text = "Annotation Saved"
       changeSave(true)
       frame_data[currentFrame] = fabricCanvas.toJSON()
+    }else if (event.key === "f"){
+      if(scrubbing === false){
+        toast_text = "Scrubbing Mode Activated"
+        setScrubbing(true)
+        changeSave(true)
+      }else{
+        toast_text = "Scrubbing Mode Deactivated"
+        setScrubbing(false)
+        changeSave(true)
+      }
+
     }
   }  
 
@@ -602,16 +616,16 @@ function MainUpload() {
                 data={annotation_data[currentFrame]} 
                 columns={ columns }
                 table
-                noDataIndication={ () => <div>Add annotations or behaviors!</div> }
+                noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
                 cellEdit={
                   cellEditFactory({ mode: 'click', blurToSave: true,
                     afterSaveCell: (oldValue, newValue, row, column) => {
                       console.log(annotation_data[currentFrame][row['id']])
                       annotation_data[currentFrame][row['id']] = row
-                      handle_key_check()
+                      changeKeyCheck(true)
                     },
                     onStartEdit: (row, column, rowIndex, columnIndex) => {
-                      handle_key_check()
+                      changeKeyCheck(false)
                     }
                   }) 
                 }
