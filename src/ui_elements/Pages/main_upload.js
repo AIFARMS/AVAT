@@ -55,12 +55,13 @@ const columns = [{
       options: status
     }
 },{
-  dataField: "is_hidden",
+  dataField: "current",
   text: "Curr",
   editor: {
     type: Type.CHECKBOX,
     value: 'Start:Stop'
-  }
+  },
+  headerStyle: () => { return { width: "60px", left: 0}; },
 },{
   dataField: "behavior",
   text: "Behavior",
@@ -71,6 +72,7 @@ const columns = [{
 },{
   dataField: "remove",
   text: "Del",
+  headerStyle: () => { return { width: "50px", left: 0}; },
   formatter: (cellContent, row) => {
     return (
       <button
@@ -85,10 +87,10 @@ const columns = [{
 ]
 
 function remove_table_index(index){
-  annotation_data[global_currFrame].splice(index, 1)
+  annotation_data[currentFrame].splice(index, 1)
   console.log(fabricCanvas.getObjects()[index])
-  fabricCanvas.remove(fabricCanvas.getObjects()[index].remove());
-  fabricCanvas.fire('saveData');
+  //fabricCanvas.remove(fabricCanvas.getObjects()[index].remove());
+  //fabricCanvas.fire('saveData');
   
 }
 
@@ -141,6 +143,7 @@ var Fabric = createReactClass({
 	componentDidMount() {
   	var el = ReactDOM.findDOMNode(this);
 
+    //alert("Loaded player: \nHorizontal Resolution = " + scaling_factor_width + "\nVertical Resolution = " + scaling_factor_height)
     // Here we have the canvas so we can initialize fabric
     fabricCanvas.initialize(el, {
     	height: scaling_factor_height,
@@ -148,17 +151,16 @@ var Fabric = createReactClass({
       backgroundColor : null,
     });
 
-    fabricCanvas.hoverCursor = "crosshair"
+    fabricCanvas.Cursor = "crosshair"
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
-      save_data(global_currFrame)
+      save_data(currentFrame)
     });
 
-    fabricCanvas.on('object:added', save_data(global_currFrame));
-    fabricCanvas.on('object:removed', save_data(global_currFrame));
-    fabricCanvas.on('object:modified', save_data(global_currFrame));
-
+    fabricCanvas.on('object:added', save_data(currentFrame));
+    fabricCanvas.on('object:removed', save_data(currentFrame));
+    fabricCanvas.on('object:modified', save_data(currentFrame));
     
     // an event we will fire when we want to save state
     fabricCanvas.on('saveData', () => {
@@ -174,18 +176,34 @@ var frame_data = [[]];
 var annotation_data = [[]];
 var upload = false;
 var disable_buttons = true;
-var global_currFrame = 0;
+var currentFrame = 0;
+var sliderPercent = 0
 var toast_text = ""
+var previous_annotation = []
+var previous_canvas_annotation = []
 
 function save_data(frame_num){
   frame_data[frame_num] = fabricCanvas.toJSON()
   console.log("SAVED")
 }
 
+
 //Current frame counter
 function MainUpload() {
   
-  const [annotationType, setAnnotationType] = useState(0)
+  const [visualToggle, setVisualToggle] = useState(false);
+
+  const save_previous_data = () => {
+    if(annotation_data[currentFrame].length == 0){
+      return;
+    }
+    console.log(annotation_data[currentFrame].length === 0)
+    console.log("saved annotation")
+    previous_annotation = annotation_data[currentFrame]
+    previous_canvas_annotation = frame_data[currentFrame]
+  }
+
+  const [annotationType, setAnnotationType] = useState("1")
   const handleAnnotationType = (event) => {
     console.log(event.target.value)
   }
@@ -198,20 +216,23 @@ function MainUpload() {
       annotation_data[currentFrame] = []
     }
     save_data(currentFrame)
-    if (annotationType === 0){
-      annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "None", is_hidden: "Start", behavior: "None"})
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
+    if (annotationType === ANNOTATION_BBOX){
+      annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "None", current: "Start", behavior: "None"})
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None", fabricCanvas).generate_no_behavior(fabricCanvas)
       //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       //fabricCanvas.add(new_bbox)
       //fabricCanvas.setActiveObject(new_bbox);
-    }else if (annotationType === 1){
+    }else if (annotationType === ANNOTATION_KEYPOINT){
       //TODO fix KeyPoint
       alert("KeyPoint annotation are currently unavailable")
       //annotation_data[currentFrame].push({id: boxCount+'k', behavior: "None", is_hidden: 0, posture: "None"})
       //var keyp = new KeyPoint().generate_stick(fabricCanvas)
-    }else if (annotationType === 2){
-      annotation_data[currentFrame].push({id: boxCount+'s', status: "None", is_hidden: 0, posture: "None"})
-      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount)
+    }else if (annotationType === ANNOTATION_SEG){
+      annotation_data[currentFrame].push({id: boxCount+'s', global_id:null, status: "None", current: "Start", behavior: "None"})
+      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+    }else if(annotationType === ANNOTATION_FRAME){
+      //TODO Add annotation frame datapoint
+      annotation_data[currentFrame].push({id: boxCount+'f', global_id: null,status: "None", current: "Start", behavior: "None"})
     }
 
     setBoxCount(boxCount + 1);
@@ -290,10 +311,10 @@ function MainUpload() {
   }
 
   const [seeking, setSeeking] = useState(false)
-  const [sliderPercent, setSliderPercent] = useState(0)
+
 
   const handleSeekChange = e => {
-    setSliderPercent(parseFloat(e.target.value))
+    sliderPercent = (parseFloat(e.target.value))
   }
 
   const handleSeekMouseDown = e => {
@@ -307,23 +328,28 @@ function MainUpload() {
 
   const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
-    setPlayer(val)
-  }
-
-  if(player != null){
-    if(player['player'] != null){
-      if(player['player']['player'] != null){
-        if(player['player']['player'] != null){
-          console.log(player['player']['player']['player'].videoWidth)
+    console.log(val)
+    if(val != null){
+      if(val['player'] != null){
+        if(val['player']['player'] != null){
+          if(val['player']['player'] != null){
+            video_width = val['player']['player']['player'].videoWidth
+            video_height = val['player']['player']['player'].videoHeight
+            var duration = val['player']['player']['player'].duration
+            //alert("*Loaded player* \nHorizontal Resolution = " + video_width + "\nVertical Resolution = " + video_height + "\nFrame Rate: " + frame_rate + " FPS\nDuration: " + duration + " seconds")
+          }
         }
       }
     }
+    setPlayer(val)
   }
+
+  //TODO Autoset resolution
+  
+
 
   const [duration, setDuration] = useState(0);
   const handleSetDuration = val => {
-    
-
     if(upload === true && player != null){      
       console.log("Initializing...")
       num_frames = Math.round(val * frame_rate);
@@ -344,14 +370,12 @@ function MainUpload() {
   }
 
 
-  const [currentFrame, setCurrentFrame] = useState(0)
   const handleSetCurrentFrame = val => {
     save_data(currentFrame)
     var total_frames = duration * frame_rate
-    setSliderPercent(currentFrame/total_frames)
-    setCurrentFrame(Math.round(val['played']*total_frames))
-    global_currFrame = Math.round(val['played']*total_frames)
-
+    currentFrame = (val['played']/total_frames)
+    currentFrame = (Math.round(val['played']*total_frames))
+    setVisualToggle(!visualToggle)
     if(oldAnnotation != null){ 
       //fabricCanvas.clear();
       var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), scaling_factor_width, scaling_factor_height).generate_frame()
@@ -366,9 +390,10 @@ function MainUpload() {
 
   }
 
-  const [scrubbing, setScrubbing] = useState(false);
+  const [scrubbing, setScrubbing] = useState(true);
 
   const skip_frame_forward = e =>{
+    save_previous_data()
     if(scrubbing === false){
       if (annotation_data[currentFrame+skip_value].length == 0){
         annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
@@ -378,10 +403,12 @@ function MainUpload() {
     }
 
     var total_frames = duration * frame_rate
+    console.log((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
     player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
   }
 
   const skip_frame_backward = e => {
+    save_previous_data()
     var total_frames = duration * frame_rate
     player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
   }
@@ -389,7 +416,8 @@ function MainUpload() {
   const downloadFile = async () => {
     var fileName = "generated_annotations";
     //const json = JSON.stringify(fabricCanvas.getObjects());
-    var json = JSON.stringify(frame_data);
+    const json = JSON.stringify({"annotations": frame_data, "behavior_data": annotation_data})
+    //var json = JSON.stringify(frame_data);
     var blob = new Blob([json],{type:'application/json'});
     var href = await URL.createObjectURL(blob);
     var link = document.createElement('a');
@@ -399,16 +427,7 @@ function MainUpload() {
     link.click();
     document.body.removeChild(link);
 
-    fileName = "generated_data";
-    json = JSON.stringify(annotation_data);
-    blob = new Blob([json],{type:'application/json'});
-    href = await URL.createObjectURL(blob);
-    link = document.createElement('a');
-    link.href = href;
-    link.download = fileName + ".json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+
   }
 
   const [show, setShow] = useState(false);
@@ -444,18 +463,22 @@ function MainUpload() {
     }
     //TODO Add keystroke disabling when typing in values in other parts
 
-    if (event.key === "1"){
+    if (event.key === ANNOTATION_BBOX){
       toast_text = "Mode Switch: Bounding Box"
       changeSave(true)
-      handleSquareBox()
-    }else if (event.key === "2"){
+      setAnnotationType(ANNOTATION_BBOX)
+    }else if (event.key === ANNOTATION_KEYPOINT){
       toast_text = "Mode Switch: Key Point"
       changeSave(true)
-      handleKeyPoint()
-    }else if(event.key === "3") {
+      setAnnotationType(ANNOTATION_KEYPOINT)
+    }else if(event.key === ANNOTATION_SEG) {
       toast_text = "Mode Switch: Segmentation"
       changeSave(true)
-      handleSegmentation()
+      setAnnotationType(ANNOTATION_SEG)
+    }else if(event.key === ANNOTATION_FRAME){
+      toast_text = "Mode Switch: Behavior Annotation"
+      changeSave(true)
+      setAnnotationType(ANNOTATION_FRAME)
     }else if (event.key === "a"){
       toast_text = "Added Annotation"
       changeSave(true)
@@ -484,7 +507,11 @@ function MainUpload() {
         setScrubbing(false)
         changeSave(true)
       }
-
+    }else if(event.key === "c"){
+      toast_text = "Copying previous frame annotation"
+      annotation_data[currentFrame] = previous_annotation
+      frame_data[currentFrame] = previous_canvas_annotation
+      changeSave(true)
     }
   }  
 
@@ -495,20 +522,9 @@ function MainUpload() {
     return () => document.removeEventListener("keydown", onKeyPress);
   }, [onKeyPress]);
   
-  useEffect(() => {
-    /*if(frame_data[currentFrame]['objects'] != undefined){
-      if(frame_data[currentFrame]['objects'].length === 0)
-        console.log('FIRED')
-        annotation_data[currentFrame] = []
-    }*/
-    console.log(currentFrame)
-    console.log(frame_data)
-    console.log(annotation_data)
-
-    fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
-      fabricCanvas.renderAll();
-    });
-  }, [currentFrame]);
+  fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
+    fabricCanvas.renderAll();
+  });
 
   return (
     <div>
@@ -535,9 +551,9 @@ function MainUpload() {
                 <NavDropdown.Divider />
                 Frame Rate: <input type="number" defaultValue="15"></input>
                 <NavDropdown.Divider />
-                Horizontal Res: <input type='number' defaultValue="3840"></input>
+                Horizontal Res: <input type='number' defaultValue={video_width}></input>
                 <NavDropdown.Divider />
-                Vertical Res: <input type='number' defaultValue="2178"></input>
+                Vertical Res: <input type='number' defaultValue={video_height}></input>
                 <NavDropdown.Divider />
                 Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = parseInt(event.target.value)}}></input>
               </NavDropdown>
