@@ -27,6 +27,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import paginationFactory from 'react-bootstrap-table2-paginator';
+import { CSVExport } from 'react-bootstrap-table2-toolkit';
 
 import {behaviors} from '../../static_data/behaviors'
 import {posture} from '../../static_data/posture'
@@ -36,10 +37,16 @@ import {status} from '../../static_data/status'
 
 const columns = [{
   dataField: "id",
-  text: "ID"
+  text: "ID",
+  headerStyle: () => { return { width: "40px", left: 0 }; }
 },{
   dataField: "global_id",
-  text: "Glo"
+  text: "Glo",
+  headerStyle: () => { return { width: "50px", left: 0}; },
+  editCellStyle: (cell, row, rowIndex, colIndex) => {
+    const backgroundColor = cell > 2101 ? '#00BFFF' : '#00FFFF';
+    return { backgroundColor };
+  }
 },{
   dataField: "behavior",
   text: "Beh",
@@ -49,7 +56,7 @@ const columns = [{
     }
 },{
   dataField: "is_hidden",
-  text: "Hid",
+  text: "Curr",
   editor: {
     type: Type.CHECKBOX,
     value: 'Start:Stop'
@@ -63,19 +70,27 @@ const columns = [{
   }
 },{
   dataField: "remove",
-  text: "Delete",
+  text: "Del",
   formatter: (cellContent, row) => {
     return (
       <button
         className="btn btn-danger btn-xs"
+          onClick={() => remove_table_index(row.id)}
         >
-        Delete
+        Del
       </button>
     );
-    //onClick={() => handleDelete(row.id, row.name)}
   },
 }
 ]
+
+function remove_table_index(index){
+  annotation_data[global_currFrame].splice(index, 1)
+  console.log(fabricCanvas.getObjects()[index])
+  fabricCanvas.remove(fabricCanvas.getObjects()[index].remove());
+  fabricCanvas.fire('saveData');
+}
+
 
 const ANNOTATION_FRAME = "1"
 const ANNOTATION_BBOX = "2"
@@ -181,7 +196,7 @@ function MainUpload() {
     }
     save_data(currentFrame)
     if (annotationType === 0){
-      annotation_data[currentFrame].push({id: boxCount, global_id: -1,behavior: "None", is_hidden: 0, posture: "None"})
+      annotation_data[currentFrame].push({id: boxCount, global_id: null,behavior: "None", is_hidden: "Start", posture: "None"})
       var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount, "None", fabricCanvas).generate_no_behavior(fabricCanvas)
       //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
       //fabricCanvas.add(new_bbox)
@@ -581,14 +596,15 @@ function MainUpload() {
           />
         </div>
         <div style={{gridColumn: 2, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-          <div style={{width: "25%"}}>
-              <BootstrapTable 
-                keyField='id' 
+          <div style={{width: "40.5%"}}>
+              <BootstrapTable
+                keyField='id'
                 data={annotation_data[currentFrame]} 
-                columns={ columns } 
+                columns={ columns }
                 table
-                cellEdit={ 
-                  cellEditFactory({ mode: 'click', blurToSave: true, 
+                noDataIndication={ () => <div>Add annotations or behaviors!</div> }
+                cellEdit={
+                  cellEditFactory({ mode: 'click', blurToSave: true,
                     afterSaveCell: (oldValue, newValue, row, column) => {
                       console.log(annotation_data[currentFrame][row['id']])
                       annotation_data[currentFrame][row['id']] = row
