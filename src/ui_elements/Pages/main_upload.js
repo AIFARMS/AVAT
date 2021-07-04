@@ -150,8 +150,6 @@ var Fabric = createReactClass({
       width: scaling_factor_width,
       backgroundColor : null,
     });
-
-    fabricCanvas.Cursor = "crosshair"
     
     // on mouse up lets save some state
     fabricCanvas.on('mouse:up', () => {
@@ -185,6 +183,7 @@ var previous_canvas_annotation = []
 function save_data(frame_num){
   frame_data[frame_num] = fabricCanvas.toJSON()
   console.log("SAVED")
+  console.log(frame_data[frame_num])
 }
 
 
@@ -215,13 +214,10 @@ function MainUpload() {
     if(annotation_data[currentFrame] == null){
       annotation_data[currentFrame] = []
     }
-    save_data(currentFrame)
+    
     if (annotationType === ANNOTATION_BBOX){
       annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "None", current: "Start", behavior: "None"})
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None", fabricCanvas).generate_no_behavior(fabricCanvas)
-      console.log(fabricCanvas.getObjects())
-      //fabricCanvas.add(new_bbox)
-      //fabricCanvas.setActiveObject(new_bbox);
+      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
     }else if (annotationType === ANNOTATION_KEYPOINT){
       //TODO fix KeyPoint
       alert("KeyPoint annotation are currently unavailable")
@@ -234,7 +230,7 @@ function MainUpload() {
       //TODO Add annotation frame datapoint
       annotation_data[currentFrame].push({id: boxCount+'f', global_id: null,status: "None", current: "Start", behavior: "None"})
     }
-
+    save_data(currentFrame)
     setBoxCount(boxCount + 1);
     fabricCanvas.fire('saveData');
   }
@@ -328,7 +324,7 @@ function MainUpload() {
 
   const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
-    console.log(val)
+    //console.log(val)
     if(val != null){
       if(val['player'] != null){
         if(val['player']['player'] != null){
@@ -435,18 +431,6 @@ function MainUpload() {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleSquareBox = () => {
-    setAnnotationType(0);
-  }
-
-  const handleKeyPoint = () => {
-    setAnnotationType(1);
-  }
-
-  const handleSegmentation = () => {
-    setAnnotationType(2);
-  }
-
   const [save, changeSave] = useState(false);
   
   const [keyCheck, changeKeyCheck] = useState(true)
@@ -536,6 +520,16 @@ function MainUpload() {
     fabricCanvas.renderAll();
   });
 
+  /*
+    <NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
+    <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_BBOX)} >Square Box</NavDropdown.Item>
+    <NavDropdown.Divider />
+    <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_KEYPOINT)}>Key Point</NavDropdown.Item>
+    <NavDropdown.Divider />
+    <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_SEG)}>Segmentation</NavDropdown.Item>
+  </NavDropdown>
+  */ 
+
   return (
     <div>
       <Navbar bg="dark" variant="dark" className="bg-5">
@@ -543,13 +537,7 @@ function MainUpload() {
           <Nav className="mr-auto">
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 
-              <NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
-                <NavDropdown.Item onClick={handleSquareBox} >Square Box</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleKeyPoint}>Key Point</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item onClick={handleSegmentation}>Segmentation</NavDropdown.Item>
-              </NavDropdown>
+
 
               <NavDropdown disabled={disable_buttons} title="Export" id="basic-nav-dropdown">
                 <NavDropdown.Item onClick={downloadFile}>JSON</NavDropdown.Item>
@@ -646,7 +634,7 @@ function MainUpload() {
               cellEdit={
                 cellEditFactory({ mode: 'click', blurToSave: true,
                   afterSaveCell: (oldValue, newValue, row, column) => {
-                    console.log(annotation_data[currentFrame][row['id']])
+                    //console.log(annotation_data[currentFrame][row['id']])
                     annotation_data[currentFrame][row['id']] = row
                     changeKeyCheck(true)
                   },
