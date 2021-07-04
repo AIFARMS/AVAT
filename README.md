@@ -37,6 +37,15 @@ npm start
 
 If the goal is to simply access the website then go to the ```build``` folder to ```index.html``` to access the website. 
 
+### Browser Support
+
+The below listed browsers should be compatible. If any errors persist please use the latest version of Chrome or Firefox as those have ben extensively tested.
+
+* Chrome 49 (release: 2/3/2016)
+* Firefox 50 (release: 11/15/2016)
+* Safari 10 (release: 9/20/2016)
+* Edge 14 (release: 2/18/2016)
+
 ## Instructions 
 
 Follow these instructions to get the most out of the tool.
@@ -54,6 +63,8 @@ There are preset keybinds setup to make it easier to use the tool without having
 * <kbd>s</kbd> : Save annotation
 * <kbd>w</kbd> : Pause/Play
 * <kbd>e</kbd> : Skip forward frame(s)
+* <kbd>f</kbd> : Activate/Deactivate scrub mode (Activated by default)
+* <kbd>c</kbd> : Copy previous annotation
 
 ### Uploading Video:
 
