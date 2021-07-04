@@ -219,7 +219,7 @@ function MainUpload() {
     if (annotationType === ANNOTATION_BBOX){
       annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "None", current: "Start", behavior: "None"})
       var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None", fabricCanvas).generate_no_behavior(fabricCanvas)
-      //annotation_data[currentFrame].push(new Annotation(boxCount, "None", "None", 0,0, new_bbox))
+      console.log(fabricCanvas.getObjects())
       //fabricCanvas.add(new_bbox)
       //fabricCanvas.setActiveObject(new_bbox);
     }else if (annotationType === ANNOTATION_KEYPOINT){
@@ -480,7 +480,17 @@ function MainUpload() {
       changeSave(true)
       setAnnotationType(ANNOTATION_FRAME)
     }else if (event.key === "a"){
-      toast_text = "Added Annotation"
+      var annotext = ""
+      if(annotationType === ANNOTATION_BBOX){
+        annotext = "Bounding Box"
+      }else if(annotationType === ANNOTATION_FRAME){
+        annotext = "Behavior Data"
+      }else if (annotationType === ANNOTATION_KEYPOINT){
+        annotext = "Keypoint"
+      }else if (annotationType === ANNOTATION_SEG){
+        annotext = "Segmentation"
+      }
+      toast_text = "Added Annotation - " + annotext
       changeSave(true)
       addToCanvas()
     }else if (event.key === "r"){
@@ -611,7 +621,7 @@ function MainUpload() {
             pip={false}
           />
         </div>
-        <div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+        <div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
           <Fabric/>
         </div>
         <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
@@ -625,29 +635,29 @@ function MainUpload() {
             onMouseUp={handleSeekMouseUp}
           />
         </div>
-        <div style={{gridColumn: 2, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-          <div style={{width: "40.5%"}}>
-              <BootstrapTable
-                keyField='id'
-                data={annotation_data[currentFrame]} 
-                columns={ columns }
-                table
-                noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
-                cellEdit={
-                  cellEditFactory({ mode: 'click', blurToSave: true,
-                    afterSaveCell: (oldValue, newValue, row, column) => {
-                      console.log(annotation_data[currentFrame][row['id']])
-                      annotation_data[currentFrame][row['id']] = row
-                      changeKeyCheck(true)
-                    },
-                    onStartEdit: (row, column, rowIndex, columnIndex) => {
-                      changeKeyCheck(false)
-                    }
-                  }) 
-                }
-                pagination={ paginationFactory() }
-              />
-          </div>
+        <div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
+          <div>
+            <BootstrapTable
+              keyField='id'
+              data={annotation_data[currentFrame]} 
+              columns={ columns }
+              table
+              noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
+              cellEdit={
+                cellEditFactory({ mode: 'click', blurToSave: true,
+                  afterSaveCell: (oldValue, newValue, row, column) => {
+                    console.log(annotation_data[currentFrame][row['id']])
+                    annotation_data[currentFrame][row['id']] = row
+                    changeKeyCheck(true)
+                  },
+                  onStartEdit: (row, column, rowIndex, columnIndex) => {
+                    changeKeyCheck(false)
+                  }
+                }) 
+              }
+              pagination={ paginationFactory() }
+            />
+            </div>
         </div>
       </div>
     </div>
