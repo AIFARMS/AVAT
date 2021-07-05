@@ -11,7 +11,7 @@ import Form from 'react-bootstrap/Form'
 import Toast from 'react-bootstrap/Toast'
 
 
-import AnnotationProcessing from '../../backend_processing/annotation-processing'
+import ExtractingAnnotation from '../../backend_processing/annotation-processing'
 import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
@@ -277,7 +277,7 @@ function MainUpload() {
       var promise = downloadOldAnnotation(event)
       promise.then(function (result) {
         if(result != null){
-          setOldAnnotation(new AnnotationProcessing(result));
+          setOldAnnotation(new ExtractingAnnotation(result));
         }else{
           console.log("ERROR in upload old_annotation")
         }
@@ -289,8 +289,12 @@ function MainUpload() {
     if(oldAnnotation == null){
       return;
     }
+    alert("Annotation upload processed.\nAny existing annotations will be deleted and replaced with uploaded ones.")
     console.log(oldAnnotation)
-    console.log(oldAnnotation.getAllObjectByFrame(2));
+    console.log(oldAnnotation.get_frame_data());
+    frame_data = oldAnnotation.get_frame_data();
+    annotation_data = oldAnnotation.get_annotation_data();
+    setVisualToggle(!visualToggle)
   }, oldAnnotation);
 
   const downloadOldAnnotation = (file) => {
@@ -382,7 +386,7 @@ function MainUpload() {
     currentFrame = (val['played']/total_frames)
     currentFrame = (Math.round(val['played']*total_frames))
     setVisualToggle(!visualToggle)
-    if(oldAnnotation != null){ 
+    /*if(oldAnnotation != null){ //ANNOTATIONS FOR MCPT (Multi Camera Pig Tracking) additions. TODO add in another class to process all instead of doing per-frame basis which is slow and inefficient.)
       //fabricCanvas.clear();
       var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), scaling_factor_width, scaling_factor_height).generate_frame()
       for(var i = 0; i < bbox.length; i++){
@@ -392,7 +396,7 @@ function MainUpload() {
         fabricCanvas.setActiveObject(curr_obj);
         fabricCanvas.fire('saveData');
       }
-    }
+    }*/
 
   }
 

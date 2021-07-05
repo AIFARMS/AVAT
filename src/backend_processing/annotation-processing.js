@@ -1,22 +1,41 @@
-export default class AnnotationProcessing {
+import { Annotation } from "./annotation"
+
+export default class ExtractingAnnotation{
+    constructor(annotation_json){
+        this.frame_data = annotation_json['annotations']
+        this.annotation_data = annotation_json['behavior_data']
+    }
+
+    get_frame_data(){
+        return this.frame_data
+    }
+    
+    get_annotation_data(){
+        return this.annotation_data
+    }
+}
+
+
+//This is the parser for the Multi-Camera pig tracking output JSON code. 
+class MCPT_Processing {
     constructor(annotation_json){
         this.objects = annotation_json['objects']
         console.log(this.objects)
     }
 
-    getObjects() {
+    getObjects_MCPT() {
         return this.objects
     }
 
-    getObjectById(id) {
+    getObjectById_MCPT(id) {
         return this.objects[id]
     }
-
+    
     getObjectByIdFrame(id, frame_num){
         return this.objects[id][frame_num]
     }
 
-    getAllObjectByFrame(frame_num){
+    getAllObjectByFrame_MCPT(frame_num){
         var i;
         var objects_frame = []
         for (i = 0; i < this.objects.length; i++){
@@ -35,6 +54,4 @@ export default class AnnotationProcessing {
         console.log(objects_frame)
         return objects_frame;
     }
-
 }
-
