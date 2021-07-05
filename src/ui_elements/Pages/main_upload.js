@@ -34,6 +34,11 @@ import {posture} from '../../static_data/posture'
 import {status} from '../../static_data/status'
 //import {columns} from '../../static_data/columns' //TODO re-add columns
 
+//TODO add local storage functionality to auto-save
+if (typeof(Storage) === "undefined") {
+  // Code for localStorage/sessionStorage.
+  alert('Your browser does not support local storage. \nSome autosaving features of the app will not work as intended.\nPlease see the documentation to find supported browsers and their versions')
+} 
 
 const columns = [{
   dataField: "id",
@@ -179,6 +184,9 @@ var sliderPercent = 0
 var toast_text = ""
 var previous_annotation = []
 var previous_canvas_annotation = []
+var ANNOTATOR_NAME = ""
+var ANNOTATION_VIDEO_NAME = ""
+
 
 function save_data(frame_num){
   frame_data[frame_num] = fabricCanvas.toJSON()
@@ -252,6 +260,8 @@ function MainUpload() {
   const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
     setVideoFileURL(URL.createObjectURL(event.target.files[0]));
+    console.log(event.target.files[0])
+    ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
     upload = true;
   };
 
@@ -411,6 +421,9 @@ function MainUpload() {
 
   const downloadFile = async () => {
     var fileName = "generated_annotations";
+    if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
+      fileName = ANNOTATION_VIDEO_NAME + "_" +  ANNOTATOR_NAME
+    }
     //const json = JSON.stringify(fabricCanvas.getObjects());
     const json = JSON.stringify({"annotations": frame_data, "behavior_data": annotation_data})
     //var json = JSON.stringify(frame_data);
@@ -545,7 +558,7 @@ function MainUpload() {
                 <NavDropdown.Item >CSV</NavDropdown.Item>
               </NavDropdown>
 
-              <NavDropdown disabled={disable_buttons} title="Settings" id="basic-nav-dropdown">
+              <NavDropdown title="Settings" id="basic-nav-dropdown">
                 <NavDropdown.Divider />
                 Frame Rate: <input type="number" defaultValue="15"></input>
                 <NavDropdown.Divider />
@@ -554,7 +567,9 @@ function MainUpload() {
                 Vertical Res: <input type='number' defaultValue={video_height}></input>
                 <NavDropdown.Divider />
                 Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = parseInt(event.target.value)}}></input>
-              </NavDropdown>
+                <NavDropdown.Divider />
+                Annotator Name: <input type='text' defaultValue="" onChange={(event) => {ANNOTATOR_NAME = (event.target.value)}}></input>
+                </NavDropdown>
           </Nav>
 
           <div>
@@ -575,8 +590,8 @@ function MainUpload() {
       <Toast onClose={() => changeSave(false)} show={save} delay={500} autohide
           style={{
             position: 'absolute',
-            top: '00%',
-            left: '50%',
+            top: 0,
+            left: '40%',
             zIndex: 100
           }}>
         <Toast.Header>
