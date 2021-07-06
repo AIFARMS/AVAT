@@ -194,7 +194,6 @@ function MainUpload() {
   ]
   
   const remove_table_index = (index) => {
-    console.log(index.substring(index.length-1, index.length) !== "f")
     var index_num = 0;
 
     for(var i = 0; i < annotation_data[currentFrame].length; i++){
@@ -203,8 +202,6 @@ function MainUpload() {
         break;
       }
     }
-
-    console.log(index_num)
 
     if(index.substring(index.length-1, index.length) !== "f"){
       for(var i = 0; i < fabricCanvas.getObjects().length; i++){
@@ -219,10 +216,13 @@ function MainUpload() {
     annotation_data[currentFrame].splice(index_num, 1)
     console.log(annotation_data[currentFrame])
     save_data(currentFrame)
-    handle_visual_toggle()
+    //TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
+    setVisualToggle(Math.floor(Math.random() * 999999999999))
   }
   
   const [visualToggle, setVisualToggle] = useState(0);
+  
+  console.log(visualToggle)
 
   const save_previous_data = () => {
     if(annotation_data[currentFrame].length == 0){

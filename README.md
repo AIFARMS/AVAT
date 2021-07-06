@@ -54,9 +54,10 @@ Follow these instructions to get the most out of the tool.
 
 There are preset keybinds setup to make it easier to use the tool without having to click around. If done properly a combination of mouse and keyboard actions speed up the annotation process. 
 
-* <kbd>1</kbd> : Mode Switch: Bounding Box
-* <kbd>2</kbd> : Mode Switch: Key Point
-* <kbd>3</kbd> : Mode Switch: Segmentation
+* <kbd>1</kbd> : Mode Switch: Behavior Annotation
+* <kbd>2</kbd> : Mode Switch: Bounding Box
+* <kbd>3</kbd> : Mode Switch: Key Point
+* <kbd>4</kbd> : Mode Switch: Segmentation
 * <kbd>a</kbd> : Add annotation
 * <kbd>r</kbd> : Remove selected annotation
 * <kbd>q</kbd> : Skip backward frame(s)
