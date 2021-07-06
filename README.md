@@ -75,7 +75,11 @@ Click on the right side browse button. All other buttons on the screen shuold be
 
 ## Annotations
 
-There are currently three kinds of annotations. 
+There are currently four kinds of annotations. 
+
+### Behavior Annotation:
+
+This does not have a visual element. Instead this adds a row onto the the table so that behavior and behavior changes may be recorded.
 
 ### Bounding Box:
 
