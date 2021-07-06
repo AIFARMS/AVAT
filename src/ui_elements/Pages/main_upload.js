@@ -38,67 +38,7 @@ import {status} from '../../static_data/status'
 if (typeof(Storage) === "undefined") {
   // Code for localStorage/sessionStorage.
   alert('Your browser does not support local storage. \nSome autosaving features of the app will not work as intended.\nPlease see the documentation to find supported browsers and their versions')
-} 
-
-const columns = [{
-  dataField: "id",
-  text: "ID",
-  headerStyle: () => { return { width: "40px", left: 0 }; }
-},{
-  dataField: "global_id",
-  text: "Glo",
-  headerStyle: () => { return { width: "50px", left: 0}; },
-  editCellStyle: (cell, row, rowIndex, colIndex) => {
-    const backgroundColor = cell > 2101 ? '#00BFFF' : '#00FFFF';
-    return { backgroundColor };
-  }
-},{
-  dataField: "status",
-  text: "Status",
-  editor: {
-      type: Type.SELECT,
-      options: status
-    }
-},{
-  dataField: "current",
-  text: "Curr",
-  editor: {
-    type: Type.CHECKBOX,
-    value: 'Start:Stop'
-  },
-  headerStyle: () => { return { width: "60px", left: 0}; },
-},{
-  dataField: "behavior",
-  text: "Behavior",
-  editor: {
-      type: Type.SELECT,
-      options: behaviors,
-  }
-},{
-  dataField: "remove",
-  text: "Del",
-  headerStyle: () => { return { width: "50px", left: 0}; },
-  formatter: (cellContent, row) => {
-    return (
-      <button
-        className="btn btn-danger btn-xs"
-          onClick={() => remove_table_index(row.id)}
-          label="Del"
-        >
-      </button>
-    );
-  },
 }
-]
-
-function remove_table_index(index){
-  annotation_data[currentFrame].splice(index, 1)
-  console.log(fabricCanvas.getObjects()[index])
-  //fabricCanvas.remove(fabricCanvas.getObjects()[index].remove());
-  //fabricCanvas.fire('saveData');
-  
-}
-
 
 const ANNOTATION_FRAME = "1"
 const ANNOTATION_BBOX = "2"
@@ -107,6 +47,7 @@ const ANNOTATION_SEG = "4"
 
 const fabric = require("fabric").fabric;
 const createReactClass = require('create-react-class');
+
 
 
 //TODO ADD DYNAMIC SOLUTION 
@@ -143,6 +84,10 @@ var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
 
 var video_width = 0;
 var video_height = 0;
+
+function get_player_metadata(){
+
+}
 
 var Fabric = createReactClass({
 	componentDidMount() {
@@ -191,14 +136,93 @@ var ANNOTATION_VIDEO_NAME = ""
 function save_data(frame_num){
   frame_data[frame_num] = fabricCanvas.toJSON()
   console.log("SAVED")
-  console.log(frame_data[frame_num])
 }
 
 
 //Current frame counter
 function MainUpload() {
+  const columns = [{
+    dataField: "id",
+    text: "ID",
+    headerStyle: () => { return { width: "40px", left: 0 }; }
+  },{
+    dataField: "global_id",
+    text: "Glo",
+    headerStyle: () => { return { width: "50px", left: 0}; },
+    editCellStyle: (cell, row, rowIndex, colIndex) => {
+      const backgroundColor = cell > 2101 ? '#00BFFF' : '#00FFFF';
+      return { backgroundColor };
+    }
+  },{
+    dataField: "status",
+    text: "Status",
+    editor: {
+        type: Type.SELECT,
+        options: status
+      }
+  },{
+    dataField: "current",
+    text: "Curr",
+    editor: {
+      type: Type.CHECKBOX,
+      value: 'Start:Stop'
+    },
+    headerStyle: () => { return { width: "60px", left: 0}; },
+  },{
+    dataField: "behavior",
+    text: "Behavior",
+    editor: {
+        type: Type.SELECT,
+        options: behaviors,
+    }
+  },{
+    dataField: "remove",
+    text: "Del",
+    editable: false,
+    headerStyle: () => { return { width: "50px", left: 0}; },
+    formatter: (cellContent, row) => {
+      return (
+        <button
+          className="btn btn-danger btn-xs"
+            onClick={() => remove_table_index(row.id)}
+            label="Del"
+          >
+        </button>
+      );
+    },
+  }
+  ]
   
-  const [visualToggle, setVisualToggle] = useState(false);
+  const remove_table_index = (index) => {
+    console.log(index.substring(index.length-1, index.length) !== "f")
+    var index_num = 0;
+
+    for(var i = 0; i < annotation_data[currentFrame].length; i++){
+      if(annotation_data[currentFrame][i]['id'] == index){
+        index_num = i
+        break;
+      }
+    }
+
+    console.log(index_num)
+
+    if(index.substring(index.length-1, index.length) !== "f"){
+      for(var i = 0; i < fabricCanvas.getObjects().length; i++){
+        if(fabricCanvas.getObjects()[i]['_objects'][1]['text'] === index){
+          fabricCanvas.remove(fabricCanvas.getObjects()[i]);
+          fabricCanvas.fire('saveData');
+          break;
+        }
+      }
+    }
+    console.log(annotation_data[currentFrame])
+    annotation_data[currentFrame].splice(index_num, 1)
+    console.log(annotation_data[currentFrame])
+    save_data(currentFrame)
+    handle_visual_toggle()
+  }
+  
+  const [visualToggle, setVisualToggle] = useState(0);
 
   const save_previous_data = () => {
     if(annotation_data[currentFrame].length == 0){
@@ -226,14 +250,17 @@ function MainUpload() {
     if (annotationType === ANNOTATION_BBOX){
       annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "None", current: "Start", behavior: "None"})
       var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
+      fabricCanvas.add(new_bbox)
     }else if (annotationType === ANNOTATION_KEYPOINT){
       //TODO fix KeyPoint
       alert("KeyPoint annotation are currently unavailable")
       //annotation_data[currentFrame].push({id: boxCount+'k', behavior: "None", is_hidden: 0, posture: "None"})
       //var keyp = new KeyPoint().generate_stick(fabricCanvas)
     }else if (annotationType === ANNOTATION_SEG){
-      annotation_data[currentFrame].push({id: boxCount+'s', global_id:null, status: "None", current: "Start", behavior: "None"})
-      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+      alert("Segmentation annotation is currently under development")
+      //TODO Fix segmentation issues
+      //annotation_data[currentFrame].push({id: boxCount+'s', global_id:null, status: "None", current: "Start", behavior: "None"})
+      //var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
     }else if(annotationType === ANNOTATION_FRAME){
       //TODO Add annotation frame datapoint
       annotation_data[currentFrame].push({id: boxCount+'f', global_id: null,status: "None", current: "Start", behavior: "None"})
@@ -245,8 +272,13 @@ function MainUpload() {
 
   const remove = () => {
     setBoxCount(boxCount + 1)
+    if(fabricCanvas.getActiveObject() === null){
+      console.log(fabricCanvas.getObjects())
+      alert("Please select a bounding box / segmentation from the screen to delete.")
+      //return
+    }
+    console.log(fabricCanvas.getActiveObject())
     var index = fabricCanvas.getActiveObject().toJSON()['local_id']
-    console.log(fabricCanvas.getActiveObject().toJSON())
     for(var i = 0; i < annotation_data[currentFrame].length; i++){
       if (annotation_data[currentFrame][i]['id'] === index){
         annotation_data[currentFrame].splice(i, 1)
@@ -294,7 +326,7 @@ function MainUpload() {
     console.log(oldAnnotation.get_frame_data());
     frame_data = oldAnnotation.get_frame_data();
     annotation_data = oldAnnotation.get_annotation_data();
-    setVisualToggle(!visualToggle)
+    handle_visual_toggle()
   }, oldAnnotation);
 
   const downloadOldAnnotation = (file) => {
@@ -385,7 +417,7 @@ function MainUpload() {
     var total_frames = duration * frame_rate
     currentFrame = (val['played']/total_frames)
     currentFrame = (Math.round(val['played']*total_frames))
-    setVisualToggle(!visualToggle)
+    handle_visual_toggle()
     /*if(oldAnnotation != null){ //ANNOTATIONS FOR MCPT (Multi Camera Pig Tracking) additions. TODO add in another class to process all instead of doing per-frame basis which is slow and inefficient.)
       //fabricCanvas.clear();
       var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), scaling_factor_width, scaling_factor_height).generate_frame()
@@ -426,7 +458,7 @@ function MainUpload() {
   const downloadFile = async () => {
     var fileName = "generated_annotations";
     if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
-      fileName = ANNOTATION_VIDEO_NAME + "_" +  ANNOTATOR_NAME
+      fileName = ANNOTATION_VIDEO_NAME.split('.').slice(0, -1).join('.') + "_" +  ANNOTATOR_NAME
     }
     //const json = JSON.stringify(fabricCanvas.getObjects());
     const json = JSON.stringify({"annotations": frame_data, "behavior_data": annotation_data})
@@ -495,9 +527,10 @@ function MainUpload() {
       changeSave(true)
       addToCanvas()
     }else if (event.key === "r"){
-      toast_text = "Removed Annotation"
-      changeSave(true)
-      remove()
+      //TODO Determine if having a remove key is efficient or the deletion can be done directly from UI
+      //toast_text = "Removed Annotation"
+      //changeSave(true)
+      //remove()
     }else if (event.key === "q"){
       skip_frame_backward()
     }else if (event.key === "w"){
@@ -520,8 +553,8 @@ function MainUpload() {
       }
     }else if(event.key === "c"){
       toast_text = "Copying previous frame annotation"
-      annotation_data[currentFrame] = previous_annotation
-      frame_data[currentFrame] = previous_canvas_annotation
+      annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
+      frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
       changeSave(true)
     }
   }  
@@ -537,6 +570,10 @@ function MainUpload() {
     fabricCanvas.renderAll();
   });
 
+  const handle_link_open = () => {
+    window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
+  }
+
   /*
     <NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
     <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_BBOX)} >Square Box</NavDropdown.Item>
@@ -546,6 +583,9 @@ function MainUpload() {
     <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_SEG)}>Segmentation</NavDropdown.Item>
   </NavDropdown>
   */ 
+  const handle_visual_toggle = () => {
+    setVisualToggle(visualToggle+1)
+  }
 
   return (
     <div>
@@ -573,7 +613,9 @@ function MainUpload() {
                 Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = parseInt(event.target.value)}}></input>
                 <NavDropdown.Divider />
                 Annotator Name: <input type='text' defaultValue="" onChange={(event) => {ANNOTATOR_NAME = (event.target.value)}}></input>
-                </NavDropdown>
+              </NavDropdown>
+
+              <Nav.Link onClick={handle_link_open}>Report</Nav.Link>
           </Nav>
 
           <div>
@@ -588,7 +630,7 @@ function MainUpload() {
             <Button variant="primary" disabled={disable_buttons} onClick={handlePlaying}>{play_button_text}</Button>{' '}
             <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_forward}>Next</Button>{' '}
             <Button variant="success" disabled={disable_buttons} onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
-            <Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}
+            {/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
           </div>
       </Navbar>
       <Toast onClose={() => changeSave(false)} show={save} delay={500} autohide

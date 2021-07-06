@@ -3,7 +3,7 @@
 The front-end dashboard that provides the ability to annotate videos of livestock for the use in research.
 
 ## Goals
-The goal of this project is to create a tool that is easy to use, has a small learning curve and can scale easily to provide the ability to annotate videos efficiently and at scale. The intuition of this project is gained from analyzing similar projects and analyzing the weaknesses and points of frustration and improving them. 
+The goal of this project is to create a tool that is easy to use, has a small learning curve and can scale easily to provide the ability to annotate videos efficiently and at scale. The intuition of this project is gained from analyzing similar projects and analyzing the weaknesses and points of frustration and improving them. Another goal is to have an annotation workflow that is extremely fast and efficient, as there are terrabytes of video that needs to be processed at large. 
 
 ## Feedback + Bud Report + Feature Suggesions
 

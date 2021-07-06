@@ -54,9 +54,9 @@ class BoundingBox {
                 });
             };
         })(group.toObject);
-        //console.log(group.toJSON())
+        console.log(group.toJSON())
 
-        canvas.add(group)
+        //canvas.add(group)
 
         function onChange(obj) {
             var circle = obj.target.item(1),
