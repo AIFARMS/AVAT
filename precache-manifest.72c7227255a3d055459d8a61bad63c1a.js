@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "ce74d22ee0603be1b5365d0dc00a3e69",
+    "revision": "77b7997b9397d6c3f39d84304ee6a471",
     "url": "/pig-annotation-tool/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/pig-annotation-tool/static/css/2.cf23c88f.chunk.css"
   },
   {
-    "revision": "74b7d12a1fbb0961e4e8",
+    "revision": "87fecab10d1049f72153",
     "url": "/pig-annotation-tool/static/css/main.7f904051.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/pig-annotation-tool/static/js/2.66df659d.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "74b7d12a1fbb0961e4e8",
-    "url": "/pig-annotation-tool/static/js/main.15944be5.chunk.js"
+    "revision": "87fecab10d1049f72153",
+    "url": "/pig-annotation-tool/static/js/main.6bdaa4fd.chunk.js"
   },
   {
     "revision": "adfa5934224b12434833",
