@@ -1,8 +1,10 @@
+//Core imports
 import React, { useEffect, useState } from "react"; 
 import ReactDOM from 'react-dom'
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+//UI Element imports
 import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
@@ -10,31 +12,27 @@ import Modal from 'react-bootstrap/Modal'
 import Form from 'react-bootstrap/Form'
 import Toast from 'react-bootstrap/Toast'
 
-
+//Annotation Processing
 import ExtractingAnnotation from '../../backend_processing/annotation-processing'
-import ChangeTable from '../Components/change_table'
-import { NavDropdown } from "react-bootstrap";
 
-//Custom implemented classes
-import { BoundingBox } from '../../backend_processing/bounding_box'
-import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
-import { KeyPoint } from '../../backend_processing/key_point'
-import { Segmentation } from '../../backend_processing/segmentation'
+//Annotations
+import { BoundingBox } from '../../annotations/bounding_box'
+import { KeyPoint } from '../../annotations/key_point'
+import { Segmentation } from '../../annotations/segmentation'
 import { Annotation } from '../../backend_processing/annotation'
-import Instructions from "../Components/instructions";
 
+//Table imports
 import BootstrapTable from 'react-bootstrap-table-next';
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
+import cellEditFactory from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import { CSVExport } from 'react-bootstrap-table2-toolkit';
 
-import {behaviors} from '../../static_data/behaviors_LPS'
-import {posture} from '../../static_data/posture'
-import {status} from '../../static_data/status'
+//Column information + data structure
 import {columns} from '../../static_data/columns'
-//import {columns} from '../../static_data/columns' //TODO re-add columns
+//import {columns_LPS} from '../../static_data/columns'
 
+//Components
+import Instructions from "../Components/instructions";
 import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
 
@@ -82,7 +80,6 @@ if (current_screen_height >= 1440){
   scaling_factor_height = 576;
 }
 
-
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
 
@@ -108,7 +105,20 @@ function save_data(frame_num){
 
 
 //Current frame counter
-function MainUpload() {
+export default function MainUpload() {
+	const [visualToggle, setVisualToggle] = useState(0);
+	const [annotationType, setAnnotationType] = useState("1")
+	const [boxCount, setBoxCount] = useState(0)
+	const [videoFilePath, setVideoFileURL] = useState(null);
+	const [videoFilePath1, setVideoFileURL1] = useState(null);
+	const [oldAnnotation, setOldAnnotation] = useState(null)
+	const [player, setPlayer] = useState(null)
+	const [duration, setDuration] = useState(0);
+	const [show, setShow] = useState(false);
+	const [save, changeSave] = useState(false);
+	const [seeking, setSeeking] = useState(false)
+	const [playing, setPlaying] = useState(false);
+
 
   
   const remove_table_index = (index) => {
@@ -130,34 +140,22 @@ function MainUpload() {
         }
       }
     }
-    console.log(annotation_data[currentFrame])
     annotation_data[currentFrame].splice(index_num, 1)
-    console.log(annotation_data[currentFrame])
     save_data(currentFrame)
     //TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
     setVisualToggle(Math.floor(Math.random() * 999999999999))
   }
   
-  const [visualToggle, setVisualToggle] = useState(0);
   
-  console.log(visualToggle)
 
   const save_previous_data = () => {
     if(annotation_data[currentFrame].length == 0){
       return;
     }
-    console.log(annotation_data[currentFrame].length === 0)
-    console.log("saved annotation")
     previous_annotation = annotation_data[currentFrame]
     previous_canvas_annotation = frame_data[currentFrame]
   }
 
-  const [annotationType, setAnnotationType] = useState("1")
-  const handleAnnotationType = (event) => {
-    console.log(event.target.value)
-  }
-  
-  const [boxCount, setBoxCount] = useState(0)
   const addToCanvas = () =>{
     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
     
@@ -188,48 +186,20 @@ function MainUpload() {
     fabricCanvas.fire('saveData');
   }
 
-  const remove = () => {
-    setBoxCount(boxCount + 1)
-    if(fabricCanvas.getActiveObject() === null){
-      console.log(fabricCanvas.getObjects())
-      alert("Please select a bounding box / segmentation from the screen to delete.")
-      //return
-    }
-    console.log(fabricCanvas.getActiveObject())
-    var index = fabricCanvas.getActiveObject().toJSON()['local_id']
-    for(var i = 0; i < annotation_data[currentFrame].length; i++){
-      if (annotation_data[currentFrame][i]['id'] === index){
-        annotation_data[currentFrame].splice(i, 1)
-        break;
-      }
-    }
-    fabricCanvas.remove(fabricCanvas.getActiveObject());
-    fabricCanvas.fire('saveData');
-  }
-
-  const [videoFilePath, setVideoFileURL] = useState(null);
   const handleVideoUpload = (event) => {
     setVideoFileURL(URL.createObjectURL(event.target.files[0]));
-    console.log(event.target.files[0])
     ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
     upload = true;
   };
 
-  //Code for dual video upload option. Currently disabled
-  const [videoFilePath1, setVideoFileURL1] = useState(null);
-  const handleVideoUpload1 = (event) => {
-    setVideoFileURL1(URL.createObjectURL(event.target.files[0]));
-  };
-  
   //ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
-  const [oldAnnotation, setOldAnnotation] = useState(null)
   const handleOldAnnotation = (event) => {
       var promise = downloadOldAnnotation(event)
       promise.then(function (result) {
         if(result != null){
           setOldAnnotation(new ExtractingAnnotation(result));
         }else{
-          console.log("ERROR in upload old_annotation")
+          alert("Error in processing Annotation")
         }
       })
   }
@@ -240,8 +210,6 @@ function MainUpload() {
       return;
     }
     alert("Annotation upload processed.\nAny existing annotations will be deleted and replaced with uploaded ones.")
-    console.log(oldAnnotation)
-    console.log(oldAnnotation.get_frame_data());
     frame_data = oldAnnotation.get_frame_data();
     annotation_data = oldAnnotation.get_annotation_data();
     handle_visual_toggle()
@@ -258,7 +226,6 @@ function MainUpload() {
   }
   
 
-  const [playing, setPlaying] = useState(false);
   const handlePlaying = (event) => {
     setPlaying(!playing)
   }
@@ -270,7 +237,6 @@ function MainUpload() {
   play_button_text = "Play"
   }
 
-  const [seeking, setSeeking] = useState(false)
 
 
   const handleSeekChange = e => {
@@ -286,9 +252,7 @@ function MainUpload() {
     player.seekTo(parseFloat(e.target.value))
   }
 
-  const [player, setPlayer] = useState(null)
   const handleSetPlayer = val => {
-    //console.log(val)
     if(val != null){
       if(val['player'] != null){
         if(val['player']['player'] != null){
@@ -304,14 +268,8 @@ function MainUpload() {
     setPlayer(val)
   }
 
-  //TODO Autoset resolution
-  
-
-
-  const [duration, setDuration] = useState(0);
   const handleSetDuration = val => {
     if(upload === true && player != null){      
-      console.log("Initializing...")
       num_frames = Math.round(val * frame_rate);
 
       frame_data = new Array(num_frames)
@@ -326,7 +284,6 @@ function MainUpload() {
       disable_buttons = false
     }
     setDuration(parseInt(val))
-    console.log(val)
   }
 
 
@@ -336,18 +293,6 @@ function MainUpload() {
     currentFrame = (val['played']/total_frames)
     currentFrame = (Math.round(val['played']*total_frames))
     handle_visual_toggle()
-    /*if(oldAnnotation != null){ //ANNOTATIONS FOR MCPT (Multi Camera Pig Tracking) additions. TODO add in another class to process all instead of doing per-frame basis which is slow and inefficient.)
-      //fabricCanvas.clear();
-      var bbox = new FrameBoundingBox(oldAnnotation.getAllObjectByFrame(currentFrame), scaling_factor_width, scaling_factor_height).generate_frame()
-      for(var i = 0; i < bbox.length; i++){
-        var curr_obj = bbox[i]
-        console.log(curr_obj)
-        fabricCanvas.add(curr_obj);
-        fabricCanvas.setActiveObject(curr_obj);
-        fabricCanvas.fire('saveData');
-      }
-    }*/
-
   }
 
   const [scrubbing, setScrubbing] = useState(true);
@@ -355,15 +300,13 @@ function MainUpload() {
   const skip_frame_forward = e =>{
     save_previous_data()
     if(scrubbing === false){
-      if (annotation_data[currentFrame+skip_value].length == 0){
+      if (annotation_data[currentFrame+skip_value].length === 0){
         annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
         frame_data[currentFrame+skip_value] = frame_data[currentFrame];
-        console.log("Carryover annotation")
       }
     }
 
     var total_frames = duration * frame_rate
-    console.log((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
     player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
   }
 
@@ -393,12 +336,10 @@ function MainUpload() {
 
   }
 
-  const [show, setShow] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const [save, changeSave] = useState(false);
   
   const [keyCheck, changeKeyCheck] = useState(true)
   const handle_key_check = (event) => {
@@ -588,7 +529,6 @@ function MainUpload() {
 					cellEdit={
 					cellEditFactory({ mode: 'click', blurToSave: true,
 						afterSaveCell: (oldValue, newValue, row, column) => {
-							//console.log(annotation_data[currentFrame][row['id']])
 							annotation_data[currentFrame][row['id']] = row
 							changeKeyCheck(true)
 						},
@@ -608,4 +548,3 @@ function MainUpload() {
 }
 
 
-export default MainUpload;

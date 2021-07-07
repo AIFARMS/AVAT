@@ -16,10 +16,9 @@ import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
 //Custom implemented classes
-import { BoundingBox } from '../../backend_processing/bounding_box'
-import { FrameBoundingBox } from '../../backend_processing/frame_bounding_box'
-import { KeyPoint } from '../../backend_processing/key_point'
-import { Segmentation } from '../../backend_processing/segmentation'
+import { BoundingBox } from '../../annotations/bounding_box'
+import { KeyPoint } from '../../annotations/key_point'
+import { Segmentation } from '../../annotations/segmentation'
 import { Annotation } from '../../backend_processing/annotation'
 import Instructions from "../Components/instructions";
 
