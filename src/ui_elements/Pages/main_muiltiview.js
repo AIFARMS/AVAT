@@ -85,41 +85,6 @@ var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
 var video_width = 0;
 var video_height = 0;
 
-function get_player_metadata(){
-
-}
-
-var Fabric = createReactClass({
-	componentDidMount() {
-  	var el = ReactDOM.findDOMNode(this);
-
-    //alert("Loaded player: \nHorizontal Resolution = " + scaling_factor_width + "\nVertical Resolution = " + scaling_factor_height)
-    // Here we have the canvas so we can initialize fabric
-    fabricCanvas.initialize(el, {
-    	height: scaling_factor_height,
-      width: scaling_factor_width,
-      backgroundColor : null,
-    });
-    
-    // on mouse up lets save some state
-    fabricCanvas.on('mouse:up', () => {
-      save_data(currentFrame)
-    });
-
-    fabricCanvas.on('object:added', save_data(currentFrame));
-    fabricCanvas.on('object:removed', save_data(currentFrame));
-    fabricCanvas.on('object:modified', save_data(currentFrame));
-    
-    // an event we will fire when we want to save state
-    fabricCanvas.on('saveData', () => {
-      fabricCanvas.renderAll(); // programatic changes we make will not trigger a render in fabric
-    });
-  }, 
-  render() {
-    return <canvas></canvas>
-  }
-});
-
 var frame_data = [[]];
 var annotation_data = [[]];
 var upload = false;
@@ -665,7 +630,7 @@ function MainMultiview() {
           </Modal.Footer>
       </Modal>
       <div style={{display: "grid"}}>
-        <div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+        <div style={{gridColumn: 1, gridRow:1, position: "relative", height: current_screen_height*.4}}>
           <ReactPlayer 
             onProgress={handleSetCurrentFrame} 
             ref={handleSetPlayer} 
@@ -675,13 +640,12 @@ function MainMultiview() {
             height='99.999%'
             playing={playing} 
             controls={false} 
-            style={{position:'absolute', float:'left', top:0, left:0}}
             volume={0}
             muted={true}
             pip={false}
           />
         </div>
-        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+        <div style={{gridColumn: 1, gridRow:2, position: "relative",height: current_screen_height*.4}}>
           <ReactPlayer 
             onProgress={handleSetCurrentFrame} 
             ref={handleSetPlayer} 
@@ -691,19 +655,14 @@ function MainMultiview() {
             height='99.999%'
             playing={playing} 
             controls={false} 
-            style={{position:'absolute', float:'left', top:0, left:0}}
             volume={0}
             muted={true}
             pip={false}
           />
         </div>
-        <div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
-          <Fabric/>
-        </div>
-        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
-
+        <div style={{gridColumn: 1, gridRow:3, position: "relative", top: 0, left: 0}}>
           <input
-            style={{width: scaling_factor_width}}
+            style={{width: scaling_factor_width*.5}}
             type='range' min={0} max={0.999999} step='any'
             value={sliderPercent}
             onMouseDown={handleSeekMouseDown}
@@ -711,7 +670,7 @@ function MainMultiview() {
             onMouseUp={handleSeekMouseUp}
           />
         </div>
-        <div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
+        <div style={{gridColumn: 2, gridRow:1, position: "relative",width: current_screen_width*.4, top: 0, left: 0}}>
           <div>
             <BootstrapTable
               keyField='id'

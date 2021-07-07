@@ -34,6 +34,8 @@ import {posture} from '../../static_data/posture'
 import {status} from '../../static_data/status'
 //import {columns} from '../../static_data/columns' //TODO re-add columns
 
+import CustomNavBar from "../Components/nav_bar";
+
 //TODO add local storage functionality to auto-save
 if (typeof(Storage) === "undefined") {
   // Code for localStorage/sessionStorage.
@@ -567,8 +569,6 @@ function MainUpload() {
     }
   }  
 
-  const [test, changeTest] = useState(false);
- 
   useEffect(() => {
     document.addEventListener("keydown", onKeyPress);
     return () => document.removeEventListener("keydown", onKeyPress);
@@ -597,50 +597,24 @@ function MainUpload() {
 
   return (
     <div>
-      <Navbar bg="dark" variant="dark" className="bg-5">
-          <Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
-          <Nav className="mr-auto">
-              <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
-
-
-
-              <NavDropdown disabled={disable_buttons} title="Export" id="basic-nav-dropdown">
-                <NavDropdown.Item onClick={downloadFile}>JSON</NavDropdown.Item>
-                <NavDropdown.Divider />
-                <NavDropdown.Item >CSV</NavDropdown.Item>
-              </NavDropdown>
-
-              <NavDropdown title="Settings" id="basic-nav-dropdown">
-                <NavDropdown.Divider />
-                Frame Rate: <input type="number" defaultValue="15"></input>
-                <NavDropdown.Divider />
-                Horizontal Res: <input type='number' defaultValue={video_width}></input>
-                <NavDropdown.Divider />
-                Vertical Res: <input type='number' defaultValue={video_height}></input>
-                <NavDropdown.Divider />
-                Skip Value: <input type='number' defaultValue="1" onChange={(event) => {skip_value = parseInt(event.target.value)}}></input>
-                <NavDropdown.Divider />
-                Annotator Name: <input type='text' defaultValue="" onChange={(event) => {ANNOTATOR_NAME = (event.target.value)}}></input>
-              </NavDropdown>
-
-              <Nav.Link onClick={handle_link_open}>Report</Nav.Link>
-          </Nav>
-
-          <div>
-            <Form style={{float: "left", width: 80}}>
-              <Form.File disabled={disable_buttons} id="file" label="Annotation Upload" custom type="file" onChange={handleOldAnnotation}/>
-            </Form>
-            <Form style={{float: "left", width: 80}}>
-              <Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={handleVideoUpload} />
-            </Form>
-            <Button variant="secondary" disabled={true}>Frame # {parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}</Button>{' '}
-            <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_backward}>Prev</Button>{' '}
-            <Button variant="primary" disabled={disable_buttons} onClick={handlePlaying}>{play_button_text}</Button>{' '}
-            <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_forward}>Next</Button>{' '}
-            <Button variant="success" disabled={disable_buttons} onClick={addToCanvas} style={{position:"relative"}}>Add</Button>{' '}
-            {/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
-          </div>
-      </Navbar>
+      <CustomNavBar 
+          disable_buttons={disable_buttons} 
+          downloadFile={downloadFile} 
+          video_width={video_width} 
+          video_height={video_height} 
+          skip_value={skip_value} 
+          ANNOTATOR_NAME={ANNOTATOR_NAME}
+          handle_link_open={handle_link_open}
+          handleOldAnnotation={handleOldAnnotation}
+          handleVideoUpload={handleVideoUpload}
+          currentFrame={currentFrame}
+          display_frame_num={"Frame #" + parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}
+          skip_frame_forward={skip_frame_forward}
+          skip_frame_backward={skip_frame_backward}
+          handlePlaying={handlePlaying}
+          play_button_text={play_button_text}
+          addToCanvas={addToCanvas}
+      />
       <Toast onClose={() => changeSave(false)} show={save} delay={500} autohide
           style={{
             position: 'absolute',
