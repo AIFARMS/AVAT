@@ -32,9 +32,11 @@ import { CSVExport } from 'react-bootstrap-table2-toolkit';
 import {behaviors} from '../../static_data/behaviors_LPS'
 import {posture} from '../../static_data/posture'
 import {status} from '../../static_data/status'
+import {columns} from '../../static_data/columns'
 //import {columns} from '../../static_data/columns' //TODO re-add columns
 
 import CustomNavBar from "../Components/nav_bar";
+import FabricRender from "../Components/fabric_canvas";
 
 //TODO add local storage functionality to auto-save
 if (typeof(Storage) === "undefined") {
@@ -86,42 +88,6 @@ var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
 
 var video_width = 0;
 var video_height = 0;
-
-function get_player_metadata(){
-
-}
-
-var Fabric = createReactClass({
-	componentDidMount() {
-  	var el = ReactDOM.findDOMNode(this);
-
-    //alert("Loaded player: \nHorizontal Resolution = " + scaling_factor_width + "\nVertical Resolution = " + scaling_factor_height)
-    // Here we have the canvas so we can initialize fabric
-    fabricCanvas.initialize(el, {
-    	height: scaling_factor_height,
-      width: scaling_factor_width,
-      backgroundColor : null,
-    });
-    
-    // on mouse up lets save some state
-    fabricCanvas.on('mouse:up', () => {
-      save_data(currentFrame)
-    });
-
-    fabricCanvas.on('object:added', save_data(currentFrame));
-    fabricCanvas.on('object:removed', save_data(currentFrame));
-    fabricCanvas.on('object:modified', save_data(currentFrame));
-    
-    // an event we will fire when we want to save state
-    fabricCanvas.on('saveData', () => {
-      fabricCanvas.renderAll(); // programatic changes we make will not trigger a render in fabric
-    });
-  }, 
-  render() {
-    return <canvas></canvas>
-  }
-});
-
 var frame_data = [[]];
 var annotation_data = [[]];
 var upload = false;
@@ -143,65 +109,7 @@ function save_data(frame_num){
 
 //Current frame counter
 function MainUpload() {
-  const columns = [{
-    dataField: "id",
-    text: "ID",
-    headerStyle: () => { return { width: "40px", left: 0 }; }
-  },{
-    dataField: "global_id",
-    text: "Glo",
-    headerStyle: () => { return { width: "50px", left: 0}; },
-    editCellStyle: (cell, row, rowIndex, colIndex) => {
-      const backgroundColor = cell > 2101 ? '#00BFFF' : '#00FFFF';
-      return { backgroundColor };
-    }
-  },{
-    dataField: "status",
-    text: "Status",
-    editor: {
-        type: Type.SELECT,
-        options: status
-      }
-  },{
-    dataField: "current",
-    text: "Curr",
-    editor: {
-      type: Type.CHECKBOX,
-      value: 'Start:Stop'
-    },
-    headerStyle: () => { return { width: "60px", left: 0}; },
-  },{
-    dataField: "behavior",
-    text: "Behavior",
-    editor: {
-        type: Type.SELECT,
-        options: behaviors,
-    }
-  },
-  {
-    dataField: "posture",
-    text: "Posture",
-    editor: {
-        type: Type.SELECT,
-        options: posture,
-    }
-  },{
-    dataField: "remove",
-    text: "Del",
-    editable: false,
-    headerStyle: () => { return { width: "50px", left: 0}; },
-    formatter: (cellContent, row) => {
-      return (
-        <button
-          className="btn btn-danger btn-xs"
-            onClick={() => remove_table_index(row.id)}
-            label="Del"
-          >
-        </button>
-      );
-    },
-  }
-  ]
+
   
   const remove_table_index = (index) => {
     var index_num = 0;
@@ -597,101 +505,104 @@ function MainUpload() {
 
   return (
     <div>
-      <CustomNavBar 
-          disable_buttons={disable_buttons} 
-          downloadFile={downloadFile} 
-          video_width={video_width} 
-          video_height={video_height} 
-          skip_value={skip_value} 
-          ANNOTATOR_NAME={ANNOTATOR_NAME}
-          handle_link_open={handle_link_open}
-          handleOldAnnotation={handleOldAnnotation}
-          handleVideoUpload={handleVideoUpload}
-          currentFrame={currentFrame}
-          display_frame_num={"Frame #" + parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}
-          skip_frame_forward={skip_frame_forward}
-          skip_frame_backward={skip_frame_backward}
-          handlePlaying={handlePlaying}
-          play_button_text={play_button_text}
-          addToCanvas={addToCanvas}
-      />
-      <Toast onClose={() => changeSave(false)} show={save} delay={500} autohide
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: '40%',
-            zIndex: 100
-          }}>
-        <Toast.Header>
-          <strong className="mr-auto">{toast_text}</strong>
-        </Toast.Header>
-      </Toast>
-      <Modal show={show} onHide={handleClose} size='lg'>
-          <Modal.Header closeButton>
-          <Modal.Title>Instructions</Modal.Title>
-          </Modal.Header>
-          <Modal.Body><Instructions></Instructions></Modal.Body>
-          <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>Close</Button>
-          </Modal.Footer>
-      </Modal>
-      <div style={{display: "grid"}}>
-        <div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-          <ReactPlayer 
-            onProgress={handleSetCurrentFrame} 
-            ref={handleSetPlayer} 
-            onDuration={handleSetDuration} 
-            url={videoFilePath} 
-            width='100%'
-            height='99.999%'
-            playing={playing} 
-            controls={false} 
-            style={{position:'absolute', float:'left', top:0, left:0}}
-            volume={0}
-            muted={true}
-            pip={false}
-          />
-        </div>
-        <div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
-          <Fabric/>
-        </div>
-        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
-
-          <input
-            style={{width: scaling_factor_width}}
-            type='range' min={0} max={0.999999} step='any'
-            value={sliderPercent}
-            onMouseDown={handleSeekMouseDown}
-            onChange={handleSeekChange}
-            onMouseUp={handleSeekMouseUp}
-          />
-        </div>
-        <div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
-          <div>
-            <BootstrapTable
-              keyField='id'
-              data={annotation_data[currentFrame]} 
-              columns={ columns }
-              table
-              noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
-              cellEdit={
-                cellEditFactory({ mode: 'click', blurToSave: true,
-                  afterSaveCell: (oldValue, newValue, row, column) => {
-                    //console.log(annotation_data[currentFrame][row['id']])
-                    annotation_data[currentFrame][row['id']] = row
-                    changeKeyCheck(true)
-                  },
-                  onStartEdit: (row, column, rowIndex, columnIndex) => {
-                    changeKeyCheck(false)
-                  }
-                }) 
-              }
-              pagination={ paginationFactory() }
-            />
-            </div>
-        </div>
-        
-      </div>
+		<CustomNavBar 
+			disable_buttons={disable_buttons} 
+			downloadFile={downloadFile} 
+			video_width={video_width} 
+			video_height={video_height} 
+			skip_value={skip_value} 
+			ANNOTATOR_NAME={ANNOTATOR_NAME}
+			handle_link_open={handle_link_open}
+			handleOldAnnotation={handleOldAnnotation}
+			handleVideoUpload={handleVideoUpload}
+			currentFrame={currentFrame}
+			display_frame_num={"Frame #" + parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}
+			skip_frame_forward={skip_frame_forward}
+			skip_frame_backward={skip_frame_backward}
+			handlePlaying={handlePlaying}
+			play_button_text={play_button_text}
+			addToCanvas={addToCanvas}
+		/>
+		<Toast 
+			onClose={() => changeSave(false)} 
+			show={save} delay={500} autohide
+			style={{ position: 'absolute',top: 0, left: '40%', zIndex: 100}}
+		>
+			<Toast.Header>
+				<strong className="mr-auto">{toast_text}</strong>
+			</Toast.Header>
+		</Toast>
+		<Modal show={show} onHide={handleClose} size='lg'>
+			<Modal.Header closeButton>
+			<Modal.Title>Instructions</Modal.Title>
+			</Modal.Header>
+			<Modal.Body><Instructions></Instructions></Modal.Body>
+			<Modal.Footer>
+			<Button variant="secondary" onClick={handleClose}>Close</Button>
+			</Modal.Footer>
+		</Modal>
+		<div style={{display: "grid"}}>
+			<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+				<ReactPlayer 
+				onProgress={handleSetCurrentFrame} 
+				ref={handleSetPlayer} 
+				onDuration={handleSetDuration} 
+				url={videoFilePath} 
+				width='100%'
+				height='99.999%'
+				playing={playing} 
+				controls={false} 
+				style={{position:'absolute', float:'left', top:0, left:0}}
+				volume={0}
+				muted={true}
+				pip={false}
+				/>
+			</div>
+			<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
+				<FabricRender 
+					fabricCanvas={fabricCanvas}
+					currentFrame={currentFrame}
+					save_data={save_data}
+					scaling_factor_height={scaling_factor_height}
+					scaling_factor_width={scaling_factor_width}
+				/>
+			</div>
+			<div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
+				<input
+					style={{width: scaling_factor_width}}
+					type='range' min={0} max={0.999999} step='any'
+					value={sliderPercent}
+					onMouseDown={handleSeekMouseDown}
+					onChange={handleSeekChange}
+					onMouseUp={handleSeekMouseUp}
+				/>
+			</div>
+			<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
+				<div>
+				<BootstrapTable
+					keyField='id'
+					data={annotation_data[currentFrame]} 
+					columns={columns(remove_table_index)}
+					table
+					noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
+					cellEdit={
+					cellEditFactory({ mode: 'click', blurToSave: true,
+						afterSaveCell: (oldValue, newValue, row, column) => {
+							//console.log(annotation_data[currentFrame][row['id']])
+							annotation_data[currentFrame][row['id']] = row
+							changeKeyCheck(true)
+						},
+						onStartEdit: (row, column, rowIndex, columnIndex) => {
+							changeKeyCheck(false)
+						}
+					}) 
+					}
+					pagination={ paginationFactory() }
+				/>
+				</div>
+			</div>
+		
+		</div>
     </div>
   );
 }

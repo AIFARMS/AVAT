@@ -4,7 +4,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
-import Modal from 'react-bootstrap/Modal'
 import Button from 'react-bootstrap/Button'
 import { NavDropdown } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form'
