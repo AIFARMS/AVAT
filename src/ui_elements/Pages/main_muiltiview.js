@@ -140,7 +140,7 @@ function save_data(frame_num){
 
 
 //Current frame counter
-function MainUpload() {
+function MainMultiview() {
   const columns = [{
     dataField: "id",
     text: "ID",
@@ -633,6 +633,9 @@ function MainUpload() {
             <Form style={{float: "left", width: 80}}>
               <Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={handleVideoUpload} />
             </Form>
+            <Form style={{float: "left", width: 80}}>
+              <Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={handleVideoUpload1} />
+            </Form>
             <Button variant="secondary" disabled={true}>Frame # {parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}</Button>{' '}
             <Button variant="primary" disabled={disable_buttons} onClick={skip_frame_backward}>Prev</Button>{' '}
             <Button variant="primary" disabled={disable_buttons} onClick={handlePlaying}>{play_button_text}</Button>{' '}
@@ -668,6 +671,22 @@ function MainUpload() {
             ref={handleSetPlayer} 
             onDuration={handleSetDuration} 
             url={videoFilePath} 
+            width='100%'
+            height='99.999%'
+            playing={playing} 
+            controls={false} 
+            style={{position:'absolute', float:'left', top:0, left:0}}
+            volume={0}
+            muted={true}
+            pip={false}
+          />
+        </div>
+        <div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+          <ReactPlayer 
+            onProgress={handleSetCurrentFrame} 
+            ref={handleSetPlayer} 
+            onDuration={handleSetDuration} 
+            url={videoFilePath1} 
             width='100%'
             height='99.999%'
             playing={playing} 
@@ -723,4 +742,4 @@ function MainUpload() {
 }
 
 
-export default MainUpload;
+export default MainMultiview;

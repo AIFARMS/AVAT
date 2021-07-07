@@ -8,8 +8,8 @@ import MainUpload from './ui_elements/Pages/main_upload'
 import MainYoutube from './ui_elements/Pages/main_youtube'
 
 ReactDOM.render(
-    <MainUpload></MainUpload>,
-  document.getElementById('root')
+    <App/>,
+    document.getElementById('root')
 );
 
 /**
