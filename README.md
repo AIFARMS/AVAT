@@ -97,7 +97,7 @@ Upon generating this each click on the video generates a point which eventually 
 
 ***Note: Unline the Bounding Box, segmentation cant be edited after generated. To fix a mistake remove the annotation and continue from the start.***
 
-### Annotation Process
+## Annotation Process
 
 With knowledge of the keybinds and the annotation types the annotation process can begin. First upload a video by selecting the ***right*** Browse button. After that go to ```settings``` and enter your name under the "Annotator Name" textbox. After that you may proceed with annotating the video normally using the <kbd>a</kbd> key. Changing the modes as needed using their respective key-binds and changing the values on the table. 
 
