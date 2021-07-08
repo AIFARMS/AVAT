@@ -1,5 +1,5 @@
 
-export async function downloadFile (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame_data, annotation_data, VIDEO_METADATA) {
+export async function downloadFileJSON (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame_data, annotation_data, VIDEO_METADATA) {
     var fileName = "generated_annotations";
     if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
         fileName = ANNOTATION_VIDEO_NAME.split('.').slice(0, -1).join('.') + "_" +  ANNOTATOR_NAME
@@ -18,3 +18,11 @@ export async function downloadFile (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame
     document.body.removeChild(link);
 }
 
+function convert_JSON_csv(json, columns){
+    console.log(columns)
+    
+}
+
+export async function downloadFileCSV (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, annotation_data) {
+    var csv = convert_JSON_csv(annotation_data)
+}

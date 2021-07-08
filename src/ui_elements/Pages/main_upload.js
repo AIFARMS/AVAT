@@ -11,7 +11,6 @@ import Toast from 'react-bootstrap/Toast'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
-import { downloadFile } from "../../processing/misc";
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
@@ -82,7 +81,6 @@ var frame_data = [[]];
 var annotation_data = [[]];
 var upload = false;
 var disable_buttons = true;
-var currentFrame = 0;
 var sliderPercent = 0
 var toast_text = ""
 var previous_annotation = []
@@ -112,8 +110,21 @@ export default function MainUpload() {
 	const [save, changeSave] = useState(false);
 	const [seeking, setSeeking] = useState(false)
 	const [playing, setPlaying] = useState(false);
+	const [currentFrame, setCurrentFrame] = useState(0)
 
-
+	const handleSetCurrentFrame = (val) => {
+		if(typeof(val) === "number"){
+			console.log(val)
+			setCurrentFrame(val)
+		}else{
+			console.log(val)
+			save_data(currentFrame)
+			var total_frames = duration * frame_rate
+			var frame_calc = (val['played']/total_frames)
+			frame_calc = (Math.round(val['played']*total_frames))
+			setCurrentFrame(frame_calc)
+		}
+	}
   
   const remove_table_index = (index) => {
 	var index_num = 0;
@@ -240,6 +251,7 @@ export default function MainUpload() {
 
   const handleSeekChange = e => {
 	sliderPercent = (parseFloat(e.target.value))
+	console.log(sliderPercent)
   }
 
   const handleSeekMouseDown = e => {
@@ -284,15 +296,6 @@ export default function MainUpload() {
 	  disable_buttons = false
 	}
 	setDuration(parseInt(val))
-  }
-
-
-  const handleSetCurrentFrame = val => {
-	save_data(currentFrame)
-	var total_frames = duration * frame_rate
-	currentFrame = (val['played']/total_frames)
-	currentFrame = (Math.round(val['played']*total_frames))
-	handle_visual_toggle()
   }
 
   const [scrubbing, setScrubbing] = useState(true);
@@ -426,6 +429,7 @@ export default function MainUpload() {
 	  console.log(ANNOTATOR_NAME)
   }
 
+
   /*
 	<NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
 	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_BBOX)} >Square Box</NavDropdown.Item>
@@ -436,14 +440,13 @@ export default function MainUpload() {
   </NavDropdown>
   */ 
   const handle_visual_toggle = () => {
-	setVisualToggle(visualToggle+1)
+	setVisualToggle(Math.floor(Math.random() * 999999999999))
   }
 
   return (
 	<div>
 		<CustomNavBar 
 			disable_buttons={disable_buttons} 
-			downloadFile={downloadFile} 
 			video_width={video_width} 
 			video_height={video_height} 
 			skip_value={skip_value} 
@@ -467,6 +470,7 @@ export default function MainUpload() {
 			VIDEO_METADATA={VIDEO_METADATA}
 			scaling_factor_height={scaling_factor_height}
 			scaling_factor_width={scaling_factor_width}
+			columns={columns}
 		/>
 		<Toast 
 			onClose={() => changeSave(false)} 
@@ -493,7 +497,7 @@ export default function MainUpload() {
 				volume={0}
 				muted={true}
 				pip={false}
-				playbackRate={.1}
+				playbackRate={1}
 				/>
 			</div>
 			<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>

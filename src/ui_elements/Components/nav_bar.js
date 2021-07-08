@@ -12,7 +12,7 @@ import { ButtonGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
 
 import Instructions from './instructions';
-import { downloadFile } from '../../processing/misc';
+import { downloadFileJSON , downloadFileCSV} from '../../processing/misc';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
@@ -23,8 +23,12 @@ export default function CustomNavBar(props){
 	const handleUploadClose = () => setUploadShow(false)
 	const handleUploadShow = () => setUploadShow(true)
 
-	const handleDownload = () => {
-		downloadFile(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.frame_data, props.annotation_data, props.VIDEO_METADATA)
+	const handleDownloadJSON = () => {
+		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.frame_data, props.annotation_data, props.VIDEO_METADATA)
+	}
+
+	const handleDownloadCSV = () => {
+		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data)
 	}
 
 	return (
@@ -40,16 +44,27 @@ export default function CustomNavBar(props){
 		</Modal>
 		<Modal show={uploadShow} onHide={handleUploadClose} size='lg'>
 			<Modal.Header closeButton>
-			<Modal.Title>Uplaod</Modal.Title>
+			<Modal.Title>Upload</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
 				<div style={{display: "grid"}}>
-					<Form style={{float: "left",gridColumn: 1, gridRow:1}}>
-						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
-					</Form>
+					<div style={{float: "left",gridColumn: 1, gridRow:1}}>Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input><NavDropdown.Divider /></div>
+					
 					<Form style={{float: "left",gridColumn: 1, gridRow:2}}>
 						<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={props.handleVideoUpload} />
 					</Form>
+					<Form style={{float: "left",gridColumn: 1, gridRow:3}}>
+						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
+					</Form>
+						<NavDropdown.Divider />
+						Frame Rate: <input type="number" defaultValue="15"></input>
+						<NavDropdown.Divider />
+						Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+						<NavDropdown.Divider />
+						Horizontal Res: <input type='number' defaultValue={props.video_width}></input>
+						Vertical Res: <input type='number' defaultValue={props.video_height}></input>
+						<NavDropdown.Divider />
+						
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
@@ -59,35 +74,28 @@ export default function CustomNavBar(props){
 		<Navbar bg="dark" variant="dark" className="bg-5">
 				<Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
 				<Nav className="mr-auto">
-						<Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 						<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">
-							<NavDropdown.Item onClick={handleDownload}>JSON</NavDropdown.Item>
+							<NavDropdown.Item onClick={handleDownloadJSON}>JSON</NavDropdown.Item>
 							<NavDropdown.Divider />
-							<NavDropdown.Item >CSV</NavDropdown.Item>
+							<NavDropdown.Item onClick={handleDownloadCSV}>CSV</NavDropdown.Item>
 						</NavDropdown>
-
-						<NavDropdown title="Video" id="basic-nav-dropdown">
+						<NavDropdown title="Help" id="basic-nav-dropdown">
+							<NavDropdown.Item onClick={props.handle_link_open}>Report</NavDropdown.Item>
 							<NavDropdown.Divider />
-							Frame Rate: <input type="number" defaultValue="15"></input>
-							<NavDropdown.Divider />
-							Horizontal Res: <input type='number' defaultValue={props.video_width}></input>
-							<NavDropdown.Divider />
-							Vertical Res: <input type='number' defaultValue={props.video_height}></input>
-							<NavDropdown.Divider />
-							Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+							<NavDropdown.Item onClick={handleShow}>Instructions</NavDropdown.Item>
 						</NavDropdown>
-						<NavDropdown title="Settings" id="basic-nav-dropdown">
-							<NavDropdown.Divider />
-							Annotator Name: <input type='text' defaultValue="" onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
-						</NavDropdown>
-
-						<Nav.Link onClick={props.handle_link_open}>Report</Nav.Link>
 				</Nav>
 			
 				<div>
-					<Button onClick={handleUploadShow}>hi</Button>
-
-					<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
+					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
+					<Dropdown as={ButtonGroup}>
+						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
+						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
+						<Dropdown.Menu>
+							Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+						</Dropdown.Menu>
+					</Dropdown>{' '}
+					
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
