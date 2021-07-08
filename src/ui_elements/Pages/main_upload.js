@@ -89,6 +89,7 @@ var previous_annotation = []
 var previous_canvas_annotation = []
 var ANNOTATOR_NAME = ""
 var ANNOTATION_VIDEO_NAME = ""
+var VIDEO_METADATA = {}
 
 
 function save_data(frame_num){
@@ -258,6 +259,7 @@ export default function MainUpload() {
 			video_width = val['player']['player']['player'].videoWidth
 			video_height = val['player']['player']['player'].videoHeight
 			var duration = val['player']['player']['player'].duration
+			VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate}
 			//alert("*Loaded player* \nHorizontal Resolution = " + video_width + "\nVertical Resolution = " + video_height + "\nFrame Rate: " + frame_rate + " FPS\nDuration: " + duration + " seconds")
 		  }
 		}
@@ -420,8 +422,8 @@ export default function MainUpload() {
   }
 
   const change_annotator_name = (event) => {
-	  console.log(event)
 	  ANNOTATOR_NAME = event
+	  console.log(ANNOTATOR_NAME)
   }
 
   /*
@@ -461,6 +463,10 @@ export default function MainUpload() {
 			change_skip_value={change_skip_value}
 			change_annotator_name={change_annotator_name}
 			change_annotation_type={change_annotation_type}
+			annotation_data={annotation_data}
+			VIDEO_METADATA={VIDEO_METADATA}
+			scaling_factor_height={scaling_factor_height}
+			scaling_factor_width={scaling_factor_width}
 		/>
 		<Toast 
 			onClose={() => changeSave(false)} 

@@ -1,11 +1,12 @@
 
-export async function downloadFile (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame_data, annotation_data) {
+export async function downloadFile (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame_data, annotation_data, VIDEO_METADATA) {
     var fileName = "generated_annotations";
     if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
         fileName = ANNOTATION_VIDEO_NAME.split('.').slice(0, -1).join('.') + "_" +  ANNOTATOR_NAME
     }
+    console.log(annotation_data)
     //const json = JSON.stringify(fabricCanvas.getObjects());
-    const json = JSON.stringify({"annotations": frame_data, "behavior_data": annotation_data})
+    const json = JSON.stringify({"vid_metadata": VIDEO_METADATA, "annotations": frame_data, "behavior_data": annotation_data})
     //var json = JSON.stringify(frame_data);
     var blob = new Blob([json],{type:'application/json'});
     var href = await URL.createObjectURL(blob);
