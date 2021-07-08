@@ -25,14 +25,6 @@ const columns = (remove_table_index) => [{
       options: status
     }
 },{
-  dataField: "current",
-  text: "Curr",
-  editor: {
-    type: Type.CHECKBOX,
-    value: 'Start:Stop'
-  },
-  headerStyle: () => { return { width: "60px", left: 0}; },
-},{
   dataField: "behavior",
   text: "Behavior",
   editor: {

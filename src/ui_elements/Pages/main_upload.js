@@ -8,6 +8,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
 import Toast from 'react-bootstrap/Toast'
+import Tabs from 'react-bootstrap/Tabs'
+import Tab from 'react-bootstrap/Tab'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
@@ -16,12 +18,6 @@ import ExtractingAnnotation from '../../processing/annotation-processing'
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-
-//Table imports
-import BootstrapTable from 'react-bootstrap-table-next';
-import cellEditFactory from 'react-bootstrap-table2-editor';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import paginationFactory from 'react-bootstrap-table2-paginator';
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
@@ -32,6 +28,7 @@ import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} 
 import Instructions from "../Components/instructions";
 import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
+import AnnotationTable from "../Components/change_table";
 
 //TODO add local storage functionality to auto-save
 if (typeof(Storage) === "undefined") {
@@ -497,7 +494,7 @@ export default function MainUpload() {
 				volume={0}
 				muted={true}
 				pip={false}
-				playbackRate={1}
+				playbackRate={5}
 				/>
 			</div>
 			<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
@@ -520,27 +517,13 @@ export default function MainUpload() {
 				/>
 			</div>
 			<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
-				<div>
-				<BootstrapTable
-					keyField='id'
-					data={annotation_data[currentFrame]} 
-					columns={columns(remove_table_index)}
-					table
-					noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
-					cellEdit={
-					cellEditFactory({ mode: 'click', blurToSave: true,
-						afterSaveCell: (oldValue, newValue, row, column) => {
-							annotation_data[currentFrame][row['id']] = row
-							changeKeyCheck(true)
-						},
-						onStartEdit: (row, column, rowIndex, columnIndex) => {
-							changeKeyCheck(false)
-						}
-					}) 
-					}
-					pagination={ paginationFactory() }
+				<AnnotationTable
+					annotation_data={annotation_data}
+					currentFrame={currentFrame}
+					changeKeyCheck={changeKeyCheck}
+					columns={columns}
+					remove_table_inde={remove_table_index}
 				/>
-				</div>
 			</div>
 		
 		</div>

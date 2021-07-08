@@ -10,6 +10,8 @@ import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
 import { ButtonGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
+import { InputGroup } from 'react-bootstrap';
+import { FormControl } from 'react-bootstrap';
 
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/misc';
@@ -28,7 +30,7 @@ export default function CustomNavBar(props){
 	}
 
 	const handleDownloadCSV = () => {
-		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data)
+		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data, props.columns)
 	}
 
 	return (
@@ -85,8 +87,8 @@ export default function CustomNavBar(props){
 							<NavDropdown.Item onClick={handleShow}>Instructions</NavDropdown.Item>
 						</NavDropdown>
 				</Nav>
-			
 				<div>
+
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}

@@ -4,67 +4,40 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import BootstrapTable from 'react-bootstrap-table-next';
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
+import paginationFactory from 'react-bootstrap-table2-paginator';
 
-import {behaviors} from '../../static_data/behaviors'
-import {posture} from '../../static_data/posture'
+import Tabs from 'react-bootstrap/Tabs'
+import Tab from 'react-bootstrap/Tab'
 
-const columns = [{
-    dataField: "id",
-    text: "ID"
-},{
-    dataField: "behavior",
-    text: "Beh",
-    editor: {
-        type: Type.SELECT,
-        options: behaviors
-      }
-},{
-    dataField: "is_hidden",
-    text: "Hid"
-},{
-    dataField: "posture",
-    text: "Pos",
-    editor: {
-        type: Type.SELECT,
-        options: posture
-      }
-}]
 
-function json_to_table_ANIKET(data){
-    var ret = []
-    if(data == null){
-        return []
-    }
-    for(var i = 0; i < data['objects'].length; i++){
-        const elem_id = i + 1
-        var curr_obj = data['objects'][i]
-        console.log(curr_obj['left'])
-        ret.push({id: elem_id.toString(), behavior: "None", is_hidden: "False", posture: "None"})        
-    }
-    return ret
-}
-
-function json_to_table(data){
-    var ret = []
-    if (data == null){
-        return []
-    }
-    for(var i = 0; i < data.length; i++){
-        ret.push(data[i].generate_row())
-    }
-    
-
-    return ret
-}
-
-function ChangeTable(input){
+export default function AnnotationTable(props){
     //console.log(input.data)
-    const data = json_to_table(input.data)
     return (
-        <div style={{width: "15%"}}>
-            <BootstrapTable condensed={true} keyField='id' data={data} columns={ columns } cellEdit={ cellEditFactory({ mode: 'click', blurToSave: true }) }/>
-        </div>
+        <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
+        <Tab eventKey="home" title="Current">
+            <BootstrapTable
+                keyField='id'
+                data={props.annotation_data[props.currentFrame]} 
+                columns={props.columns(props.remove_table_index)}
+                table
+                noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
+                cellEdit={
+                cellEditFactory({ mode: 'click', blurToSave: true,
+                    afterSaveCell: (oldValue, newValue, row, column) => {
+                        props.annotation_data[props.currentFrame][row['id']] = row
+                        props.changeKeyCheck(true)
+                    },
+                    onStartEdit: (row, column, rowIndex, columnIndex) => {
+                        props.changeKeyCheck(false)
+                    }
+                }) 
+                }
+                pagination={ paginationFactory() }
+            />
+        </Tab>
+        <Tab eventKey="profile" title="Previous">
+            {"Prev Annotated frames will go here :)\n In Progress!"}
+        </Tab>
+    </Tabs>
     )
 }
-
-export default ChangeTable;
