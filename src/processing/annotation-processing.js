@@ -1,5 +1,3 @@
-import { Annotation } from "./annotation"
-
 export default class ExtractingAnnotation{
     constructor(annotation_json){
         this.frame_data = annotation_json['annotations']

@@ -13,13 +13,12 @@ import Form from 'react-bootstrap/Form'
 import Toast from 'react-bootstrap/Toast'
 
 //Annotation Processing
-import ExtractingAnnotation from '../../backend_processing/annotation-processing'
+import ExtractingAnnotation from '../../processing/annotation-processing'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-import { Annotation } from '../../backend_processing/annotation'
 
 //Table imports
 import BootstrapTable from 'react-bootstrap-table-next';

@@ -6,20 +6,17 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 //UI Element imports
 import Button from 'react-bootstrap/Button'
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
 import Modal from 'react-bootstrap/Modal'
-import Form from 'react-bootstrap/Form'
 import Toast from 'react-bootstrap/Toast'
 
-//Annotation Processing
-import ExtractingAnnotation from '../../backend_processing/annotation-processing'
+//Processing
+import ExtractingAnnotation from '../../processing/annotation-processing'
+import { downloadFile } from "../../processing/misc";
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-import { Annotation } from '../../backend_processing/annotation'
 
 //Table imports
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -30,6 +27,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 //Column information + data structure
 import {columns} from '../../static_data/columns'
 //import {columns_LPS} from '../../static_data/columns'
+import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} from '../../static_data/constants'
 
 //Components
 import Instructions from "../Components/instructions";
@@ -41,11 +39,6 @@ if (typeof(Storage) === "undefined") {
   // Code for localStorage/sessionStorage.
   alert('Your browser does not support local storage. \nSome autosaving features of the app will not work as intended.\nPlease see the documentation to find supported browsers and their versions')
 }
-
-const ANNOTATION_FRAME = "1"
-const ANNOTATION_BBOX = "2"
-const ANNOTATION_KEYPOINT = "3"
-const ANNOTATION_SEG = "4"
 
 const fabric = require("fabric").fabric;
 const createReactClass = require('create-react-class');
@@ -122,117 +115,122 @@ export default function MainUpload() {
 
   
   const remove_table_index = (index) => {
-    var index_num = 0;
+	var index_num = 0;
 
-    for(var i = 0; i < annotation_data[currentFrame].length; i++){
-      if(annotation_data[currentFrame][i]['id'] == index){
-        index_num = i
-        break;
-      }
-    }
+	for(var i = 0; i < annotation_data[currentFrame].length; i++){
+	  if(annotation_data[currentFrame][i]['id'] == index){
+		index_num = i
+		break;
+	  }
+	}
 
-    if(index.substring(index.length-1, index.length) !== "f"){
-      for(var i = 0; i < fabricCanvas.getObjects().length; i++){
-        if(fabricCanvas.getObjects()[i]['_objects'][1]['text'] === index){
-          fabricCanvas.remove(fabricCanvas.getObjects()[i]);
-          fabricCanvas.fire('saveData');
-          break;
-        }
-      }
-    }
-    annotation_data[currentFrame].splice(index_num, 1)
-    save_data(currentFrame)
-    //TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
-    setVisualToggle(Math.floor(Math.random() * 999999999999))
+	if(index.substring(index.length-1, index.length) !== "f"){
+	  for(var i = 0; i < fabricCanvas.getObjects().length; i++){
+		if(fabricCanvas.getObjects()[i]['_objects'][1]['text'] === index){
+		  fabricCanvas.remove(fabricCanvas.getObjects()[i]);
+		  fabricCanvas.fire('saveData');
+		  break;
+		}
+	  }
+	}
+	annotation_data[currentFrame].splice(index_num, 1)
+	save_data(currentFrame)
+	//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
+	setVisualToggle(Math.floor(Math.random() * 999999999999))
   }
   
   
 
   const save_previous_data = () => {
-    if(annotation_data[currentFrame].length == 0){
-      return;
-    }
-    previous_annotation = annotation_data[currentFrame]
-    previous_canvas_annotation = frame_data[currentFrame]
+	if(annotation_data[currentFrame].length == 0){
+	  return;
+	}
+	previous_annotation = annotation_data[currentFrame]
+	previous_canvas_annotation = frame_data[currentFrame]
   }
 
   const addToCanvas = () =>{
-    var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-    
-    if(annotation_data[currentFrame] == null){
-      annotation_data[currentFrame] = []
-    }
-    
-    if (annotationType === ANNOTATION_BBOX){
-      annotation_data[currentFrame].push({id: boxCount+'b', global_id: null,status: "", current: "Start", behavior: "None"})
-      var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
-      fabricCanvas.add(new_bbox)
-    }else if (annotationType === ANNOTATION_KEYPOINT){
-      //TODO fix KeyPoint
-      alert("KeyPoint annotation are currently unavailable")
-      //annotation_data[currentFrame].push({id: boxCount+'k', behavior: "None", is_hidden: 0, posture: "None"})
-      //var keyp = new KeyPoint().generate_stick(fabricCanvas)
-    }else if (annotationType === ANNOTATION_SEG){
-      alert("Segmentation annotation is currently under development")
-      //TODO Fix segmentation issues
-      annotation_data[currentFrame].push({id: boxCount+'s', global_id:null, status: "None", current: "Start", behavior: "None"})
-      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
-    }else if(annotationType === ANNOTATION_FRAME){
-      //TODO Add annotation frame datapoint
-      annotation_data[currentFrame].push({id: boxCount+'f', global_id: null,status: "", current: "Start", behavior: "None"})
-    }
-    save_data(currentFrame)
-    setBoxCount(boxCount + 1);
-    fabricCanvas.fire('saveData');
+	var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
+	
+	if(annotation_data[currentFrame] == null){
+	  annotation_data[currentFrame] = []
+	}
+	
+	var annotation_type_txt = "error"
+
+	if (annotationType === ANNOTATION_BBOX){
+		annotation_type_txt = "b"
+	  var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
+	  fabricCanvas.add(new_bbox)
+	}else if (annotationType === ANNOTATION_KEYPOINT){
+	  //TODO fix KeyPoint
+	  alert("KeyPoint annotation are currently unavailable")
+	  annotation_type_txt = "k"
+	  //var keyp = new KeyPoint().generate_stick(fabricCanvas)
+	}else if (annotationType === ANNOTATION_SEG){
+	  alert("Segmentation annotation is currently under development")
+	  //TODO Fix segmentation issues
+	  annotation_type_txt = "s"	  
+	  var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+	}else if(annotationType === ANNOTATION_FRAME){
+	  //TODO Add annotation frame datapoint
+	  annotation_type_txt = "f"
+	}
+	annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: null,status: "", current: "", behavior: "", posture: ""})
+
+	save_data(currentFrame)
+	setBoxCount(boxCount + 1);
+	fabricCanvas.fire('saveData');
   }
 
   const handleVideoUpload = (event) => {
-    setVideoFileURL(URL.createObjectURL(event.target.files[0]));
-    ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
-    upload = true;
+	setVideoFileURL(URL.createObjectURL(event.target.files[0]));
+	ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
+	upload = true;
   };
 
   //ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
   const handleOldAnnotation = (event) => {
-      var promise = downloadOldAnnotation(event)
-      promise.then(function (result) {
-        if(result != null){
-          setOldAnnotation(new ExtractingAnnotation(result));
-        }else{
-          alert("Error in processing Annotation")
-        }
-      })
+	  var promise = downloadOldAnnotation(event)
+	  promise.then(function (result) {
+		if(result != null){
+		  setOldAnnotation(new ExtractingAnnotation(result));
+		}else{
+		  alert("Error in processing Annotation")
+		}
+	  })
   }
 
   useEffect(() => {
-    //TODO Find a more elegant solution. This is a temporay patch work.
-    if(oldAnnotation == null){
-      return;
-    }
-    alert("Annotation upload processed.\nAny existing annotations will be deleted and replaced with uploaded ones.")
-    frame_data = oldAnnotation.get_frame_data();
-    annotation_data = oldAnnotation.get_annotation_data();
-    handle_visual_toggle()
+	//TODO Find a more elegant solution. This is a temporay patch work.
+	if(oldAnnotation == null){
+	  return;
+	}
+	alert("Annotation upload processed.\nAny existing annotations will be deleted and replaced with uploaded ones.")
+	frame_data = oldAnnotation.get_frame_data();
+	annotation_data = oldAnnotation.get_annotation_data();
+	handle_visual_toggle()
   }, oldAnnotation);
 
   const downloadOldAnnotation = (file) => {
-    return new Promise((resolve, reject) => {
-      var reader = new FileReader();
-      reader.onload = function(e) {
-         resolve((JSON.parse(e.target.result)));
-      }
-      reader.readAsText(file.target.files[0])
-    })
+	return new Promise((resolve, reject) => {
+	  var reader = new FileReader();
+	  reader.onload = function(e) {
+		 resolve((JSON.parse(e.target.result)));
+	  }
+	  reader.readAsText(file.target.files[0])
+	})
   }
   
 
   const handlePlaying = (event) => {
-    setPlaying(!playing)
+	save_previous_data()
+	setPlaying(!playing)
   }
 
   var play_button_text = "ERROR"
   if(playing === true){
-    play_button_text = "Pause"
+	play_button_text = "Pause"
   }else{
   play_button_text = "Play"
   }
@@ -240,101 +238,82 @@ export default function MainUpload() {
 
 
   const handleSeekChange = e => {
-    sliderPercent = (parseFloat(e.target.value))
+	sliderPercent = (parseFloat(e.target.value))
   }
 
   const handleSeekMouseDown = e => {
-    setSeeking(true)
+	setSeeking(true)
   }
 
   const handleSeekMouseUp = e => {
-    setSeeking(false)
-    player.seekTo(parseFloat(e.target.value))
+	setSeeking(false)
+	player.seekTo(parseFloat(e.target.value))
   }
 
   const handleSetPlayer = val => {
-    if(val != null){
-      if(val['player'] != null){
-        if(val['player']['player'] != null){
-          if(val['player']['player'] != null){
-            video_width = val['player']['player']['player'].videoWidth
-            video_height = val['player']['player']['player'].videoHeight
-            var duration = val['player']['player']['player'].duration
-            //alert("*Loaded player* \nHorizontal Resolution = " + video_width + "\nVertical Resolution = " + video_height + "\nFrame Rate: " + frame_rate + " FPS\nDuration: " + duration + " seconds")
-          }
-        }
-      }
-    }
-    setPlayer(val)
+	if(val != null){
+	  if(val['player'] != null){
+		if(val['player']['player'] != null){
+		  if(val['player']['player'] != null){
+			video_width = val['player']['player']['player'].videoWidth
+			video_height = val['player']['player']['player'].videoHeight
+			var duration = val['player']['player']['player'].duration
+			//alert("*Loaded player* \nHorizontal Resolution = " + video_width + "\nVertical Resolution = " + video_height + "\nFrame Rate: " + frame_rate + " FPS\nDuration: " + duration + " seconds")
+		  }
+		}
+	  }
+	}
+	setPlayer(val)
   }
 
   const handleSetDuration = val => {
-    if(upload === true && player != null){      
-      num_frames = Math.round(val * frame_rate);
+	if(upload === true && player != null){      
+	  num_frames = Math.round(val * frame_rate);
 
-      frame_data = new Array(num_frames)
-      annotation_data = new Array(num_frames)
+	  frame_data = new Array(num_frames)
+	  annotation_data = new Array(num_frames)
 
-      //TODO Update this later
-      for (var i = 0; i < num_frames; i++){
-        frame_data[i] = []
-        annotation_data[i] = []
-      }
-      upload = false;
-      disable_buttons = false
-    }
-    setDuration(parseInt(val))
+	  //TODO Update this later
+	  for (var i = 0; i < num_frames; i++){
+		frame_data[i] = []
+		annotation_data[i] = []
+	  }
+	  upload = false;
+	  disable_buttons = false
+	}
+	setDuration(parseInt(val))
   }
 
 
   const handleSetCurrentFrame = val => {
-    save_data(currentFrame)
-    var total_frames = duration * frame_rate
-    currentFrame = (val['played']/total_frames)
-    currentFrame = (Math.round(val['played']*total_frames))
-    handle_visual_toggle()
+	save_data(currentFrame)
+	var total_frames = duration * frame_rate
+	currentFrame = (val['played']/total_frames)
+	currentFrame = (Math.round(val['played']*total_frames))
+	handle_visual_toggle()
   }
 
   const [scrubbing, setScrubbing] = useState(true);
 
   const skip_frame_forward = e =>{
-    save_previous_data()
-    if(scrubbing === false){
-      if (annotation_data[currentFrame+skip_value].length === 0){
-        annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
-        frame_data[currentFrame+skip_value] = frame_data[currentFrame];
-      }
-    }
+	save_previous_data()
+	if(scrubbing === false){
+	  if (annotation_data[currentFrame+skip_value].length === 0){
+		annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
+		frame_data[currentFrame+skip_value] = frame_data[currentFrame];
+	  }
+	}
 
-    var total_frames = duration * frame_rate
-    player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
+	var total_frames = duration * frame_rate
+	player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
   }
 
   const skip_frame_backward = e => {
-    save_previous_data()
-    var total_frames = duration * frame_rate
-    player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
+	save_previous_data()
+	var total_frames = duration * frame_rate
+	player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
   }
 
-  const downloadFile = async () => {
-    var fileName = "generated_annotations";
-    if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
-      fileName = ANNOTATION_VIDEO_NAME.split('.').slice(0, -1).join('.') + "_" +  ANNOTATOR_NAME
-    }
-    //const json = JSON.stringify(fabricCanvas.getObjects());
-    const json = JSON.stringify({"annotations": frame_data, "behavior_data": annotation_data})
-    //var json = JSON.stringify(frame_data);
-    var blob = new Blob([json],{type:'application/json'});
-    var href = await URL.createObjectURL(blob);
-    var link = document.createElement('a');
-    link.href = href;
-    link.download = fileName + ".json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-
-  }
 
 
   const handleClose = () => setShow(false);
@@ -343,109 +322,123 @@ export default function MainUpload() {
   
   const [keyCheck, changeKeyCheck] = useState(true)
   const handle_key_check = (event) => {
-    changeKeyCheck(!keyCheck)
-    console.log("Changing keyCheck to: " + keyCheck)
+	changeKeyCheck(!keyCheck)
+	console.log("Changing keyCheck to: " + keyCheck)
+  }
+
+  const change_skip_value = (event) => {
+	  skip_value = event
+  }
+
+  const change_annotation_type = (event) => {
+	  console.log(event)
+	setAnnotationType(event)
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const onKeyPress = (event) =>{
-    //Making sure input for textbox doesnt get counted as a mode change
-    if(keyCheck == false){
-      return;
-    }
-    //TODO Add keystroke disabling when typing in values in other parts
+	//Making sure input for textbox doesnt get counted as a mode change
+	if(keyCheck == false){
+	  return;
+	}
+	//TODO Add keystroke disabling when typing in values in other parts
 
-    if (event.key === ANNOTATION_BBOX){
-      toast_text = "Mode Switch: Bounding Box"
-      changeSave(true)
-      setAnnotationType(ANNOTATION_BBOX)
-    }else if (event.key === ANNOTATION_KEYPOINT){
-      toast_text = "Mode Switch: Key Point"
-      changeSave(true)
-      setAnnotationType(ANNOTATION_KEYPOINT)
-    }else if(event.key === ANNOTATION_SEG) {
-      toast_text = "Mode Switch: Segmentation"
-      changeSave(true)
-      setAnnotationType(ANNOTATION_SEG)
-    }else if(event.key === ANNOTATION_FRAME){
-      toast_text = "Mode Switch: Behavior Annotation"
-      changeSave(true)
-      setAnnotationType(ANNOTATION_FRAME)
-    }else if (event.key === "a"){
-      var annotext = ""
-      if(annotationType === ANNOTATION_BBOX){
-        annotext = "Bounding Box"
-      }else if(annotationType === ANNOTATION_FRAME){
-        annotext = "Behavior Data"
-      }else if (annotationType === ANNOTATION_KEYPOINT){
-        annotext = "Keypoint"
-      }else if (annotationType === ANNOTATION_SEG){
-        annotext = "Segmentation"
-      }
-      toast_text = "Added Annotation - " + annotext
-      changeSave(true)
-      addToCanvas()
-    }else if (event.key === "r"){
-      //TODO Determine if having a remove key is efficient or the deletion can be done directly from UI
-      //toast_text = "Removed Annotation"
-      //changeSave(true)
-      //remove()
-    }else if (event.key === "q"){
-      skip_frame_backward()
-    }else if (event.key === "w"){
-      handlePlaying()
-    }else if (event.key === "e"){
-      skip_frame_forward()
-    }else if (event.key === "s"){
-      toast_text = "Annotation Saved"
-      changeSave(true)
-      frame_data[currentFrame] = fabricCanvas.toJSON()
-    }else if (event.key === "f"){
-      if(scrubbing === false){
-        toast_text = "Scrubbing Mode Activated"
-        setScrubbing(true)
-        changeSave(true)
-      }else{
-        toast_text = "Scrubbing Mode Deactivated"
-        setScrubbing(false)
-        changeSave(true)
-      }
-    }else if(event.key === "c"){
-      toast_text = "Copying previous frame annotation"
-      annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
-      frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
-      changeSave(true)
-    }
+	if (event.key === ANNOTATION_BBOX){
+	  toast_text = "Mode Switch: Bounding Box"
+	  changeSave(true)
+	  setAnnotationType(ANNOTATION_BBOX)
+	}else if (event.key === ANNOTATION_KEYPOINT){
+	  toast_text = "Mode Switch: Key Point"
+	  changeSave(true)
+	  setAnnotationType(ANNOTATION_KEYPOINT)
+	}else if(event.key === ANNOTATION_SEG) {
+	  toast_text = "Mode Switch: Segmentation"
+	  changeSave(true)
+	  setAnnotationType(ANNOTATION_SEG)
+	}else if(event.key === ANNOTATION_FRAME){
+	  toast_text = "Mode Switch: Behavior Annotation"
+	  changeSave(true)
+	  setAnnotationType(ANNOTATION_FRAME)
+	}else if (event.key === "a"){
+	  var annotext = ""
+	  if(annotationType === ANNOTATION_BBOX){
+		annotext = "Bounding Box"
+	  }else if(annotationType === ANNOTATION_FRAME){
+		annotext = "Behavior Data"
+	  }else if (annotationType === ANNOTATION_KEYPOINT){
+		annotext = "Keypoint"
+	  }else if (annotationType === ANNOTATION_SEG){
+		annotext = "Segmentation"
+	  }
+	  toast_text = "Added Annotation - " + annotext
+	  changeSave(true)
+	  addToCanvas()
+	}else if (event.key === "r"){
+	  //TODO Determine if having a remove key is efficient or the deletion can be done directly from UI
+	  //toast_text = "Removed Annotation"
+	  //changeSave(true)
+	  //remove()
+	}else if (event.key === "q"){
+	  skip_frame_backward()
+	}else if (event.key === "w"){
+	  handlePlaying()
+	}else if (event.key === "e"){
+	  skip_frame_forward()
+	}else if (event.key === "s"){
+	  toast_text = "Annotation Saved"
+	  changeSave(true)
+	  frame_data[currentFrame] = fabricCanvas.toJSON()
+	}else if (event.key === "f"){
+	  if(scrubbing === false){
+		toast_text = "Scrubbing Mode Activated"
+		setScrubbing(true)
+		changeSave(true)
+	  }else{
+		toast_text = "Scrubbing Mode Deactivated"
+		setScrubbing(false)
+		changeSave(true)
+	  }
+	}else if(event.key === "c"){
+	  toast_text = "Copying previous frame annotation"
+	  annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
+	  frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
+	  changeSave(true)
+	}
   }  
 
   useEffect(() => {
-    document.addEventListener("keydown", onKeyPress);
-    return () => document.removeEventListener("keydown", onKeyPress);
+	document.addEventListener("keydown", onKeyPress);
+	return () => document.removeEventListener("keydown", onKeyPress);
   }, [onKeyPress]);
   
   fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
-    fabricCanvas.renderAll();
+	fabricCanvas.renderAll();
   });
 
   const handle_link_open = () => {
-    window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
+	window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
+  }
+
+  const change_annotator_name = (event) => {
+	  console.log(event)
+	  ANNOTATOR_NAME = event
   }
 
   /*
-    <NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
-    <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_BBOX)} >Square Box</NavDropdown.Item>
-    <NavDropdown.Divider />
-    <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_KEYPOINT)}>Key Point</NavDropdown.Item>
-    <NavDropdown.Divider />
-    <NavDropdown.Item onClick={setAnnotationType(ANNOTATION_SEG)}>Segmentation</NavDropdown.Item>
+	<NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
+	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_BBOX)} >Square Box</NavDropdown.Item>
+	<NavDropdown.Divider />
+	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_KEYPOINT)}>Key Point</NavDropdown.Item>
+	<NavDropdown.Divider />
+	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_SEG)}>Segmentation</NavDropdown.Item>
   </NavDropdown>
   */ 
   const handle_visual_toggle = () => {
-    setVisualToggle(visualToggle+1)
+	setVisualToggle(visualToggle+1)
   }
 
   return (
-    <div>
+	<div>
 		<CustomNavBar 
 			disable_buttons={disable_buttons} 
 			downloadFile={downloadFile} 
@@ -463,6 +456,11 @@ export default function MainUpload() {
 			handlePlaying={handlePlaying}
 			play_button_text={play_button_text}
 			addToCanvas={addToCanvas}
+			ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
+			frame_data={frame_data}
+			change_skip_value={change_skip_value}
+			change_annotator_name={change_annotator_name}
+			change_annotation_type={change_annotation_type}
 		/>
 		<Toast 
 			onClose={() => changeSave(false)} 
@@ -473,15 +471,7 @@ export default function MainUpload() {
 				<strong className="mr-auto">{toast_text}</strong>
 			</Toast.Header>
 		</Toast>
-		<Modal show={show} onHide={handleClose} size='lg'>
-			<Modal.Header closeButton>
-			<Modal.Title>Instructions</Modal.Title>
-			</Modal.Header>
-			<Modal.Body><Instructions></Instructions></Modal.Body>
-			<Modal.Footer>
-			<Button variant="secondary" onClick={handleClose}>Close</Button>
-			</Modal.Footer>
-		</Modal>
+
 		<div style={{display: "grid"}}>
 			<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
 				<ReactPlayer 
@@ -497,6 +487,7 @@ export default function MainUpload() {
 				volume={0}
 				muted={true}
 				pip={false}
+				playbackRate={.1}
 				/>
 			</div>
 			<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
@@ -543,7 +534,7 @@ export default function MainUpload() {
 			</div>
 		
 		</div>
-    </div>
+	</div>
   );
 }
 

@@ -16,8 +16,8 @@ export default function Instructions(){
         * <kbd>s</kbd> : Save annotation<br></br>
         * <kbd>w</kbd> : Pause/Play<br></br>
         * <kbd>e</kbd> : Skip forward frame(s)<br></br>
-        * <kbd>f</kbd> : Activate/Deactivate scrub mode (Activated by default)
-        * <kbd>c</kbd> : Copy previous annotation
+        * <kbd>c</kbd> : Copy previous annotation<br></br>
+        * <kbd>f</kbd> : Activate/Deactivate scrub mode (Activated by default)<br></br>
 
         <br></br><br></br>
         <h3>Uploading Video:</h3>

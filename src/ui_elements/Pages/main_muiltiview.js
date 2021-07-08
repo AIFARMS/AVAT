@@ -11,7 +11,7 @@ import Form from 'react-bootstrap/Form'
 import Toast from 'react-bootstrap/Toast'
 
 
-import ExtractingAnnotation from '../../backend_processing/annotation-processing'
+import ExtractingAnnotation from '../../processing/annotation-processing'
 import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
@@ -19,7 +19,6 @@ import { NavDropdown } from "react-bootstrap";
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-import { Annotation } from '../../backend_processing/annotation'
 import Instructions from "../Components/instructions";
 
 import BootstrapTable from 'react-bootstrap-table-next';
