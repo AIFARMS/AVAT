@@ -113,6 +113,8 @@ export default function MainUpload() {
 		if(typeof(val) === "number"){
 			console.log(val)
 			setCurrentFrame(val)
+			var total_frames = duration * frame_rate
+			player.seekTo(val/(total_frames))
 		}else{
 			console.log(val)
 			save_data(currentFrame)
@@ -180,7 +182,7 @@ export default function MainUpload() {
 	  alert("Segmentation annotation is currently under development")
 	  //TODO Fix segmentation issues
 	  annotation_type_txt = "s"	  
-	  var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+	  //var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
 	}else if(annotationType === ANNOTATION_FRAME){
 	  //TODO Add annotation frame datapoint
 	  annotation_type_txt = "f"
@@ -426,16 +428,6 @@ export default function MainUpload() {
 	  console.log(ANNOTATOR_NAME)
   }
 
-
-  /*
-	<NavDropdown disabled={disable_buttons} title="Mode" id="basic-nav-dropdown">
-	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_BBOX)} >Square Box</NavDropdown.Item>
-	<NavDropdown.Divider />
-	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_KEYPOINT)}>Key Point</NavDropdown.Item>
-	<NavDropdown.Divider />
-	<NavDropdown.Item onClick={setAnnotationType(ANNOTATION_SEG)}>Segmentation</NavDropdown.Item>
-  </NavDropdown>
-  */ 
   const handle_visual_toggle = () => {
 	setVisualToggle(Math.floor(Math.random() * 999999999999))
   }
@@ -523,6 +515,7 @@ export default function MainUpload() {
 					changeKeyCheck={changeKeyCheck}
 					columns={columns}
 					remove_table_inde={remove_table_index}
+					handleSetCurrentFrame={handleSetCurrentFrame}
 				/>
 			</div>
 		

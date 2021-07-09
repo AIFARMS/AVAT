@@ -14,7 +14,7 @@ import { InputGroup } from 'react-bootstrap';
 import { FormControl } from 'react-bootstrap';
 
 import Instructions from './instructions';
-import { downloadFileJSON , downloadFileCSV} from '../../processing/misc';
+import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
