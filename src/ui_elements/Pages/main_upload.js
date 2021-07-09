@@ -217,7 +217,6 @@ export default function MainUpload() {
 	if(oldAnnotation == null){
 	  return;
 	}
-	alert("Annotation upload processed.\nAny existing annotations will be deleted and replaced with uploaded ones.")
 	frame_data = oldAnnotation.get_frame_data();
 	annotation_data = oldAnnotation.get_annotation_data();
 	handle_visual_toggle()

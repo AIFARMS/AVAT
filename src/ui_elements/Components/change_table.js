@@ -24,6 +24,10 @@ const anno_col = (handler) => [
         text: "Local ID",
         headerStyle: () => { return { width: "40px", left: 0 }; }
     },{
+        dataField: "global_ids",
+        text: "Global ID",
+        headerStyle: () => { return { width: "40px", left: 0 }; }
+    },{
         dataField: "swap",
         text: "Swap",
         editable: false,
@@ -46,12 +50,16 @@ function getAnnotationTableCount(annotation_data) {
     var data = []
     for(var i = 0; i < annotation_data.length; i++){
         if(annotation_data[i].length !== 0){
-            var txt = ""
-            for(var j = 0; annotation_data[i].length; j++){
-                
-                //txt.concat(annotation_data[i]['local_id'])
+            var txt_id = ""
+            var txt_global = ""
+            for(var j = 0; j < annotation_data[i].length; j++){
+                txt_id += (annotation_data[i][j]['id']) + ', '
+                txt_global += (annotation_data[i][j]['global_id']) + ', '
+                console.log((annotation_data[i][j]['id']))
+                console.log(txt_id)
             }
-            data.push({frame_num: i, anno_count: annotation_data[i].length, local_id: txt})
+            data.push({frame_num: i, anno_count: annotation_data[i].length, local_ids: txt_id, global_ids: txt_global})
+            console.log(data)
         }
     }
     return data
