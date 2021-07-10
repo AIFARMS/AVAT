@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/pig-annotation-tool/precache-manifest.cd462ee13c365833a77ec36968acd866.js"
+  "/pig-annotation-tool/precache-manifest.d29030823f3d21eb1c64796a3bd7ce7a.js"
 );
 
 self.addEventListener('message', (event) => {
