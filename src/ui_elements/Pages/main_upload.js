@@ -13,6 +13,7 @@ import Tab from 'react-bootstrap/Tab'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
+import {video_to_img} from '../../processing/frame_extract'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
@@ -109,25 +110,23 @@ export default function MainUpload() {
 	const [playing, setPlaying] = useState(false);
 	const [currentFrame, setCurrentFrame] = useState(0)
 	const [keyCheck, changeKeyCheck] = useState(true)
-	const [playbackRate, setPlaybackRate] = useState(0)
+	const [playbackRate, setPlaybackRate] = useState(1)
 
+	
 
 	const handleSetCurrentFrame = (val) => {
+		var total_frames = duration * frame_rate
 		if(typeof(val) === "number"){
-			console.log(val)
 			setCurrentFrame(val)
-			var total_frames = duration * frame_rate
 			player.seekTo(val/(total_frames))
 		}else{
-			console.log(val)
 			save_data(currentFrame)
-			var total_frames = duration * frame_rate
 			var frame_calc = (val['played']/total_frames)
-			frame_calc = (Math.round(val['played']*total_frames))
-			setCurrentFrame(frame_calc)
+			frame_calc = (Math.floor(val['played']*total_frames))
+			//setCurrentFrame(frame_calc)
 		}
 	}
-  
+
 	const removeRow = (index) => {
 		console.log(index)
 		var index_num = 0;
@@ -217,6 +216,7 @@ export default function MainUpload() {
 
 	const handleVideoUpload = (event) => {
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
+		video_to_img(event.target.files[0], fabricCanvas)
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		upload = true;
 	};
@@ -320,20 +320,31 @@ export default function MainUpload() {
 	const skip_frame_forward = e =>{
 		save_previous_data()
 		if(scrubbing === false){
-		if (annotation_data[currentFrame+skip_value].length === 0){
-			annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
-			frame_data[currentFrame+skip_value] = frame_data[currentFrame];
-		}
+			if (annotation_data[currentFrame+skip_value].length === 0){
+				annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
+				frame_data[currentFrame+skip_value] = frame_data[currentFrame];
+			}
 		}
 
 		var total_frames = duration * frame_rate
-		player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
+		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
+
+		var frameVal = currentFrame + skip_value
+		handleSetCurrentFrame(frameVal)
 	}
 
 	const skip_frame_backward = e => {
 		save_previous_data()
 		var total_frames = duration * frame_rate
-		player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
+
+		var frameVal = currentFrame - skip_value
+		if(frameVal < 0){
+			handleSetCurrentFrame(0)
+		}else{
+			handleSetCurrentFrame(frameVal)
+		}
+		//player.seekTo((frameVal/total_frames) * duration)
+		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
 	}
 
 	const change_skip_value = (event) => {
@@ -484,19 +495,19 @@ export default function MainUpload() {
 			<div style={{display: "grid"}}>
 				<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
 					<ReactPlayer 
-					onProgress={handleSetCurrentFrame} 
-					ref={handleSetPlayer} 
-					onDuration={handleSetDuration} 
-					url={videoFilePath} 
-					width='100%'
-					height='99.999%'
-					playing={playing} 
-					controls={false} 
-					style={{position:'absolute', float:'left', top:0, left:0}}
-					volume={0}
-					muted={true}
-					pip={false}
-					playbackRate={playbackRate}
+						//onProgress={handleSetCurrentFrame} 
+						ref={handleSetPlayer} 
+						onDuration={handleSetDuration} 
+						url={videoFilePath} 
+						width='100%'
+						height='99.999%'
+						playing={playing} 
+						controls={false} 
+						style={{position:'absolute', float:'left', top:0, left:0}}
+						volume={0}
+						muted={true}
+						pip={false}
+						playbackRate={playbackRate}
 					/>
 				</div>
 				<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
