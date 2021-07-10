@@ -55,11 +55,8 @@ function getAnnotationTableCount(annotation_data) {
             for(var j = 0; j < annotation_data[i].length; j++){
                 txt_id += (annotation_data[i][j]['id']) + ', '
                 txt_global += (annotation_data[i][j]['global_id']) + ', '
-                console.log((annotation_data[i][j]['id']))
-                console.log(txt_id)
             }
             data.push({frame_num: i, anno_count: annotation_data[i].length, local_ids: txt_id, global_ids: txt_global})
-            console.log(data)
         }
     }
     return data

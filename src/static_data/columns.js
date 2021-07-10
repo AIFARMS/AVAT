@@ -44,6 +44,17 @@ const columns = (remove_table_index) => [{
   text: "Del",
   editable: false,
   headerStyle: () => { return { width: "50px", left: 0}; },
+  headerFormatter: () => {return (
+    <div>
+      Del
+      <Button
+        className="btn btn-danger btn-xs"
+        onClick={() => remove_table_index()}
+        label="Del"
+      >
+      </Button>
+    </div>
+  );},
   formatter: (cellContent, row) => {
     return (
       <Button

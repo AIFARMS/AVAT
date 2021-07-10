@@ -62,6 +62,7 @@ export default function CustomNavBar(props){
 						Frame Rate: <input type="number" defaultValue="15"></input>
 						<NavDropdown.Divider />
 						Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+						Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
 						<NavDropdown.Divider />
 						Horizontal Res: <input type='number' defaultValue={props.video_width}></input>
 						Vertical Res: <input type='number' defaultValue={props.video_height}></input>
@@ -88,13 +89,13 @@ export default function CustomNavBar(props){
 						</NavDropdown>
 				</Nav>
 				<div>
-
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
 						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
 						<Dropdown.Menu>
 							Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+							Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
 						</Dropdown.Menu>
 					</Dropdown>{' '}
 					
