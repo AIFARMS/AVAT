@@ -86,6 +86,8 @@ var previous_canvas_annotation = []
 var ANNOTATOR_NAME = ""
 var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
+var play_button_text = "ERROR"
+var temp_flag = false
 
 
 function save_data(frame_num){
@@ -120,10 +122,14 @@ export default function MainUpload() {
 			setCurrentFrame(val)
 			player.seekTo(val/(total_frames))
 		}else{
+			console.log(val['played'])
 			save_data(currentFrame)
 			var frame_calc = (val['played']/total_frames)
 			frame_calc = (Math.floor(val['played']*total_frames))
-			//setCurrentFrame(frame_calc)
+			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
+				setCurrentFrame(frame_calc)
+				temp_flag = false;
+			}
 		}
 	}
 
@@ -184,7 +190,7 @@ export default function MainUpload() {
 		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
 		
 		if(annotation_data[currentFrame] == null){
-		annotation_data[currentFrame] = []
+			annotation_data[currentFrame] = []
 		}
 		
 		var annotation_type_txt = "error"
@@ -192,20 +198,20 @@ export default function MainUpload() {
 		if (annotationType === ANNOTATION_BBOX){
 			annotation_type_txt = "b"
 		var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
-		fabricCanvas.add(new_bbox)
+			fabricCanvas.add(new_bbox)
 		}else if (annotationType === ANNOTATION_KEYPOINT){
-		//TODO fix KeyPoint
-		alert("KeyPoint annotation are currently unavailable")
-		annotation_type_txt = "k"
-		//var keyp = new KeyPoint().generate_stick(fabricCanvas)
+			//TODO fix KeyPoint
+			alert("KeyPoint annotation are currently unavailable")
+			annotation_type_txt = "k"
+			//var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
-		alert("Segmentation annotation is currently under development")
-		//TODO Fix segmentation issues
-		annotation_type_txt = "s"	  
-		//var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+			alert("Segmentation annotation is currently under development")
+			//TODO Fix segmentation issues
+			annotation_type_txt = "s"	  
+			//var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
 		}else if(annotationType === ANNOTATION_FRAME){
-		//TODO Add annotation frame datapoint
-		annotation_type_txt = "f"
+			//TODO Add annotation frame datapoint
+			annotation_type_txt = "f"
 		}
 		annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: null,status: "", current: "", behavior: "", posture: ""})
 
@@ -226,9 +232,9 @@ export default function MainUpload() {
 		var promise = downloadOldAnnotation(event)
 		promise.then(function (result) {
 			if(result != null){
-			setOldAnnotation(new ExtractingAnnotation(result));
+				setOldAnnotation(new ExtractingAnnotation(result));
 			}else{
-			alert("Error in processing Annotation")
+				alert("Error in processing Annotation")
 			}
 		})
 	}
@@ -255,11 +261,16 @@ export default function MainUpload() {
   
 
 	const handlePlaying = (event) => {
-		save_previous_data()
+		//if(window.confirm("Are you sure you want to use the play/pause functionality?\n It is currenlty under development and WILL have unintentional bugs and glitches. \nReload the page if any issues arise") === true && play_button_text === "Play"){
+		//}
+		if(play_button_text === "Pause"){
+			temp_flag = true;
+		}
 		setPlaying(!playing)
+		save_previous_data()
 	}
 
-	var play_button_text = "ERROR"
+
 	if(playing === true){
 		play_button_text = "Pause"
 	}else{
@@ -452,6 +463,11 @@ export default function MainUpload() {
 		}
 	}
 
+	const handleOnPlay = () => {
+		console.log(player)
+
+	}
+
 	return (
 		<div>
 			<CustomNavBar 
@@ -495,7 +511,7 @@ export default function MainUpload() {
 			<div style={{display: "grid"}}>
 				<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
 					<ReactPlayer 
-						//onProgress={handleSetCurrentFrame} 
+						onProgress={handleSetCurrentFrame} 
 						ref={handleSetPlayer} 
 						onDuration={handleSetDuration} 
 						url={videoFilePath} 
@@ -508,6 +524,7 @@ export default function MainUpload() {
 						muted={true}
 						pip={false}
 						playbackRate={playbackRate}
+						onPlay={handleOnPlay}
 					/>
 				</div>
 				<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
