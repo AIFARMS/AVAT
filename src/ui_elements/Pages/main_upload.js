@@ -459,7 +459,11 @@ export default function MainUpload() {
 		console.log(playbackRate)
 		if(isNaN(playbackRate)){
 			setPlaybackRate(0)
-		}else{
+		}else if(playbackRate > 16){
+			alert("Max playback rate is 16!")
+			setPlaybackRate(16)
+		}	
+		else{
 			setPlaybackRate(playbackRate)
 		}
 	}
