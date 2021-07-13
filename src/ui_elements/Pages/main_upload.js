@@ -159,7 +159,8 @@ export default function MainUpload() {
 	}
 
 	const remove_table_index = (index) => {
-		if (!Number.isInteger(index)) {
+		console.log(index)
+		if (index === undefined) {
 			console.log(annotation_data[currentFrame].length)
 			var indiciesToDelete = []
 			for(var i = 0; i < annotation_data[currentFrame].length; i++){
