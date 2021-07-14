@@ -78,10 +78,10 @@ export default function AnnotationTable(props){
                         cellEditFactory({ mode: 'click', blurToSave: true,
                             afterSaveCell: (oldValue, newValue, row, column) => {
                                 props.annotation_data[props.currentFrame][row['id']] = row
-                                props.changeKeyCheck(true)
+                                props.toggleKeyCheck(true)
                             },
                             onStartEdit: (row, column, rowIndex, columnIndex) => {
-                                props.changeKeyCheck(false)
+                                props.toggleKeyCheck(false)
                             }
                         }) 
                     }

@@ -47,7 +47,6 @@ const ANNOTATION_KEYPOINT = "3"
 const ANNOTATION_SEG = "4"
 
 const fabric = require("fabric").fabric;
-const createReactClass = require('create-react-class');
 
 
 

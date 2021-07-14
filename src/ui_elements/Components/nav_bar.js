@@ -5,7 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
 import Button from 'react-bootstrap/Button'
-import { NavDropdown } from 'react-bootstrap';
+import { NavDropdown, NavLink } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
 import { ButtonGroup } from 'react-bootstrap';
@@ -13,15 +13,24 @@ import Modal from 'react-bootstrap/Modal'
 import { InputGroup } from 'react-bootstrap';
 import { FormControl } from 'react-bootstrap';
 
+import DatePicker from 'react-datepicker'
+import "react-datepicker/dist/react-datepicker.css";
+
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
+	const [uploadShow, setUploadShow] = useState(false);
+	const [startDate, setStartDate] = useState(new Date());
+	const [frameRate, setFrameRate] = useState(0)
+	const [skipValue, setSkipValue] = useState(0)
+	const [playbackRate, setPlaybackRate] = useState(0)
+	const [horizontalRes, setHorizontalRes] = useState(0)
+	const [verticalRes, setVerticalRes] = useState(0)
+
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
-
-	const [uploadShow, setUploadShow] = useState(false);
 	const handleUploadClose = () => setUploadShow(false)
 	const handleUploadShow = () => setUploadShow(true)
 
@@ -32,6 +41,7 @@ export default function CustomNavBar(props){
 	const handleDownloadCSV = () => {
 		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data, props.columns)
 	}
+
 
 	return (
 		<div>
@@ -46,28 +56,42 @@ export default function CustomNavBar(props){
 		</Modal>
 		<Modal show={uploadShow} onHide={handleUploadClose} size='lg'>
 			<Modal.Header closeButton>
-			<Modal.Title>Upload</Modal.Title>
+				<Modal.Title>Upload</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
 				<div style={{display: "grid"}}>
-					<div style={{float: "left",gridColumn: 1, gridRow:1}}>Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input><NavDropdown.Divider /></div>
-					
-					<Form style={{float: "left",gridColumn: 1, gridRow:2}}>
+					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
+					<div style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
+						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
+						<NavDropdown.Divider />
+					</div>
+					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
+						Date and Time: 
+						<DatePicker
+							selected={startDate}
+							onChange={(date) => {setStartDate(date)}}
+							timeInputLabel="Time:"
+							dateFormat="yyyy/MM/dd hh:mm"
+							showTimeInput
+							onClick={(event) => {props.toggleKeyCheck(false)}}
+							onClickOutside={(event) => {props.toggleKeyCheck(true)}}
+							onCalendarOpen={(event) => {props.toggleKeyCheck(false)}}
+							onCalendarClose={(event) => {props.toggleKeyCheck(true)}}
+						/>
+						<NavDropdown.Divider />
+					</div>
+					<Form style={{float: "left",gridColumn: 1, gridRow:3}}>
 						<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={props.handleVideoUpload} />
 					</Form>
-					<Form style={{float: "left",gridColumn: 1, gridRow:3}}>
+					<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
-						<NavDropdown.Divider />
-						Frame Rate: <input type="number" defaultValue="15"></input>
-						<NavDropdown.Divider />
-						Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
-						Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
-						<NavDropdown.Divider />
-						Horizontal Res: <input type='number' defaultValue={props.video_width}></input>
-						Vertical Res: <input type='number' defaultValue={props.video_height}></input>
-						<NavDropdown.Divider />
-						
+					<NavDropdown.Divider />
+					Frame Rate: <input type="number" value={props.frame_rate} onChange={(event) => {props.setFrameRate(parseInt(event.target.value))}}></input>
+					<NavDropdown.Divider />
+					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
+					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
@@ -82,10 +106,10 @@ export default function CustomNavBar(props){
 							<NavDropdown.Divider />
 							<NavDropdown.Item onClick={handleDownloadCSV}>CSV</NavDropdown.Item>
 						</NavDropdown>
+						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 						<NavDropdown title="Help" id="basic-nav-dropdown">
-							<NavDropdown.Item onClick={props.handle_link_open}>Report</NavDropdown.Item>
-							<NavDropdown.Divider />
 							<NavDropdown.Item onClick={handleShow}>Instructions</NavDropdown.Item>
+							<NavDropdown.Divider />
 						</NavDropdown>
 				</Nav>
 				<div>

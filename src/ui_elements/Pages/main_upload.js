@@ -38,9 +38,6 @@ if (typeof(Storage) === "undefined") {
 }
 
 const fabric = require("fabric").fabric;
-const createReactClass = require('create-react-class');
-
-
 
 //TODO ADD DYNAMIC SOLUTION 
 var frame_rate = 15;
@@ -473,6 +470,20 @@ export default function MainUpload() {
 
 	}
 
+	const toggleKeyCheck = (toggle_val) => {
+		console.log("Keycheck activated")
+		console.log(toggle_val)
+		if(toggle_val === undefined){
+			changeKeyCheck(!keyCheck)
+		}else{
+			changeKeyCheck(toggle_val)
+		}
+	}
+
+	const setFrameRate = (framerate) => {
+		frame_rate = framerate
+	}
+
 	return (
 		<div>
 			<CustomNavBar 
@@ -502,6 +513,9 @@ export default function MainUpload() {
 				scaling_factor_width={scaling_factor_width}
 				columns={columns}
 				handleSetPlaybackRate={handleSetPlaybackRate}
+				toggleKeyCheck={toggleKeyCheck}
+				setFrameRate={setFrameRate}
+				frame_rate={frame_rate}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 
@@ -555,7 +569,7 @@ export default function MainUpload() {
 					<AnnotationTable
 						annotation_data={annotation_data}
 						currentFrame={currentFrame}
-						changeKeyCheck={changeKeyCheck}
+						toggleKeyCheck={toggleKeyCheck}
 						columns={columns}
 						remove_table_index={remove_table_index}
 						handleSetCurrentFrame={handleSetCurrentFrame}
