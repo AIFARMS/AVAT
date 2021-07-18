@@ -9,6 +9,7 @@ import paginationFactory from 'react-bootstrap-table2-paginator';
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 import Button from 'react-bootstrap/Button'
+import { FormControl } from "react-bootstrap";
 
 const anno_col = (handler) => [
     {
@@ -62,7 +63,29 @@ function getAnnotationTableCount(annotation_data) {
     return data
 }
 
+
 export default function AnnotationTable(props){
+    const expandRow = {
+        onlyOneExpanding: true,
+        renderer: (row, rowIndex) => (
+          <div>
+            <FormControl 
+                as="textarea" aria-label="With textarea" 
+                defaultValue={props.annotation_data[props.currentFrame][rowIndex]['notes']} 
+                onChange={(event)=> {handleOnChange(event, rowIndex)}}
+                onClick={(event) => {props.toggleKeyCheck(false)}} 
+                onBlur={(event) => {props.toggleKeyCheck(true)}}
+            />
+          </div>
+        )
+    };
+
+    const handleOnChange = (event, rowIndex) => {
+        console.log(props.annotation_data[props.currentFrame]);
+        props.annotation_data[props.currentFrame][rowIndex]['notes'] = (event.target.value);
+        console.log(props.annotation_data[props.currentFrame]) 
+    }
+
     var data = getAnnotationTableCount(props.annotation_data)
     //console.log(input.data)
     return (
@@ -77,7 +100,11 @@ export default function AnnotationTable(props){
                     cellEdit={
                         cellEditFactory({ mode: 'click', blurToSave: true,
                             afterSaveCell: (oldValue, newValue, row, column) => {
-                                props.annotation_data[props.currentFrame][row['id']] = row
+                                console.log(row)
+                                //var notes = props.annotation_data[props.currentFrame][row['id']]['notes']
+                                //props.annotation_data[props.currentFrame][row['id']] = row
+                                //props.annotation_data[props.currentFrame][row['id']]['notes'] = notes
+                                console.log(props.annotation_data[props.currentFrame][row['id']] )
                                 props.toggleKeyCheck(true)
                             },
                             onStartEdit: (row, column, rowIndex, columnIndex) => {
@@ -86,11 +113,12 @@ export default function AnnotationTable(props){
                         }) 
                     }
                     pagination={ paginationFactory() }
+                    expandRow={ expandRow }
                 />
             </Tab>
             <Tab eventKey="profile" title="Previous">
                 <BootstrapTable
-                    keyField='id'
+                    keyField='frame_num'
                     data={data} 
                     columns={anno_col((props.handleSetCurrentFrame))}
                     table

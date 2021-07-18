@@ -150,13 +150,16 @@ Similar to how the react components are structured, each of the types of annotat
 * - [ ] Store time (seconds) along with frame data
 * - [ ] Combine annotation_data with frame_data instead of 2 seperate files
 
+## Future Feature Requests
+* - [ ] Tensorflow integration
+* - [ ] Docker Solution
+* - [ ] Backend python integration
 
 ## Built With
 
 ### FrontEnd
 * [React](https://reactjs.org/) - Main Front-End Framework
-* [React Bootstrap](https://react-bootstrap.github.io/) - UI Framework
-* [React-papaparse](https://github.com/Bunlong/react-papaparse) - CSV Parser
+* [React Bootstrap](https://react-bootstrap.github.io/) - UI Library
 * [react-player](https://www.npmjs.com/package/react-player) - Video Player
 * [fabric.js](http://fabricjs.com/) - Canvas renderer
 
@@ -164,6 +167,3 @@ Similar to how the react components are structured, each of the types of annotat
 
 * **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - Web-tool Developmennt
 * **JiangongLi** [jli153](jli153@illinois.edu) - Matlab Tool Development
-
-## Resources Used
-* [React Documentation](https://reactjs.org/docs/)

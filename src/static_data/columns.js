@@ -8,7 +8,8 @@ import Button from 'react-bootstrap/Button'
 const columns = (remove_table_index) => [{
   dataField: "id",
   text: "ID",
-  headerStyle: () => { return { width: "40px", left: 0 }; }
+  headerStyle: () => { return { width: "40px", left: 0 }; },
+  editable: false,
 },{
   dataField: "global_id",
   text: "Glo",
