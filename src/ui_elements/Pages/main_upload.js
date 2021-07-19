@@ -5,11 +5,8 @@ import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 //UI Element imports
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
 import Toast from 'react-bootstrap/Toast'
-import Tabs from 'react-bootstrap/Tabs'
-import Tab from 'react-bootstrap/Tab'
+import ResponsiveEmbed from 'react-bootstrap/ResponsiveEmbed'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
@@ -26,7 +23,6 @@ import {columns} from '../../static_data/columns'
 import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} from '../../static_data/constants'
 
 //Components
-import Instructions from "../Components/instructions";
 import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
@@ -85,6 +81,7 @@ var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
 var play_button_text = "ERROR"
 var temp_flag = false
+var time_unix = 0;
 
 
 function save_data(frame_num){
@@ -293,33 +290,32 @@ export default function MainUpload() {
 		if(val != null){
 		if(val['player'] != null){
 			if(val['player']['player'] != null){
-			if(val['player']['player'] != null){
-				video_width = val['player']['player']['player'].videoWidth
-				video_height = val['player']['player']['player'].videoHeight
-				var duration = val['player']['player']['player'].duration
-				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate}
-				//alert("*Loaded player* \nHorizontal Resolution = " + video_width + "\nVertical Resolution = " + video_height + "\nFrame Rate: " + frame_rate + " FPS\nDuration: " + duration + " seconds")
+					if(val['player']['player'] != null){
+						video_width = val['player']['player']['player'].videoWidth
+						video_height = val['player']['player']['player'].videoHeight
+						var duration = val['player']['player']['player'].duration
+						VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
+					}
+				}
 			}
-			}
-		}
 		}
 		setPlayer(val)
 	}
 
 	const handleSetDuration = val => {
 		if(upload === true && player != null){      
-		num_frames = Math.round(val * frame_rate);
+			num_frames = Math.round(val * frame_rate);
 
-		frame_data = new Array(num_frames)
-		annotation_data = new Array(num_frames)
+			frame_data = new Array(num_frames)
+			annotation_data = new Array(num_frames)
 
-		//TODO Update this later
-		for (var i = 0; i < num_frames; i++){
-			frame_data[i] = []
-			annotation_data[i] = []
-		}
-		upload = false;
-		disable_buttons = false
+			//TODO Update this later
+			for (var i = 0; i < num_frames; i++){
+				frame_data[i] = []
+				annotation_data[i] = []
+			}
+			//upload = false;
+			disable_buttons = false
 		}
 		setDuration(parseInt(val))
 	}
@@ -484,6 +480,11 @@ export default function MainUpload() {
 		frame_rate = framerate
 	}
 
+	const setDateTime = (time) => {
+		time_unix = time;
+		console.log(time)
+	}
+
 	return (
 		<div>
 			<CustomNavBar 
@@ -516,6 +517,7 @@ export default function MainUpload() {
 				toggleKeyCheck={toggleKeyCheck}
 				setFrameRate={setFrameRate}
 				frame_rate={frame_rate}
+				setDateTime={setDateTime}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 
@@ -526,57 +528,45 @@ export default function MainUpload() {
 					<strong className="mr-auto">{toast_text}</strong>
 				</Toast.Header>
 			</Toast>
-
-			<div style={{display: "grid"}}>
-				<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-					<ReactPlayer 
-						onProgress={handleSetCurrentFrame} 
-						ref={handleSetPlayer} 
-						onDuration={handleSetDuration} 
-						url={videoFilePath} 
-						width='100%'
-						height='99.999%'
-						playing={playing} 
-						controls={false} 
-						style={{position:'absolute', float:'left', top:0, left:0}}
-						volume={0}
-						muted={true}
-						pip={false}
-						playbackRate={playbackRate}
-						onPlay={handleOnPlay}
-					/>
+			{
+				upload === true && 
+				<div style={{display: "grid"}} show={upload}>
+					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+						<ResponsiveEmbed aspectRatio="4by3">
+							<video src={videoFilePath}></video>
+						</ResponsiveEmbed>
+					</div>
+					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
+						<FabricRender 
+							fabricCanvas={fabricCanvas}
+							currentFrame={currentFrame}
+							save_data={save_data}
+							scaling_factor_height={scaling_factor_height}
+							scaling_factor_width={scaling_factor_width}
+						/>
+					</div>
+					<div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
+						<input
+							style={{width: scaling_factor_width}}
+							type='range' min={0} max={0.999999} step='any'
+							value={sliderPercent}
+							onMouseDown={handleSeekMouseDown}
+							onChange={handleSeekChange}
+							onMouseUp={handleSeekMouseUp}
+						/>
+					</div>
+					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
+						<AnnotationTable
+							annotation_data={annotation_data}
+							currentFrame={currentFrame}
+							toggleKeyCheck={toggleKeyCheck}
+							columns={columns}
+							remove_table_index={remove_table_index}
+							handleSetCurrentFrame={handleSetCurrentFrame}
+						/>
+					</div>
 				</div>
-				<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
-					<FabricRender 
-						fabricCanvas={fabricCanvas}
-						currentFrame={currentFrame}
-						save_data={save_data}
-						scaling_factor_height={scaling_factor_height}
-						scaling_factor_width={scaling_factor_width}
-					/>
-				</div>
-				<div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
-					<input
-						style={{width: scaling_factor_width}}
-						type='range' min={0} max={0.999999} step='any'
-						value={sliderPercent}
-						onMouseDown={handleSeekMouseDown}
-						onChange={handleSeekChange}
-						onMouseUp={handleSeekMouseUp}
-					/>
-				</div>
-				<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
-					<AnnotationTable
-						annotation_data={annotation_data}
-						currentFrame={currentFrame}
-						toggleKeyCheck={toggleKeyCheck}
-						columns={columns}
-						remove_table_index={remove_table_index}
-						handleSetCurrentFrame={handleSetCurrentFrame}
-					/>
-				</div>
-			
-			</div>
+			}
 		</div>
 	);
 }

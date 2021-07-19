@@ -22,7 +22,7 @@ import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
-	const [startDate, setStartDate] = useState(new Date());
+	const [startDate, setStartDate] = useState(0);
 	const [frameRate, setFrameRate] = useState(0)
 	const [skipValue, setSkipValue] = useState(0)
 	const [playbackRate, setPlaybackRate] = useState(0)
@@ -42,6 +42,14 @@ export default function CustomNavBar(props){
 		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data, props.columns)
 	}
 
+	const handleSetStartDate = (date) => {
+		setStartDate(date)
+		try { //Making sure that any garbage input taken care of
+			props.setDateTime(Math.floor((date.getTime() / 1000)))
+		} catch (error) {
+			alert("Invalid date input!")
+		}
+	}
 
 	return (
 		<div>
@@ -61,15 +69,18 @@ export default function CustomNavBar(props){
 			<Modal.Body>
 				<div style={{display: "grid"}}>
 					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-					<div style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
+					<Form style={{float: "left",gridColumn: 1, gridRow:1}}>
+						<Form.Check label="Youtube"/>
+					</Form>
+					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
 						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
 						<NavDropdown.Divider />
 					</div>
-					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
+					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
 						Date and Time: 
 						<DatePicker
 							selected={startDate}
-							onChange={(date) => {setStartDate(date)}}
+							onChange={(date) => {handleSetStartDate(date)}}
 							timeInputLabel="Time:"
 							dateFormat="yyyy/MM/dd hh:mm"
 							showTimeInput
@@ -80,10 +91,10 @@ export default function CustomNavBar(props){
 						/>
 						<NavDropdown.Divider />
 					</div>
-					<Form style={{float: "left",gridColumn: 1, gridRow:3}}>
+					<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
 						<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={props.handleVideoUpload} />
 					</Form>
-					<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />

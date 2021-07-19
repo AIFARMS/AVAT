@@ -20,7 +20,6 @@ class BoundingBox {
             height: this.height,
             width: this.width,
             fill: this.color,
-            borderColor: '#000',
             opacity: '.4',
             top: this.top,
             left: this.left,
@@ -45,7 +44,9 @@ class BoundingBox {
         var group = new fabric.Group();
         group.addWithUpdate(this.rectangle())
         group.addWithUpdate(this.id_text())
-        
+        group.borderColor = '#000000'
+        group.hasBorders = true
+
         var temp = this.id 
         group.toObject = (function(toObject) {
             return function(propertiesToInclude) {
