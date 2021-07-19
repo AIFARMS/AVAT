@@ -21,7 +21,7 @@ import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
-	const [uploadShow, setUploadShow] = useState(false);
+	const [uploadShow, setUploadShow] = useState(true);
 	const [startDate, setStartDate] = useState(new Date());
 	const [frameRate, setFrameRate] = useState(0)
 	const [skipValue, setSkipValue] = useState(0)
