@@ -109,7 +109,7 @@ export default function CustomNavBar(props){
 			<Button variant="secondary" onClick={handleUploadClose}>Close</Button>
 			</Modal.Footer>
 		</Modal>
-		<Navbar bg="dark" variant="dark" className="bg-5">
+		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
 				<Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
 				<Nav className="mr-auto">
 						<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">

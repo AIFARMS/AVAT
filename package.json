@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "https://aifarms.github.io/pig-annotation-tool/",
   "dependencies": {
-    "bootstrap": "^5.0.2",
+    "bootstrap": "^4.6.0",
     "fabric": "^3.6.3",
     "jquery": "^3.6.0",
     "react": "^16.13.1",
@@ -43,6 +43,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^3.2.3"
+    "gh-pages": "^3.2.0"
   }
 }

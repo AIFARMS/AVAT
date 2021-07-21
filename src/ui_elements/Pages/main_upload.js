@@ -532,9 +532,22 @@ export default function MainUpload() {
 				upload === true && 
 				<div style={{display: "grid"}} show={upload}>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
-						<ResponsiveEmbed aspectRatio="4by3">
-							<video src={videoFilePath}></video>
-						</ResponsiveEmbed>
+						<ReactPlayer 
+							onProgress={handleSetCurrentFrame} 
+							ref={handleSetPlayer} 
+							onDuration={handleSetDuration} 
+							url={videoFilePath} 
+							width='100%'
+							height='99.999%'
+							playing={playing} 
+							controls={false} 
+							style={{position:'absolute', float:'left', top:0, left:0}}
+							volume={0}
+							muted={true}
+							pip={false}
+							playbackRate={playbackRate}
+							onPlay={handleOnPlay}
+						/>
 					</div>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
 						<FabricRender 
