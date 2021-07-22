@@ -18,6 +18,7 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
+import {run_model, load} from '../../tensorflow/ObjectDetection';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
@@ -30,6 +31,7 @@ export default function CustomNavBar(props){
 	const [verticalRes, setVerticalRes] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
+	const [model, setModel] = useState("")
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -60,6 +62,14 @@ export default function CustomNavBar(props){
 		}else{
 			setVideoFormat(1)
 		}
+	}
+
+	const handleEnableModel = (event) => {
+		//Defualt value is true which is disbaled. False turns it on!
+		if(model === ""){
+			alert("Please select a model")
+		}
+		load(model)
 	}
 
 	const handleVideoLink = (event) => {
@@ -138,6 +148,17 @@ export default function CustomNavBar(props){
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
+					<div>
+						Enable Object Detection Model:{' '}
+						<select defaultValue={model} onChange={(event) => {setModel(event.target.value)}} id='base_model'>
+							<option value="">Select</option>
+							<option value="lite_mobilenet_v2">SSD Lite Mobilenet V2</option>
+							<option value="mobilenet_v1">SSD Mobilenet v1</option>
+							<option value="mobilenet_v2">SSD Mobilenet v2</option>
+						</select>{' '}
+						<Button size='sm' variant='outline-success' onClick={handleEnableModel}>Enable</Button>
+					</div>
+					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
@@ -156,6 +177,10 @@ export default function CustomNavBar(props){
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
+					{
+						model.length > 0 &&
+						<Button id="run" variant="outline-info" onClick={(event) => {run_model(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data); props.handle_visual_toggle();}}>Run model</Button>
+					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}

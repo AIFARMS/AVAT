@@ -192,7 +192,7 @@ export default function MainUpload() {
 
 		if (annotationType === ANNOTATION_BBOX){
 			annotation_type_txt = "b"
-		var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
+			var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
 			fabricCanvas.add(new_bbox)
 		}else if (annotationType === ANNOTATION_KEYPOINT){
 			//TODO fix KeyPoint
@@ -525,6 +525,9 @@ export default function MainUpload() {
 				setFrameRate={setFrameRate}
 				frame_rate={frame_rate}
 				setDateTime={setDateTime}
+				fabricCanvas={fabricCanvas}
+				save_data={save_data}
+				handle_visual_toggle={handle_visual_toggle}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 
@@ -554,6 +557,7 @@ export default function MainUpload() {
 							pip={false}
 							playbackRate={playbackRate}
 							onPlay={handleOnPlay}
+							id="myvideo"
 						/>
 					</div>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>

@@ -30,6 +30,6 @@ export default class FabricRender extends React.Component{
     }
 
     render() {
-      return <canvas></canvas>
+      return <canvas id="canvas"></canvas>
     }
 }
