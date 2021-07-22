@@ -216,6 +216,13 @@ export default function MainUpload() {
 	}
 
 	const handleVideoUpload = (event) => {
+		console.log(typeof(event))
+		if(typeof(event) === "string"){
+			setVideoFileURL(event)
+			ANNOTATION_VIDEO_NAME = event
+			upload = true;
+			return;
+		}
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
 		video_to_img(event.target.files[0], fabricCanvas)
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']

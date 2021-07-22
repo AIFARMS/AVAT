@@ -28,6 +28,8 @@ export default function CustomNavBar(props){
 	const [playbackRate, setPlaybackRate] = useState(0)
 	const [horizontalRes, setHorizontalRes] = useState(0)
 	const [verticalRes, setVerticalRes] = useState(0)
+	const [videoFormat, setVideoFormat] = useState(0)
+	const [videoLink, setVideoLink] = useState("")
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -51,6 +53,20 @@ export default function CustomNavBar(props){
 		}
 	}
 
+	const handleVideoFormat = (type) => {
+		console.log(type)
+		if(type === 0){
+			setVideoFormat(0)
+		}else{
+			setVideoFormat(1)
+		}
+	}
+
+	const handleVideoLink = (event) => {
+		setVideoLink(event.target.value)
+		console.log(event.target.value)
+	}
+
 	return (
 		<div>
 		<Modal show={show} onHide={handleClose} size='lg'>
@@ -69,15 +85,25 @@ export default function CustomNavBar(props){
 			<Modal.Body>
 				<div style={{display: "grid"}}>
 					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-					<Form style={{float: "left",gridColumn: 1, gridRow:1}}>
-						<Form.Check label="Youtube"/>
+					<Form style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
+						Video Format: 
+						<Form.Control
+							as="select"
+							id="inlineFormCustomSelect"
+							onChange={(event)=>{handleVideoFormat(event.target.value)}}
+							defaultValue={videoFormat}
+						>
+							<option value="0">Upload</option>
+							<option value="1">Youtube</option>
+						</Form.Control>
+						<NavDropdown.Divider />
 					</Form>
 					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
 						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
 						<NavDropdown.Divider />
 					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-						Date and Time: 
+						<text>Date and Time: </text>
 						<DatePicker
 							selected={startDate}
 							onChange={(date) => {handleSetStartDate(date)}}
@@ -91,9 +117,18 @@ export default function CustomNavBar(props){
 						/>
 						<NavDropdown.Divider />
 					</div>
-					<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-						<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={props.handleVideoUpload} />
-					</Form>
+					{videoFormat === 0 && 
+						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+							<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={props.handleVideoUpload} />
+						</Form>
+					}
+					{videoFormat === 1 &&
+						<div>
+							<text>Youtube URL: </text>
+							<input onChange={handleVideoLink}></input>
+							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
+						</div>
+					}
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
@@ -117,11 +152,8 @@ export default function CustomNavBar(props){
 							<NavDropdown.Divider />
 							<NavDropdown.Item onClick={handleDownloadCSV}>CSV</NavDropdown.Item>
 						</NavDropdown>
+						<NavLink onClick={handleShow}>Instructions</NavLink>
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
-						<NavDropdown title="Help" id="basic-nav-dropdown">
-							<NavDropdown.Item onClick={handleShow}>Instructions</NavDropdown.Item>
-							<NavDropdown.Divider />
-						</NavDropdown>
 				</Nav>
 				<div>
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
