@@ -77,11 +77,6 @@ function SelectionScreen(){
                                     </div>
                                     <div class="col-12">
                                         <div class="card my-2">
-                                            <Button onClick={handleYouTube} variant="outline-success">YouTube</Button>
-                                        </div> 
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="card my-2">
                                             <Button onClick={handleMultiview} variant="outline-success">Multiview</Button>
                                         </div> 
                                     </div>

@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://aifarms.github.io/pig-annotation-tool/",
   "dependencies": {
+    "@tensorflow/tfjs": "^3.8.0",
     "bootstrap": "^4.6.0",
     "fabric": "^3.6.3",
     "jquery": "^3.6.0",
