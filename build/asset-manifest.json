@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/pig-annotation-tool/static/css/main.d1b05096.chunk.css",
-    "main.js": "/pig-annotation-tool/static/js/main.ac9d4650.chunk.js",
-    "main.js.map": "/pig-annotation-tool/static/js/main.ac9d4650.chunk.js.map",
+    "main.js": "/pig-annotation-tool/static/js/main.d1e4fe3e.chunk.js",
+    "main.js.map": "/pig-annotation-tool/static/js/main.d1e4fe3e.chunk.js.map",
     "runtime-main.js": "/pig-annotation-tool/static/js/runtime-main.aae850be.js",
     "runtime-main.js.map": "/pig-annotation-tool/static/js/runtime-main.aae850be.js.map",
     "static/css/2.336af0b9.chunk.css": "/pig-annotation-tool/static/css/2.336af0b9.chunk.css",
     "static/js/2.458ee425.chunk.js": "/pig-annotation-tool/static/js/2.458ee425.chunk.js",
     "static/js/2.458ee425.chunk.js.map": "/pig-annotation-tool/static/js/2.458ee425.chunk.js.map",
     "index.html": "/pig-annotation-tool/index.html",
-    "precache-manifest.0fec506312916da319a4977afe4056c4.js": "/pig-annotation-tool/precache-manifest.0fec506312916da319a4977afe4056c4.js",
+    "precache-manifest.675a6f5c3ba093487073af373c6a3a49.js": "/pig-annotation-tool/precache-manifest.675a6f5c3ba093487073af373c6a3a49.js",
     "service-worker.js": "/pig-annotation-tool/service-worker.js",
     "static/css/2.336af0b9.chunk.css.map": "/pig-annotation-tool/static/css/2.336af0b9.chunk.css.map",
     "static/css/main.d1b05096.chunk.css.map": "/pig-annotation-tool/static/css/main.d1b05096.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.336af0b9.chunk.css",
     "static/js/2.458ee425.chunk.js",
     "static/css/main.d1b05096.chunk.css",
-    "static/js/main.ac9d4650.chunk.js"
+    "static/js/main.d1e4fe3e.chunk.js"
   ]
 }

@@ -13,7 +13,7 @@ export async function load(model_type) {
     modelPromise = cocoSsd.load({base: model_type});
 }
 
-export async function run_model(fabricCanvas, annotation_data, currentFrame, save_data) {
+export async function run_model(fabricCanvas, annotation_data, currentFrame, save_data, refresh) {
     const image = document.getElementsByTagName("video")[0]
 
     console.log("IMAGE CLASSIFICATION")
@@ -31,7 +31,7 @@ export async function run_model(fabricCanvas, annotation_data, currentFrame, sav
         fabricCanvas.add(new_bbox)
     } 
     save_data(currentFrame)
-
+    refresh()
     /*
     const c = document.getElementById('canvas');
     const context = c.getContext('2d');

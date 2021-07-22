@@ -179,7 +179,7 @@ export default function CustomNavBar(props){
 				<div>
 					{
 						model.length > 0 &&
-						<Button id="run" variant="outline-info" onClick={(event) => {run_model(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data); props.handle_visual_toggle();}}>Run model</Button>
+						<Button id="run" variant="outline-info" onClick={(event) => {run_model(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					<Dropdown as={ButtonGroup}>
