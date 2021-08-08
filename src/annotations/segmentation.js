@@ -80,9 +80,15 @@ class Segmentation {
                 });
                 if(pointArray.length === 0){
                     circle.set({
-                        fill:'red'
+                        fill:'red',
+                        zindex: 1
+                    })
+                }else{
+                    circle.set({
+                        zindex: 0
                     })
                 }
+
                 var points = [(options.e.layerX/canvas.getZoom()),(options.e.layerY/canvas.getZoom()),(options.e.layerX/canvas.getZoom()),(options.e.layerY/canvas.getZoom())];
                 var line = new fabric.Line(points, {
                     strokeWidth: 2,

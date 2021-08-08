@@ -1,42 +1,60 @@
 const behaviors = [{
-  value: 'inactive',
-  label: 'Inactive'
+  value: 'MOVE steady',
+  label: 'Moving (stdy)'
 },{
-  value: 'walking',
-  label: 'Walking'
+  value: 'FEED',
+  label: 'Feeding'
 },{
-  value: 'running',
-  label: 'Running'
-},{
-  value: 'play_solo',
-  label: 'Play Solo'
-},{
-  value: 'play_social',
-  label: 'Play Social'
-},{
-  value: 'head_tossing',
-  label: 'Head Tossing'
-},{
-  value: 'interacting',
-  label: 'Interacting with pen features'
-},{
-  value: 'drinking',
+  value: 'DRINK',
   label: 'Drinking'
 },{
-  value: 'eating',
-  label: 'Eating'
+  value: 'NOSE',
+  label: 'Nosing'
 },{
-  value: 'fighting',
-  label: 'Fighting'
+  value: 'SHAM',
+  label: 'Sham chewing'
 },{
-  value: 'defacating',
-  label: 'Defacating'
+  value: 'CAGE',
+  label: 'Cage Biting'
 },{
-  value: 'other_active',
-  label: 'Other'
+  value: 'ADJUST',
+  label: 'Adjusting'
 },{
-  value: 'unknown',
+  value: 'FOAM',
+  label: 'Foaming'
+},{
+  value: 'GROOM',
+  label: 'Grooming'
+},{
+  value: 'YAWN',
+  label: 'Yawning'
+},{
+  value: 'EAR twitch',
+  label: 'Ears Twitching'
+},{
+  value: 'MOVE slow',
+  label: 'Moving (slow)'
+},{
+  value: 'BREATHE',
+  label: 'Breathing (m)'
+},{
+  value: 'ELIMINATE',
+  label: 'Elimination'
+},{
+  value: 'PAW',
+  label: 'Pawing'
+},{
+  value: 'SCRATCH',
+  label: 'Scratching'
+},{
+  value: 'TOSS',
+  label: 'Head tossing'
+},{
+  value: 'UNKNOWN',
   label: 'Unknown'
+},{
+  value: 'PERSON',
+  label: 'Person'
 },]
 
 export {behaviors};

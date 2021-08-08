@@ -104,7 +104,6 @@ export default function AnnotationTable(props){
                                 //var notes = props.annotation_data[props.currentFrame][row['id']]['notes']
                                 //props.annotation_data[props.currentFrame][row['id']] = row
                                 //props.annotation_data[props.currentFrame][row['id']]['notes'] = notes
-                                console.log(props.annotation_data[props.currentFrame][row['id']] )
                                 props.toggleKeyCheck(true)
                             },
                             onStartEdit: (row, column, rowIndex, columnIndex) => {

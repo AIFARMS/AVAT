@@ -84,13 +84,6 @@ function SelectionScreen(){
                             </div> 
                         </div> 
                     </Container>
-
-
-                    <div class="container">
-                        <div class="row align-items-center">
-                            
-                        </div>
-                    </div>
                 </Jumbotron>
             </div>
         )

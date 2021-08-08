@@ -49,10 +49,10 @@ var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
 
 //Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
-if (current_screen_height >= 1440){
+/*if (current_screen_height >= 1440){
   scaling_factor_width = 1920;
   scaling_factor_height = 1080;
-}else if(current_screen_height >= 1080){
+}else */if(current_screen_height >= 1080){
   scaling_factor_width = 1280;
   scaling_factor_height = 720;
 }else if(current_screen_height >= 1024){
@@ -198,12 +198,12 @@ export default function MainUpload() {
 			//TODO fix KeyPoint
 			alert("KeyPoint annotation are currently unavailable")
 			annotation_type_txt = "k"
-			//var keyp = new KeyPoint().generate_stick(fabricCanvas)
+			var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
 			alert("Segmentation annotation is currently under development")
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
-			//var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
@@ -548,7 +548,7 @@ export default function MainUpload() {
 							onDuration={handleSetDuration} 
 							url={videoFilePath} 
 							width='100%'
-							height='99.999%'
+							height='100%'
 							playing={playing} 
 							controls={false} 
 							style={{position:'absolute', float:'left', top:0, left:0}}

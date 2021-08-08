@@ -15,6 +15,7 @@ export async function load(model_type) {
 
 export async function run_model(fabricCanvas, annotation_data, currentFrame, save_data, refresh) {
     const image = document.getElementsByTagName("video")[0]
+    console.log(image.height)
 
     console.log("IMAGE CLASSIFICATION")
     const model = await modelPromise;
@@ -27,8 +28,8 @@ export async function run_model(fabricCanvas, annotation_data, currentFrame, sav
         var box = result[i].bbox
         var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
         var new_bbox = new BoundingBox(box[1], box[0], box[2], box[3], color, i+'b', "None").generate_no_behavior(fabricCanvas)
-        annotation_data[currentFrame].push({id: i+'b', global_id: -1,status: "", current: "", behavior: "", posture: "", notes: ""})
         fabricCanvas.add(new_bbox)
+        annotation_data[currentFrame].push({id: i+'b', global_id: i,status: "", current: "", behavior: "", posture: "", notes: ""})
     } 
     save_data(currentFrame)
     refresh()
