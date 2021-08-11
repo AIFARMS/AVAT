@@ -19,13 +19,6 @@ const columns = (remove_table_index) => [{
     return { backgroundColor };
   }
 },{
-  dataField: "status",
-  text: "Status",
-  editor: {
-      type: Type.SELECT,
-      options: status
-    }
-},{
   dataField: "behavior",
   text: "Behavior",
   editor: {
