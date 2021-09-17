@@ -1,5 +1,5 @@
 {
-  "short_name": "AIFARMS AVAT",
+  "short_name": "AIFARMS annotation tool",
   "name": "A annnotation tool that can annotate behaviors and also server to provide bounding boxes for ML applications.",
   "icons": [
     {
