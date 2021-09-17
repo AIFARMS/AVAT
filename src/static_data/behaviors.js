@@ -1,54 +1,24 @@
 const behaviors = [{
+  value: 'Moving (slow)',
+  label: 'Moving (slow)'
+},{
   value: 'Moving (stdy)',
   label: 'Moving (stdy)'
 },{
-  value: 'Feeding',
-  label: 'Feeding'
+  value: 'Resting',
+  label: 'Resting'
 },{
   value: 'Drinking',
   label: 'Drinking'
 },{
-  value: 'Nosing',
-  label: 'Nosing'
-},{
-  value: 'Sham chewing',
-  label: 'Sham chewing'
-},{
-  value: 'Cage Biting',
-  label: 'Cage Biting'
-},{
-  value: 'Adjusting',
-  label: 'Adjusting'
-},{
-  value: 'Foaming',
-  label: 'Foaming'
+  value: 'Elimination',
+  label: 'Elimination'
 },{
   value: 'Grooming',
   label: 'Grooming'
 },{
-  value: 'Yawning',
-  label: 'Yawning'
-},{
-  value: 'Ears Twitching',
-  label: 'Ears Twitching'
-},{
-  value: 'Moving (slow)',
-  label: 'Moving (slow)'
-},{
-  value: 'Breathing (m)',
-  label: 'Breathing (m)'
-},{
-  value: 'Elimination',
-  label: 'Elimination'
-},{
-  value: 'Pawing',
-  label: 'Pawing'
-},{
-  value: 'Scratching',
-  label: 'Scratching'
-},{
-  value: 'Head tossing',
-  label: 'Head tossing'
+  value: 'Other',
+  label: 'Other'
 },{
   value: 'Unknown',
   label: 'Unknown'
@@ -56,12 +26,41 @@ const behaviors = [{
   value: 'Person',
   label: 'Person'
 },{
-  value: 'Resting',
-  label: 'Resting'
-},
-{
-  value: 'Other',
-  label: 'Other'
+  value: 'Scratching',
+  label: 'Scratching'
+},{
+  value: 'Pawing',
+  label: 'Pawing'
+},{
+  value: 'Adjusting',
+  label: 'Adjusting'
+},{
+  value: 'Head tossing',
+  label: 'Head tossing'
+},{
+  value: 'Ear twitching',
+  label: 'Ear twitching'
+},{
+  value: 'Feeding',
+  label: 'Feeding'
+},{
+  value: 'Nosing',
+  label: 'Nosing'
+},{
+  value: 'Cage biting',
+  label: 'Cage biting'
+},{
+  value: 'Sham chewing',
+  label: 'Sham chewing'
+},{
+  value: 'Foaming',
+  label: 'Foaming'
+},{
+  value: 'Yawning',
+  label: 'Yawning'
+},{
+  value: 'Breathing (m)',
+  label: 'Breathing (m)'
 }]
 
 export {behaviors};
