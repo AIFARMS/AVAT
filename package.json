@@ -24,8 +24,8 @@
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "NODE_ENV=production node_modules//gh-pages/bin/gh-pages.js -d build",
-    "start": "NODE_ENV=production node_modules/react-scripts/bin/react-scripts.js start",
-    "build": "NODE_ENV=production node_modules/react-scripts/bin/react-scripts.js build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
