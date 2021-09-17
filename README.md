@@ -1,4 +1,4 @@
-# pig-annotation-tool
+# AVAT
 
 The front-end dashboard that provides the ability to annotate videos of livestock for the use in research.
 
