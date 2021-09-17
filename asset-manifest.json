@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "/pig-annotation-tool/static/css/main.d1b05096.chunk.css",
-    "main.js": "/pig-annotation-tool/static/js/main.8919b839.chunk.js",
-    "main.js.map": "/pig-annotation-tool/static/js/main.8919b839.chunk.js.map",
-    "runtime-main.js": "/pig-annotation-tool/static/js/runtime-main.aae850be.js",
-    "runtime-main.js.map": "/pig-annotation-tool/static/js/runtime-main.aae850be.js.map",
-    "static/css/2.336af0b9.chunk.css": "/pig-annotation-tool/static/css/2.336af0b9.chunk.css",
-    "static/js/2.1cdb11c6.chunk.js": "/pig-annotation-tool/static/js/2.1cdb11c6.chunk.js",
-    "static/js/2.1cdb11c6.chunk.js.map": "/pig-annotation-tool/static/js/2.1cdb11c6.chunk.js.map",
-    "index.html": "/pig-annotation-tool/index.html",
-    "precache-manifest.c58180919416bfa1271b3349a6df6f2b.js": "/pig-annotation-tool/precache-manifest.c58180919416bfa1271b3349a6df6f2b.js",
-    "service-worker.js": "/pig-annotation-tool/service-worker.js",
-    "static/css/2.336af0b9.chunk.css.map": "/pig-annotation-tool/static/css/2.336af0b9.chunk.css.map",
-    "static/css/main.d1b05096.chunk.css.map": "/pig-annotation-tool/static/css/main.d1b05096.chunk.css.map",
-    "static/js/2.1cdb11c6.chunk.js.LICENSE.txt": "/pig-annotation-tool/static/js/2.1cdb11c6.chunk.js.LICENSE.txt"
+    "main.css": "/AVAT/static/css/main.d1b05096.chunk.css",
+    "main.js": "/AVAT/static/js/main.a58e5113.chunk.js",
+    "main.js.map": "/AVAT/static/js/main.a58e5113.chunk.js.map",
+    "runtime-main.js": "/AVAT/static/js/runtime-main.1ff5ca26.js",
+    "runtime-main.js.map": "/AVAT/static/js/runtime-main.1ff5ca26.js.map",
+    "static/css/2.336af0b9.chunk.css": "/AVAT/static/css/2.336af0b9.chunk.css",
+    "static/js/2.e1ae06a3.chunk.js": "/AVAT/static/js/2.e1ae06a3.chunk.js",
+    "static/js/2.e1ae06a3.chunk.js.map": "/AVAT/static/js/2.e1ae06a3.chunk.js.map",
+    "index.html": "/AVAT/index.html",
+    "precache-manifest.81460bc31114a0540e2a293458e9ade0.js": "/AVAT/precache-manifest.81460bc31114a0540e2a293458e9ade0.js",
+    "service-worker.js": "/AVAT/service-worker.js",
+    "static/css/2.336af0b9.chunk.css.map": "/AVAT/static/css/2.336af0b9.chunk.css.map",
+    "static/css/main.d1b05096.chunk.css.map": "/AVAT/static/css/main.d1b05096.chunk.css.map",
+    "static/js/2.e1ae06a3.chunk.js.LICENSE.txt": "/AVAT/static/js/2.e1ae06a3.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
-    "static/js/runtime-main.aae850be.js",
+    "static/js/runtime-main.1ff5ca26.js",
     "static/css/2.336af0b9.chunk.css",
-    "static/js/2.1cdb11c6.chunk.js",
+    "static/js/2.e1ae06a3.chunk.js",
     "static/css/main.d1b05096.chunk.css",
-    "static/js/main.8919b839.chunk.js"
+    "static/js/main.a58e5113.chunk.js"
   ]
 }
