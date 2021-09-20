@@ -559,7 +559,7 @@ function MainMultiview() {
   return (
     <div>
       <Navbar bg="dark" variant="dark" className="bg-5">
-          <Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
+          <Navbar.Brand href="#home">AVAT</Navbar.Brand>
           <Nav className="mr-auto">
               <Nav.Link onClick={handleShow}>Instructions</Nav.Link>
 

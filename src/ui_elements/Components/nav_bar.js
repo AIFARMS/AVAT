@@ -166,7 +166,7 @@ export default function CustomNavBar(props){
 			</Modal.Footer>
 		</Modal>
 		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
-				<Navbar.Brand href="#home">Annotation Tool</Navbar.Brand>
+				<Navbar.Brand href="#home">AVAT</Navbar.Brand>
 				<Nav className="mr-auto">
 						<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">
 							<NavDropdown.Item onClick={handleDownloadJSON}>JSON</NavDropdown.Item>

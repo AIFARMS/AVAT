@@ -61,10 +61,10 @@ function SelectionScreen(){
                         <div class="row align-items-center">
                             <div class="pb-4 col-md-6 col-lg-7">
                                 <h0 style={{fontSize: "50px"}}>
-                                    Annotation Tool {"  "}
+                                    AVAT{"  "}
                                     <img class="" src={process.env.PUBLIC_URL + '/favicon.ico'} alt="logo" style={{width: "9%"}}/>
                                 </h0>
-                                <h5 > Online tool to mass annotate videos for AI/ML </h5>
+                                <h5 > Online tool to mass annotate videos for AI/ML Research</h5>
                                 <Button size="lg" onClick={handleShow}>Instructions</Button>
                             </div> 
 
