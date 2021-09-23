@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"; 
-import ReactDOM from 'react-dom'
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -12,12 +11,12 @@ import Toast from 'react-bootstrap/Toast'
 
 
 import ExtractingAnnotation from '../../processing/annotation-processing'
-import ChangeTable from '../Components/change_table'
+//import ChangeTable from '../Components/change_table'
 import { NavDropdown } from "react-bootstrap";
 
 //Custom implemented classes
 import { BoundingBox } from '../../annotations/bounding_box'
-import { KeyPoint } from '../../annotations/key_point'
+//import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
 import Instructions from "../Components/instructions";
 
@@ -25,7 +24,7 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import paginationFactory from 'react-bootstrap-table2-paginator';
-import { CSVExport } from 'react-bootstrap-table2-toolkit';
+//import { CSVExport } from 'react-bootstrap-table2-toolkit';
 
 import {behaviors} from '../../static_data/behaviors_LPS'
 import {posture} from '../../static_data/posture'

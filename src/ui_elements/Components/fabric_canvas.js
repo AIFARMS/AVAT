@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom'
-import { useState } from 'react';
 
 export default class FabricRender extends React.Component{
     componentDidMount() {

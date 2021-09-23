@@ -15,6 +15,7 @@ export default class ExtractingAnnotation{
 
 
 //This is the parser for the Multi-Camera pig tracking output JSON code. 
+/*
 class MCPT_Processing {
     constructor(annotation_json){
         this.objects = annotation_json['objects']
@@ -52,4 +53,4 @@ class MCPT_Processing {
         console.log(objects_frame)
         return objects_frame;
     }
-}
+}*/

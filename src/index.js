@@ -4,8 +4,6 @@ import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 
-import MainUpload from './ui_elements/Pages/main_upload'
-import MainYoutube from './ui_elements/Pages/main_youtube'
 
 ReactDOM.render(
     <App/>,

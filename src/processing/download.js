@@ -1,5 +1,3 @@
-import { cssNumber } from "jquery";
-
 export async function downloadFileJSON (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame_data, annotation_data, VIDEO_METADATA) {
     var fileName = "generated_annotations";
     if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
