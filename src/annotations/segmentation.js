@@ -1,3 +1,4 @@
+import { Edit } from "./segmentation_updated";
 const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
@@ -180,6 +181,8 @@ class Segmentation {
                 });
                 canvas.remove(activeShape);
                 canvas.add(po);
+
+                //Edit(canvas)
 
                 /*var group = new fabric.Group()
                 for (var i = 0; i < pointArray.length; i++){

@@ -14,7 +14,7 @@ import {video_to_img} from '../../processing/frame_extract'
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-import { DynamicSegmentation } from "../../annotations/segmentation_updated";
+import { Edit } from "../../annotations/segmentation_updated";
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
@@ -203,7 +203,7 @@ export default function MainUpload() {
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
 			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
-			var test_segment = new DynamicSegmentation()
+			//var test_segment = new DynamicSegmentation()
 			//test_segment.add_polygon(fabricCanvas)
 			//test_segment.Edit(fabricCanvas)
 		}else if(annotationType === ANNOTATION_FRAME){
