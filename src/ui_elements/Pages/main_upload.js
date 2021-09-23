@@ -202,9 +202,9 @@ export default function MainUpload() {
 			alert("Segmentation annotation is currently under development")
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
-			//var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
 			var test_segment = new DynamicSegmentation()
-			test_segment.add_polygon(fabricCanvas)
+			//test_segment.add_polygon(fabricCanvas)
 			//test_segment.Edit(fabricCanvas)
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint

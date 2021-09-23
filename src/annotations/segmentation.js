@@ -128,6 +128,7 @@ class Segmentation {
                 }
                 else{
                     var polyPoint = [{x:(options.e.layerX/canvas.getZoom()),y:(options.e.layerY/canvas.getZoom())}];
+                    console.log(polyPoint)
                     var polygon = new fabric.Polygon(polyPoint,{
                         stroke:'#333333',
                         strokeWidth:1,
@@ -167,8 +168,20 @@ class Segmentation {
                 console.log(pointArray)
                 console.log(lineArray)
 
+                var po = new fabric.Polygon(points, {
+                    strokeWidth: 1,
+                    stroke: 'green',
+                    opacity: .5,
+                    scaleX: 1,
+                    scaleY: 1,
+                    objectCaching: false,
+                    transparentCorners: false,
+                    cornerColor: 'blue',
+                });
+                canvas.remove(activeShape);
+                canvas.add(po);
 
-                var group = new fabric.Group()
+                /*var group = new fabric.Group()
                 for (var i = 0; i < pointArray.length; i++){
                     group.addWithUpdate(pointArray[i])
                     group.addWithUpdate(lineArray[i])
@@ -183,15 +196,14 @@ class Segmentation {
                   }));
                 */
                //To add custom id
-                group.toObject = (function(toObject) {
+                /*group.toObject = (function(toObject) {
                     return function(propertiesToInclude) {
                         return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
                             local_id: id
                         });
                     };
                 })(group.toObject);
-
-                canvas.add(group)
+                canvas.add(group)*/
                   
                 canvas.remove(activeLine);
                 canvas.remove(activeShape)
@@ -206,7 +218,7 @@ class Segmentation {
                     object.selectable = true; 
                 });
 
-                return group
+                //return group
             }
         };
         
