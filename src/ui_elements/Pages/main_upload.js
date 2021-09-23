@@ -530,7 +530,7 @@ export default function MainUpload() {
 			<Toast 
 				onClose={() => changeSave(false)} 
 				show={save} delay={500} autohide
-				style={{ position: 'absolute',top: '100', left: '40'}}
+				style={{ position: 'absolute', top: '100', left: '100', zIndex: '100'}}
 			>
 				<Toast.Header>
 					<strong className="mr-auto">{toast_text}</strong>
