@@ -1,5 +1,3 @@
-import { grep } from "jquery";
-
 const fabric = require("fabric").fabric;
 
 class BoundingBox {

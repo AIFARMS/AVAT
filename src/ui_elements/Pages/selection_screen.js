@@ -1,18 +1,11 @@
 
-import React, { useState } from "react"; 
-import ReactDOM from 'react-dom'
-import ReactPlayer from 'react-player'
+import React, { useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Button from 'react-bootstrap/Button'
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
 import Modal from 'react-bootstrap/Modal'
-import Form from 'react-bootstrap/Form'
-import Table from 'react-bootstrap/Table'
 
 import MainUpload from './main_upload'
-import MainYoutube from './main_youtube'
 import MainMultiview from './main_muiltiview'
 import { Container, Jumbotron } from "react-bootstrap";
 import Instructions from "../Components/instructions";
@@ -22,12 +15,6 @@ function SelectionScreen(){
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
-
-    const [youtube, setYoutube] = useState(false)
-    const handleYouTube = (event) => {
-        setYoutube(!youtube)
-    } 
-
     const [upload, setUpload] = useState(false)
     const handleUpload = (event) => {
         setUpload(!upload)
@@ -38,9 +25,7 @@ function SelectionScreen(){
         setMultiview(!multiview)
     }
 
-    if(youtube){
-        return (<MainYoutube/>)
-    }else if(upload){
+    if(upload){
         return (<MainUpload/>)
     }else if(multiview){
         return (<MainMultiview/>)

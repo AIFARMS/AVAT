@@ -1,12 +1,10 @@
 //Core imports
 import React, { useEffect, useState } from "react"; 
-import ReactDOM from 'react-dom'
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 //UI Element imports
 import Toast from 'react-bootstrap/Toast'
-import ResponsiveEmbed from 'react-bootstrap/ResponsiveEmbed'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
@@ -45,7 +43,7 @@ var skip_value = 1;
 console.log(window.screen.width)
 console.log(window.screen.height)
 
-var current_screen_width = window.screen.width;
+//var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
 
 //Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
@@ -532,7 +530,7 @@ export default function MainUpload() {
 			<Toast 
 				onClose={() => changeSave(false)} 
 				show={save} delay={500} autohide
-				style={{ position: 'absolute',top: 0, left: '40%', zIndex: 100}}
+				style={{ position: 'absolute',top: '100', left: '40'}}
 			>
 				<Toast.Header>
 					<strong className="mr-auto">{toast_text}</strong>

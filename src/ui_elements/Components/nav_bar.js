@@ -10,8 +10,6 @@ import Form from 'react-bootstrap/Form'
 import Dropdown from 'react-bootstrap/Dropdown'
 import { ButtonGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
-import { InputGroup } from 'react-bootstrap';
-import { FormControl } from 'react-bootstrap';
 
 import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
@@ -24,11 +22,11 @@ export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
 	const [startDate, setStartDate] = useState(0);
-	const [frameRate, setFrameRate] = useState(0)
-	const [skipValue, setSkipValue] = useState(0)
-	const [playbackRate, setPlaybackRate] = useState(0)
-	const [horizontalRes, setHorizontalRes] = useState(0)
-	const [verticalRes, setVerticalRes] = useState(0)
+	//const [frameRate, setFrameRate] = useState(0)
+	//const [skipValue, setSkipValue] = useState(0)
+	//const [playbackRate, setPlaybackRate] = useState(0)
+	//const [horizontalRes, setHorizontalRes] = useState(0)
+	//const [verticalRes, setVerticalRes] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
