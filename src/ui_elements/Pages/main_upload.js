@@ -200,7 +200,6 @@ export default function MainUpload() {
 			annotation_type_txt = "k"
 			var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
-			//alert("Segmentation annotation is currently under development")
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
 			if (segmentation_flag == true){
@@ -209,9 +208,7 @@ export default function MainUpload() {
 			}
 			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s', toggle_segmentation)
 			toggle_segmentation()
-			//var test_segment = new DynamicSegmentation()
-			//test_segment.add_polygon(fabricCanvas)
-			//test_segment.Edit(fabricCanvas)
+
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
