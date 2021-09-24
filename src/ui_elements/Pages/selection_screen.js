@@ -58,7 +58,7 @@ function SelectionScreen(){
                             {
                                 selection_items.map((item, key) => {
                                     return(
-                                        <Col md='6'>
+                                        <Col md='6' className='d-flex'>
                                             <Card 
                                                 className="mb-5 box-shadow" 
                                                 top

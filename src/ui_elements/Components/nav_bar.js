@@ -185,7 +185,7 @@ export default function CustomNavBar(props){
 						<Button id="run" variant="outline-info" onClick={(event) => {run_model(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
-					<Button variant="outline-success" onClick={edit_click}>Test</Button>{' '}
+					<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
 						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
