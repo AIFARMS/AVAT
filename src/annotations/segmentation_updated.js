@@ -38,20 +38,20 @@ function actionHandler(eventData, transform, x, y) {
 // define a function that can keep the polygon in the same position when we change its
 // width/height/top/left.
 function anchorWrapper(anchorIndex, fn) {
-return function(eventData, transform, x, y) {
-  var fabricObject = transform.target,
-      absolutePoint = fabric.util.transformPoint({
-          x: (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x),
-          y: (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y),
-      }, fabricObject.calcTransformMatrix()),
-      actionPerformed = fn(eventData, transform, x, y),
-      newDim = fabricObject._setPositionDimensions({}),
-      polygonBaseSize = fabricObject._getNonTransformedDimensions(),
-      newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / polygonBaseSize.x,
-          newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / polygonBaseSize.y;
-  fabricObject.setPositionByOrigin(absolutePoint, newX + 0.5, newY + 0.5);
-  return actionPerformed;
-}
+    return function(eventData, transform, x, y) {
+        var fabricObject = transform.target,
+            absolutePoint = fabric.util.transformPoint({
+                x: (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x),
+                y: (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y),
+            }, fabricObject.calcTransformMatrix()),
+            actionPerformed = fn(eventData, transform, x, y),
+            newDim = fabricObject._setPositionDimensions({}),
+            polygonBaseSize = fabricObject._getNonTransformedDimensions(),
+            newX = (fabricObject.points[anchorIndex].x - fabricObject.pathOffset.x) / polygonBaseSize.x,
+                newY = (fabricObject.points[anchorIndex].y - fabricObject.pathOffset.y) / polygonBaseSize.y;
+        fabricObject.setPositionByOrigin(absolutePoint, newX + 0.5, newY + 0.5);
+        return actionPerformed;
+    }
 }
 
 function Edit(canvas) {
@@ -59,23 +59,26 @@ function Edit(canvas) {
     // may want copy and paste on different moment.
     // and you do not want the changes happened
     // later to reflect on the copy.
-    var poly = canvas.getObjects()[0];
-    console.log(poly)
+    var poly = canvas.getActiveObject();
+    if(poly == undefined || poly == null){
+        alert("Please select a segmentation")
+        return
+    }
     canvas.setActiveObject(poly);
     poly.edit = !poly.edit;
     if (poly.edit) {
-    var lastControl = poly.points.length - 1;
-    poly.cornerStyle = 'circle';
-    poly.cornerColor = 'rgba(0,0,255,0.5)';
-    poly.controls = poly.points.reduce(function(acc, point, index) {
-            acc['p' + index] = new fabric.Control({
-                positionHandler: polygonPositionHandler,
-                actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
-                actionName: 'modifyPolygon',
-                pointIndex: index
-            });
-            return acc;
-        }, { });
+        var lastControl = poly.points.length - 1;
+        poly.cornerStyle = 'circle';
+        poly.cornerColor = 'rgba(0,0,255,0.5)';
+        poly.controls = poly.points.reduce(function(acc, point, index) {
+                acc['p' + index] = new fabric.Control({
+                    positionHandler: polygonPositionHandler,
+                    actionHandler: anchorWrapper(index > 0 ? index - 1 : lastControl, actionHandler),
+                    actionName: 'modifyPolygon',
+                    pointIndex: index
+                });
+                return acc;
+            }, { });
     } else {
         poly.cornerColor = 'blue';
         poly.cornerStyle = 'rect';

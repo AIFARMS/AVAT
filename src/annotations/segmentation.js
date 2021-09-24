@@ -3,7 +3,7 @@ const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
 class Segmentation {
-    generate_polygon(canvas, id){
+    generate_polygon(canvas, id, segmentation_flag){
         var min = 99;
         var max = 999999;
         var polygonMode = true;
@@ -179,8 +179,21 @@ class Segmentation {
                     transparentCorners: false,
                     cornerColor: 'blue',
                 });
+
+                po.toObject = (function(toObject) {
+                    return function(propertiesToInclude) {
+                        return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
+                            local_id: id
+                        });
+                    };
+                })(po.toObject)
+                console.log(id)
+                console.log(po)
+
                 canvas.remove(activeShape);
                 canvas.add(po);
+
+                segmentation_flag();
 
                 //Edit(canvas)
 
@@ -199,13 +212,7 @@ class Segmentation {
                   }));
                 */
                //To add custom id
-                /*group.toObject = (function(toObject) {
-                    return function(propertiesToInclude) {
-                        return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
-                            local_id: id
-                        });
-                    };
-                })(group.toObject);
+                /*;
                 canvas.add(group)*/
                   
                 canvas.remove(activeLine);

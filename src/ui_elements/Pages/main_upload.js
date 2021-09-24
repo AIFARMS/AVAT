@@ -81,6 +81,7 @@ var VIDEO_METADATA = {}
 var play_button_text = "ERROR"
 var temp_flag = false
 var time_unix = 0;
+var segmentation_flag = false;
 
 
 function save_data(frame_num){
@@ -199,10 +200,15 @@ export default function MainUpload() {
 			annotation_type_txt = "k"
 			var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
-			alert("Segmentation annotation is currently under development")
+			//alert("Segmentation annotation is currently under development")
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
-			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+			if (segmentation_flag == true){
+				alert("Please finish your current segmentation!")
+				return
+			}
+			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s', toggle_segmentation)
+			toggle_segmentation()
 			//var test_segment = new DynamicSegmentation()
 			//test_segment.add_polygon(fabricCanvas)
 			//test_segment.Edit(fabricCanvas)
@@ -215,6 +221,10 @@ export default function MainUpload() {
 		save_data(currentFrame)
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
+	}
+
+	const toggle_segmentation = (event) => {
+		segmentation_flag = !segmentation_flag
 	}
 
 	const handleVideoUpload = (event) => {
