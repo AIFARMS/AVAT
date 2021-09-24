@@ -14,6 +14,7 @@ import {video_to_img} from '../../processing/frame_extract'
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
+import { Edit } from "../../annotations/segmentation_updated";
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
@@ -80,6 +81,7 @@ var VIDEO_METADATA = {}
 var play_button_text = "ERROR"
 var temp_flag = false
 var time_unix = 0;
+var segmentation_flag = false;
 
 
 function save_data(frame_num){
@@ -198,10 +200,15 @@ export default function MainUpload() {
 			annotation_type_txt = "k"
 			var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
-			alert("Segmentation annotation is currently under development")
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
-			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+			if (segmentation_flag == true){
+				alert("Please finish your current segmentation!")
+				return
+			}
+			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s', toggle_segmentation)
+			toggle_segmentation()
+
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
@@ -211,6 +218,10 @@ export default function MainUpload() {
 		save_data(currentFrame)
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
+	}
+
+	const toggle_segmentation = (event) => {
+		segmentation_flag = !segmentation_flag
 	}
 
 	const handleVideoUpload = (event) => {
@@ -530,7 +541,7 @@ export default function MainUpload() {
 			<Toast 
 				onClose={() => changeSave(false)} 
 				show={save} delay={500} autohide
-				style={{ position: 'absolute',top: '100', left: '40'}}
+				style={{ position: 'absolute', top: '100', left: '100', zIndex: '100'}}
 			>
 				<Toast.Header>
 					<strong className="mr-auto">{toast_text}</strong>

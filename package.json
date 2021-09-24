@@ -7,7 +7,7 @@
     "@tensorflow-models/coco-ssd": "^2.2.2",
     "@tensorflow/tfjs": "^3.8.0",
     "bootstrap": "^4.6.0",
-    "fabric": "^3.6.3",
+    "fabric": "^4.1.0",
     "jquery": "^3.6.0",
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.1",

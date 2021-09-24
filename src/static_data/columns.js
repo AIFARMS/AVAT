@@ -51,12 +51,14 @@ const columns = (remove_table_index) => [{
   );},
   formatter: (cellContent, row) => {
     return (
-      <Button
-        className="btn btn-danger btn-xs"
-          onClick={() => remove_table_index(row.id)}
-          label="Del"
-        >
-      </Button>
+      <div>        
+        <Button
+          className="btn btn-danger btn-xs"
+            onClick={() => remove_table_index(row.id)}
+            label="Del"
+          >
+        </Button>
+      </div>
     );
   },
 }
