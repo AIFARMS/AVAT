@@ -80,6 +80,13 @@ export default function CustomNavBar(props){
 		Edit(props.fabricCanvas)
 	}
 
+	/* TODO Add local storgae option
+	if (localStorage.getItem('frame_data') != null){
+		alert("There is some data stored")
+		props.annotation_data = localStorage.getItem('annotation_data');
+		props.frame_data = localStorage.getItem('frame_data');
+	}*/
+
 	return (
 		<div>
 		<Modal show={show} onHide={handleClose} size='lg'>
