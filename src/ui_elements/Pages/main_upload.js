@@ -14,7 +14,7 @@ import {video_to_img} from '../../processing/frame_extract'
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-import { Edit } from "../../annotations/segmentation_updated";
+import { Edit } from "../../annotations/segmentation_edit";
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
@@ -130,23 +130,18 @@ export default function MainUpload() {
 	const removeRow = (index) => {
 		console.log(index)
 		var index_num = 0;
+		var current_canvas = fabricCanvas.getObjects();
 
 		for(var i = 0; i < annotation_data[currentFrame].length; i++){
 			if(annotation_data[currentFrame][i]['id'] == index){
 				index_num = i
+				fabricCanvas.remove(current_canvas[i]);
+				fabricCanvas.fire('saveData');
 				break;
+
 			}
 		}
 
-		if(index.substring(index.length-1, index.length) !== "f"){
-			for(var i = 0; i < fabricCanvas.getObjects().length; i++){
-				if(fabricCanvas.getObjects()[i]['_objects'][1]['text'] === index){
-					fabricCanvas.remove(fabricCanvas.getObjects()[i]);
-					fabricCanvas.fire('saveData');
-					break;
-				}
-			}
-		}
 		annotation_data[currentFrame].splice(index_num, 1)
 		save_data(currentFrame)
 		

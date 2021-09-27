@@ -17,7 +17,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 import {run_model, load} from '../../tensorflow/ObjectDetection';
-import { Edit } from '../../annotations/segmentation_updated';
+import { Edit } from '../../annotations/segmentation_edit';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
