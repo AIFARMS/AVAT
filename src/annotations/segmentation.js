@@ -1,4 +1,4 @@
-import { Edit } from "./segmentation_updated";
+import { Edit } from "./segmentation_edit";
 const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
