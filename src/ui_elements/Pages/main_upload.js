@@ -94,8 +94,12 @@ function save_data(frame_num){
 
 function save_localstorage(){
 	console.log(frame_data)
-	localStorage.setItem('frame_data', JSON.stringify(frame_data))
-	localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
+	try{
+		localStorage.setItem('frame_data', JSON.stringify(frame_data))
+		localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
+	} catch (error){
+		console.log("Local storage failed!")
+	}
 }
 
 
@@ -123,7 +127,11 @@ export default function MainUpload() {
 		var total_frames = duration * frame_rate
 		if(typeof(val) === "number"){
 			setCurrentFrame(val)
-			player.seekTo(val/(total_frames))
+			var new_skip = val/(total_frames)
+			if(new_skip > duration){
+				new_skip = duration
+			}
+			player.seekTo(new_skip)
 		}else{
 			console.log(val['played'])
 			save_data(currentFrame)
@@ -379,7 +387,11 @@ export default function MainUpload() {
 		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
 
 		var frameVal = currentFrame + skip_value
-		handleSetCurrentFrame(frameVal)
+		if(frameVal >= total_frames){
+			handleSetCurrentFrame(total_frames-1)
+		}else{
+			handleSetCurrentFrame(frameVal)
+		}
 	}
 
 	const skip_frame_backward = e => {
@@ -523,7 +535,34 @@ export default function MainUpload() {
 	}
 
 	const setFrameRate = (framerate) => {
-		frame_rate = framerate
+		frame_rate = parseInt(framerate)
+		if (frame_rate > 120){
+			frame_rate = 120;
+		}else if(frame_rate <= 0){
+			frame_rate = 1;
+		}else if(Number.isFinite(frame_rate) == false){
+			frame_rate = 1;
+			return;
+		}
+		console.log(Number.isFinite(frame_rate))
+		console.log(frame_rate)
+
+		num_frames = Math.round(duration * frame_rate);
+		if(annotation_data[0].length == 0){
+			console.log("Resetting frame_data and annotation_data")
+			frame_data = new Array(num_frames)
+			annotation_data = new Array(num_frames)
+			//TODO Update this later
+			for (var i = 0; i < num_frames; i++){
+				frame_data[i] = []
+				annotation_data[i] = []
+			}
+			//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
+			setVisualToggle(Math.floor(Math.random() * 999999999999))
+
+		}else{
+			alert("There is data currently annotated! To change frame rate refresh the page and re-upload!")
+		}
 	}
 
 	const setDateTime = (time) => {
@@ -543,7 +582,7 @@ export default function MainUpload() {
 				handleOldAnnotation={handleOldAnnotation}
 				handleVideoUpload={handleVideoUpload}
 				currentFrame={currentFrame}
-				display_frame_num={"Frame #" + parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}
+				display_frame_num={"Frame #" + parseInt(currentFrame+1)+' / '+parseInt(duration * frame_rate)}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
 				handlePlaying={handlePlaying}
