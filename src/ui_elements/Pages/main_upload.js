@@ -85,8 +85,21 @@ var segmentation_flag = false;
 
 
 function save_data(frame_num){
-  frame_data[frame_num] = fabricCanvas.toJSON()
-  console.log("SAVED")
+	if(fabricCanvas.getObjects().length != 0){
+		frame_data[frame_num] = fabricCanvas.toJSON()
+	}
+	console.log(frame_data)
+	console.log("SAVED")
+}
+
+function save_localstorage(){
+	console.log(frame_data)
+	try{
+		localStorage.setItem('frame_data', JSON.stringify(frame_data))
+		localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
+	} catch (error){
+		console.log("Local storage failed!")
+	}
 }
 
 
@@ -114,7 +127,11 @@ export default function MainUpload() {
 		var total_frames = duration * frame_rate
 		if(typeof(val) === "number"){
 			setCurrentFrame(val)
-			player.seekTo(val/(total_frames))
+			var new_skip = val/(total_frames)
+			if(new_skip > duration){
+				new_skip = duration
+			}
+			player.seekTo(new_skip)
 		}else{
 			console.log(val['played'])
 			save_data(currentFrame)
@@ -132,6 +149,7 @@ export default function MainUpload() {
 		var index_num = 0;
 		var current_canvas = fabricCanvas.getObjects();
 
+		//Assumption - This code assumes that only ONE object is added per annotation. If multiple objects are added per annotation this code breaks and must be changed
 		for(var i = 0; i < annotation_data[currentFrame].length; i++){
 			if(annotation_data[currentFrame][i]['id'] == index){
 				index_num = i
@@ -221,15 +239,35 @@ export default function MainUpload() {
 
 	const handleVideoUpload = (event) => {
 		console.log(typeof(event))
+		//Youtube upload
 		if(typeof(event) === "string"){
 			setVideoFileURL(event)
 			ANNOTATION_VIDEO_NAME = event
+			if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
+				if(window.confirm("Past annotation for same video detected. Do you want to use the last saved annotations?")){
+					annotation_data = JSON.parse(localStorage.getItem('annotation_data'))
+					frame_data = JSON.parse(localStorage.getItem('frame_data'))
+				}
+			}else{
+				localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
+			}
 			upload = true;
 			return;
 		}
+		
+		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
+		//File upload
+		if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
+			if(window.confirm("Past annotation for same video detected. Do you want to use the last saved annotations?")){
+				annotation_data = JSON.parse(localStorage.getItem('annotation_data'))
+				frame_data = JSON.parse(localStorage.getItem('frame_data'))
+				console.log(frame_data)
+			}
+		}else{
+			localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
+		}
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
 		video_to_img(event.target.files[0], fabricCanvas)
-		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		upload = true;
 	};
 
@@ -250,8 +288,8 @@ export default function MainUpload() {
 		if(oldAnnotation == null){
 			return;
 		}
-		frame_data = oldAnnotation.get_frame_data();
-		annotation_data = oldAnnotation.get_annotation_data();
+		//frame_data = oldAnnotation.get_frame_data();
+		//annotation_data = oldAnnotation.get_annotation_data();
 		handle_visual_toggle()
 	}, oldAnnotation);
 
@@ -317,14 +355,17 @@ export default function MainUpload() {
 		if(upload === true && player != null){      
 			num_frames = Math.round(val * frame_rate);
 
-			frame_data = new Array(num_frames)
-			annotation_data = new Array(num_frames)
-
-			//TODO Update this later
-			for (var i = 0; i < num_frames; i++){
-				frame_data[i] = []
-				annotation_data[i] = []
+			if(annotation_data[0].length == 0){
+				console.log("Resetting frame_data and annotation_data")
+				frame_data = new Array(num_frames)
+				annotation_data = new Array(num_frames)
+				//TODO Update this later
+				for (var i = 0; i < num_frames; i++){
+					frame_data[i] = []
+					annotation_data[i] = []
+				}
 			}
+
 			//upload = false;
 			disable_buttons = false
 		}
@@ -346,7 +387,11 @@ export default function MainUpload() {
 		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
 
 		var frameVal = currentFrame + skip_value
-		handleSetCurrentFrame(frameVal)
+		if(frameVal >= total_frames){
+			handleSetCurrentFrame(total_frames-1)
+		}else{
+			handleSetCurrentFrame(frameVal)
+		}
 	}
 
 	const skip_frame_backward = e => {
@@ -410,10 +455,12 @@ export default function MainUpload() {
 			changeSave(true)
 			addToCanvas()
 		}else if (event.key === "q"){
+			save_localstorage()
 			skip_frame_backward()
 		}else if (event.key === "w"){
 			handlePlaying()
 		}else if (event.key === "e"){
+			save_localstorage()
 			skip_frame_forward()
 		}else if (event.key === "s"){
 			toast_text = "Annotation Saved"
@@ -488,7 +535,34 @@ export default function MainUpload() {
 	}
 
 	const setFrameRate = (framerate) => {
-		frame_rate = framerate
+		frame_rate = parseInt(framerate)
+		if (frame_rate > 120){
+			frame_rate = 120;
+		}else if(frame_rate <= 0){
+			frame_rate = 1;
+		}else if(Number.isFinite(frame_rate) == false){
+			frame_rate = 1;
+			return;
+		}
+		console.log(Number.isFinite(frame_rate))
+		console.log(frame_rate)
+
+		num_frames = Math.round(duration * frame_rate);
+		if(annotation_data[0].length == 0){
+			console.log("Resetting frame_data and annotation_data")
+			frame_data = new Array(num_frames)
+			annotation_data = new Array(num_frames)
+			//TODO Update this later
+			for (var i = 0; i < num_frames; i++){
+				frame_data[i] = []
+				annotation_data[i] = []
+			}
+			//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
+			setVisualToggle(Math.floor(Math.random() * 999999999999))
+
+		}else{
+			alert("There is data currently annotated! To change frame rate refresh the page and re-upload!")
+		}
 	}
 
 	const setDateTime = (time) => {
@@ -508,7 +582,7 @@ export default function MainUpload() {
 				handleOldAnnotation={handleOldAnnotation}
 				handleVideoUpload={handleVideoUpload}
 				currentFrame={currentFrame}
-				display_frame_num={"Frame #" + parseInt(currentFrame)+' / '+parseInt(duration * frame_rate)}
+				display_frame_num={"Frame #" + parseInt(currentFrame+1)+' / '+parseInt(duration * frame_rate)}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
 				handlePlaying={handlePlaying}

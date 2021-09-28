@@ -80,6 +80,13 @@ export default function CustomNavBar(props){
 		Edit(props.fabricCanvas)
 	}
 
+	/* TODO Add local storgae option
+	if (localStorage.getItem('frame_data') != null){
+		alert("There is some data stored")
+		props.annotation_data = localStorage.getItem('annotation_data');
+		props.frame_data = localStorage.getItem('frame_data');
+	}*/
+
 	return (
 		<div>
 		<Modal show={show} onHide={handleClose} size='lg'>
@@ -146,7 +153,7 @@ export default function CustomNavBar(props){
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
-					Frame Rate: <input type="number" value={props.frame_rate} onChange={(event) => {props.setFrameRate(parseInt(event.target.value))}}></input>
+					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
