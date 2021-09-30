@@ -138,6 +138,11 @@ export default function MainUpload() {
 			var frame_calc = (val['played']/total_frames)
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
+				if(frame_calc >= total_frames){
+					setCurrentFrame(total_frames-1)
+					temp_flag = false;
+					return;
+				}
 				setCurrentFrame(frame_calc)
 				temp_flag = false;
 			}
