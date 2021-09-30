@@ -288,8 +288,8 @@ export default function MainUpload() {
 		if(oldAnnotation == null){
 			return;
 		}
-		//frame_data = oldAnnotation.get_frame_data();
-		//annotation_data = oldAnnotation.get_annotation_data();
+		frame_data = oldAnnotation.get_frame_data();
+		annotation_data = oldAnnotation.get_annotation_data();
 		handle_visual_toggle()
 	}, oldAnnotation);
 
@@ -567,6 +567,7 @@ export default function MainUpload() {
 
 	const setDateTime = (time) => {
 		time_unix = time;
+		VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
 		console.log(time)
 	}
 
