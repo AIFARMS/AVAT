@@ -2,7 +2,7 @@
   "name": "annotation_tool",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://aifarms.github.io/AVAT/",
+  "homepage": "https://eddie0131.github.io/AVAT/",
   "dependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.2",
     "@tensorflow/tfjs": "^3.8.0",
