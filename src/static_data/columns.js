@@ -32,7 +32,7 @@ const columns = (remove_table_index) => [{
   text: "Behavior",
   editor: {
       type: Type.SELECT,
-      options: behavior,
+      options: behaviors,
   }
 },{
   dataField: "confidence",

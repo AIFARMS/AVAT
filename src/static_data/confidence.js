@@ -15,3 +15,4 @@ const confidence = [{
     label: 'Suspected'
   },
 ]
+export {confidence};
