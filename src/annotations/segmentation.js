@@ -212,6 +212,8 @@ class Segmentation {
                 })
 
                 canvas.add(grouppo)
+                //canvas.setActiveObject(grouppo)
+                //Edit(canvas)
                 console.log(grouppo._objects[0])
                 console.log(grouppo)
 

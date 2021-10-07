@@ -75,11 +75,14 @@ function Edit(canvas) {
         poly = group._objects[0]
         var text = group._objects[1]
         group.destroy()
-        canvas.remove(text)
+        //canvas.remove(text)
+        //canvas.remove(poly)
+        //canvas.remove(group)
+        canvas.add(poly)
     }else{
         poly = group
     }
-    canvas.add(poly)
+    
 
     canvas.setActiveObject(poly);
     poly.edit = !poly.edit;
@@ -103,16 +106,14 @@ function Edit(canvas) {
         
         var display_text = new fabric.Text(poly.local_id.toString(), {
             fontSize: 20,
-            centerX: "center",
-            centerY: "center",
-            top: poly.points[0].top,
-            left: poly.points[0].left, 
+            top: poly.points[0].y,
+            left: poly.points[0].x, 
             uniScaleTransform: false,
             fill: "white",
         })
 
         var grouppo = new fabric.Group([poly, display_text])
-        //canvas.remove(poly)
+        canvas.remove(poly)
         canvas.add(grouppo)
         console.log(grouppo)
 
