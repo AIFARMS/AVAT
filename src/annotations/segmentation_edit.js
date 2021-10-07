@@ -112,10 +112,11 @@ function Edit(canvas) {
             fill: "white",
         })
 
-        var grouppo = new fabric.Group([poly, display_text])
-        canvas.remove(poly)
-        canvas.add(grouppo)
-        console.log(grouppo)
+        var grouppo = new fabric.Group([poly, display_text]);
+        grouppo['local_id'] = poly.local_id;
+        canvas.remove(poly);
+        canvas.add(grouppo);
+        console.log(grouppo);
 
     }
     poly.hasBorders = !poly.edit;
