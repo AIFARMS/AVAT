@@ -178,22 +178,43 @@ class Segmentation {
                     objectCaching: false,
                     transparentCorners: false,
                     cornerColor: 'blue',
+                    originX: 'center',
+                    originY: 'center'
                 });
 
-                po.toObject = (function(toObject) {
+                /*po.toObject = (function(toObject) {
                     return function(propertiesToInclude) {
                         return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
                             local_id: id
                         });
                     };
-                })(po.toObject)
+                })(po.toObject)*/
+                po['local_id'] = id
                 console.log(id)
                 console.log(po)
 
                 canvas.remove(activeShape);
-                canvas.add(po);
+                //canvas.add(po);
 
                 segmentation_flag();
+
+                var display_text = new fabric.Text(id.toString(), {
+                    fontSize: 20,
+                    centerX: "center",
+                    top: pointArray[0].top,
+                    left: pointArray[0].left, 
+                    uniScaleTransform: false,
+                    fill: "white",
+                })
+
+                var grouppo = new fabric.Group([po, display_text], {
+
+                })
+
+                canvas.add(grouppo)
+                console.log(grouppo._objects[0])
+                console.log(grouppo)
+
 
                 //Edit(canvas)
 
