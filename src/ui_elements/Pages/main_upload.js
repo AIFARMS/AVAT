@@ -87,6 +87,8 @@ var segmentation_flag = false;
 function save_data(frame_num){
 	if(fabricCanvas.getObjects().length != 0){
 		frame_data[frame_num] = fabricCanvas.toJSON()
+	}else{
+		frame_data[frame_num] = []
 	}
 	console.log(frame_data)
 	console.log("SAVED")
@@ -152,19 +154,27 @@ export default function MainUpload() {
 	const removeRow = (index) => {
 		console.log(index)
 		var index_num = 0;
-		var current_canvas = fabricCanvas.getObjects();
 
-		//Assumption - This code assumes that only ONE object is added per annotation. If multiple objects are added per annotation this code breaks and must be changed
 		for(var i = 0; i < annotation_data[currentFrame].length; i++){
 			if(annotation_data[currentFrame][i]['id'] == index){
 				index_num = i
-				fabricCanvas.remove(current_canvas[i]);
-				fabricCanvas.fire('saveData');
 				break;
-
 			}
 		}
 
+		if(index.substring(index.length-1, index.length) !== "f"){
+			var current_objects = fabricCanvas.getObjects()
+			console.log(current_objects)
+			for(var i = 0; i < current_objects.length; i++){
+				if(current_objects[i]['_objects'][1]['text'] === index){
+					fabricCanvas.remove(current_objects[i]);
+					fabricCanvas.fire('saveData');
+					console.log(fabricCanvas.getObjects())
+					break;
+				}
+			}
+		}
+		console.log(index_num)
 		annotation_data[currentFrame].splice(index_num, 1)
 		save_data(currentFrame)
 		

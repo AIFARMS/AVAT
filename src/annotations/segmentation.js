@@ -210,6 +210,7 @@ class Segmentation {
                 var grouppo = new fabric.Group([po, display_text], {
 
                 })
+                grouppo['local_id'] = id
 
                 canvas.add(grouppo)
                 //canvas.setActiveObject(grouppo)
