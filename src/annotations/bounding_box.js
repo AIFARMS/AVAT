@@ -46,13 +46,14 @@ class BoundingBox {
         group.hasBorders = true
 
         var temp = this.id 
-        group.toObject = (function(toObject) {
+        /*group.toObject = (function(toObject) {
             return function(propertiesToInclude) {
                 return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
                     local_id: temp
                 });
             };
-        })(group.toObject);
+        })(group.toObject);*/
+        group.local_id = temp
         console.log(group.toJSON())
 
         //canvas.add(group)

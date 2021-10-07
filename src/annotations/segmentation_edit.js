@@ -4,14 +4,15 @@ const $ = require("jquery")
 // define a function that can locate the controls.
 // this function will be used both for drawing and for interaction.
 function polygonPositionHandler(dim, finalMatrix, fabricObject) {
-  var x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x),
+    var x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x),
         y = (fabricObject.points[this.pointIndex].y - fabricObject.pathOffset.y);
+
     return fabric.util.transformPoint(
         { x: x, y: y },
-  fabric.util.multiplyTransformMatrices(
-    fabricObject.canvas.viewportTransform,
-    fabricObject.calcTransformMatrix()
-  )
+        fabric.util.multiplyTransformMatrices(
+            fabricObject.canvas.viewportTransform,
+            fabricObject.calcTransformMatrix()
+        )
     );
 }
 
@@ -59,11 +60,30 @@ function Edit(canvas) {
     // may want copy and paste on different moment.
     // and you do not want the changes happened
     // later to reflect on the copy.
-    var poly = canvas.getActiveObject();
-    if(poly == undefined || poly == null){
+    var group = canvas.getActiveObject();
+    if(group == undefined || group == null){
         alert("Please select a segmentation")
         return
     }
+    
+    if(group._objects == undefined && group.points == undefined){
+        alert("Please select a segmentation")
+        return
+    }
+    var poly;
+    if(group.points == undefined){
+        poly = group._objects[0]
+        var text = group._objects[1]
+        group.destroy()
+        //canvas.remove(text)
+        //canvas.remove(poly)
+        //canvas.remove(group)
+        canvas.add(poly)
+    }else{
+        poly = group
+    }
+    
+
     canvas.setActiveObject(poly);
     poly.edit = !poly.edit;
     if (poly.edit) {
@@ -83,6 +103,21 @@ function Edit(canvas) {
         poly.cornerColor = 'blue';
         poly.cornerStyle = 'rect';
         poly.controls = fabric.Object.prototype.controls;
+        
+        var display_text = new fabric.Text(poly.local_id.toString(), {
+            fontSize: 20,
+            top: poly.points[0].y,
+            left: poly.points[0].x, 
+            uniScaleTransform: false,
+            fill: "white",
+        })
+
+        var grouppo = new fabric.Group([poly, display_text]);
+        grouppo['local_id'] = poly.local_id;
+        canvas.remove(poly);
+        canvas.add(grouppo);
+        console.log(grouppo);
+
     }
     poly.hasBorders = !poly.edit;
     canvas.requestRenderAll();
