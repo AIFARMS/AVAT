@@ -13,6 +13,8 @@ class Segmentation {
         var activeLine;
         var activeShape = false;
 
+        var generate_flag = false;
+
         canvas.forEachObject(function(object){ 
             object.selectable = false; 
         });
@@ -25,7 +27,10 @@ class Segmentation {
         
                 canvas.on('mouse:down', function (options) {
                     if(options.target && options.target.id === pointArray[0].id){
-                        prototypefabric.polygon.generatePolygon(pointArray);
+                        if(generate_flag == false){
+                            prototypefabric.polygon.generatePolygon(pointArray);
+                            generate_flag = true;
+                        }
                     }
                     if(polygonMode){
                         prototypefabric.polygon.addPoint(options);
@@ -49,7 +54,7 @@ class Segmentation {
                         });
                         canvas.renderAll();
                     }
-                    canvas.renderAll();
+                    //canvas.renderAll();
                 });
         }();
         
@@ -62,8 +67,8 @@ class Segmentation {
                 lineArray = new Array();
             },
             addPoint : function(options) {
-                var random = Math.floor(Math.random() * (max - min + 1)) + min;
-                var id = new Date().getTime() + random;
+                //var random = Math.floor(Math.random() * (max - min + 1)) + min;
+                //var id = new Date().getTime() + random;
                 var circle = new fabric.Circle({
                     radius: 5,
                     fill: '#ffffff',
@@ -76,9 +81,9 @@ class Segmentation {
                     hasControls: false,
                     originX:'center',
                     originY:'center',
-                    id:id,
-                        objectCaching:false
+                    objectCaching:false
                 });
+                circle.selectable = false;
                 if(pointArray.length === 0){
                     circle.set({
                         fill:'red',
@@ -89,6 +94,7 @@ class Segmentation {
                         zindex: 0
                     })
                 }
+                
 
                 var points = [(options.e.layerX/canvas.getZoom()),(options.e.layerY/canvas.getZoom()),(options.e.layerX/canvas.getZoom()),(options.e.layerY/canvas.getZoom())];
                 var line = new fabric.Line(points, {
@@ -190,6 +196,8 @@ class Segmentation {
                     };
                 })(po.toObject)*/
                 po['local_id'] = id
+                po.lockMovementY = true;
+                po.lockMovementX = true;
                 console.log(id)
                 console.log(po)
 
@@ -219,27 +227,6 @@ class Segmentation {
                 //Edit(canvas)
                 console.log(grouppo._objects[0])
                 console.log(grouppo)
-
-
-                //Edit(canvas)
-
-                /*var group = new fabric.Group()
-                for (var i = 0; i < pointArray.length; i++){
-                    group.addWithUpdate(pointArray[i])
-                    group.addWithUpdate(lineArray[i])
-                }
-                
-                /*group.addWithUpdate(new fabric.Text(id.toString(), {
-                    fontSize: 20,
-                    centerX: "center",
-                    top: pointArray[0].top,
-                    left: pointArray[0].left, 
-                    uniScaleTransform: false,
-                  }));
-                */
-               //To add custom id
-                /*;
-                canvas.add(group)*/
                   
                 canvas.remove(activeLine);
                 canvas.remove(activeShape)

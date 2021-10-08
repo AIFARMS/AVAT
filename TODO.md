@@ -33,8 +33,8 @@
 * [ ] CSV export accuracy
 
 ## AI Assisted Annotations
-* [ ] Tensorflow integration
-* [ ] Bounding box generation using COCO
+* [x] Tensorflow integration
+* [x] Bounding box generation using COCO
 * [ ] Segmentation generation
 * [ ] Ability for custom models to be added
 

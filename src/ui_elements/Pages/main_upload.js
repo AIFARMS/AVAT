@@ -215,6 +215,10 @@ export default function MainUpload() {
 		if(annotation_data[currentFrame] == null){
 			annotation_data[currentFrame] = []
 		}
+		if (segmentation_flag == true){
+			alert("Please finish your current segmentation!")
+			return
+		}
 		
 		var annotation_type_txt = "error"
 
@@ -230,10 +234,7 @@ export default function MainUpload() {
 		}else if (annotationType === ANNOTATION_SEG){
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
-			if (segmentation_flag == true){
-				alert("Please finish your current segmentation!")
-				return
-			}
+
 			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s', toggle_segmentation)
 			toggle_segmentation()
 
@@ -467,7 +468,9 @@ export default function MainUpload() {
 				annotext = "Segmentation"
 			}
 			toast_text = "Added Annotation - " + annotext
-			changeSave(true)
+			if(annotationType !== ANNOTATION_SEG){
+				changeSave(true)
+			}
 			addToCanvas()
 		}else if (event.key === "q"){
 			save_localstorage()
