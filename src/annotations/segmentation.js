@@ -210,6 +210,8 @@ class Segmentation {
                 var grouppo = new fabric.Group([po, display_text], {
 
                 })
+                grouppo.lockMovementY = true;
+                grouppo.lockMovementX = true;
                 grouppo['local_id'] = id
 
                 canvas.add(grouppo)
