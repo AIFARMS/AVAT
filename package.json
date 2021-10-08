@@ -5,6 +5,7 @@
   "homepage": "https://aifarms.github.io/AVAT/",
   "dependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.2",
+    "@tensorflow-models/deeplab": "^0.2.1",
     "@tensorflow/tfjs": "^3.8.0",
     "bootstrap": "^4.6.0",
     "fabric": "^4.1.0",
@@ -19,7 +20,8 @@
     "react-dom": "^16.13.1",
     "react-player": "^2.9.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.4"
+    "react-scripts": "^3.4.4",
+    "tensorflow-models": "^0.0.1"
   },
   "scripts": {
     "predeploy": "npm run build",
