@@ -114,6 +114,8 @@ function Edit(canvas) {
 
         var grouppo = new fabric.Group([poly, display_text]);
         grouppo['local_id'] = poly.local_id;
+        grouppo.lockMovementY = true;
+        grouppo.lockMovementX = true;
         canvas.remove(poly);
         canvas.add(grouppo);
         console.log(grouppo);
