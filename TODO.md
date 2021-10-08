@@ -31,6 +31,7 @@
 * [ ] ~~Separate file for behavior + posture + column list~~
 * [ ] Store time (seconds) along with frame data
 * [ ] CSV export accuracy
+* [ ] Standardize the output for bounding boxes - ignore screen resolution
 
 ## AI Assisted Annotations
 * [x] Tensorflow integration

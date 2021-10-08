@@ -71,5 +71,5 @@ Similar to how the react components are structured, each of the types of annotat
 
 ## Authors
 
-* **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - Web-tool Development
+* **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - AVAT
 * **JiangongLi** [jli153](jli153@illinois.edu) - Matlab Tool Development
