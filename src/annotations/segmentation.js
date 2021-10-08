@@ -67,10 +67,11 @@ class Segmentation {
                 lineArray = new Array();
             },
             addPoint : function(options) {
+                var CIRCLE_RADIUS = 2;
                 //var random = Math.floor(Math.random() * (max - min + 1)) + min;
                 //var id = new Date().getTime() + random;
                 var circle = new fabric.Circle({
-                    radius: 5,
+                    radius: 2,
                     fill: '#ffffff',
                     stroke: '#333333',
                     strokeWidth: 0.5,
