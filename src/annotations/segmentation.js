@@ -236,7 +236,7 @@ class Segmentation {
                 activeLine = null;
                 activeShape = null;
                 polygonMode = false;
-                canvas.selection = true;
+                //canvas.selection = true;
 
                 canvas.forEachObject(function(object){ 
                     object.selectable = true; 
