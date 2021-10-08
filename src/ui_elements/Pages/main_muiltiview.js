@@ -17,7 +17,7 @@ import { NavDropdown } from "react-bootstrap";
 //Custom implemented classes
 import { BoundingBox } from '../../annotations/bounding_box'
 //import { KeyPoint } from '../../annotations/key_point'
-import { Segmentation } from '../../annotations/segmentation'
+//import { Segmentation } from '../../annotations/segmentation'
 import Instructions from "../Components/instructions";
 
 import BootstrapTable from 'react-bootstrap-table-next';
@@ -228,7 +228,7 @@ function MainMultiview() {
       alert("Segmentation annotation is currently under development")
       //TODO Fix segmentation issues
       annotation_data[currentFrame].push({id: boxCount+'s', global_id:null, status: "None", current: "Start", behavior: "None"})
-      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
+//      var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s')
     }else if(annotationType === ANNOTATION_FRAME){
       //TODO Add annotation frame datapoint
       annotation_data[currentFrame].push({id: boxCount+'f', global_id: null,status: "", current: "Start", behavior: "None"})
