@@ -22,6 +22,9 @@ const posture = [{
 },{
   value: 'Standing (d)',
   label: 'Standing (d)'
+},{
+  value: 'Transition',
+  label: 'Transition'
 },]
 
   export {posture}
