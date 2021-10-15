@@ -1,15 +1,9 @@
 const posture = [{
-  value: 'Lying sternal (s)',
-  label: 'Lying sternal (s)'
+  value: 'Lying sternal',
+  label: 'Lying sternal'
 },{
-  value: 'Lying sternal (rm)',
-  label: 'Lying sternal (rm)'
-},{
-  value: 'Lying lateral (s)',
-  label: 'Lying lateral (s)'
-},{
-  value: 'Lying Lateral (rm)',
-  label: 'Lying Lateral (rm)'
+  value: 'Lying lateral',
+  label: 'Lying lateral'
 },{
   value: 'Kneeling',
   label: 'Kneeling'
@@ -17,11 +11,11 @@ const posture = [{
   value: 'Sitting',
   label: 'Sitting'
 },{
-  value: 'Standing (p)',
-  label: 'Standing (p)'
+  value: 'Standing',
+  label: 'Standing'
 },{
-  value: 'Standing (d)',
-  label: 'Standing (d)'
+  value: 'Adjusting',
+  label: 'Adjusting'
 },{
   value: 'Transition',
   label: 'Transition'
