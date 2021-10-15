@@ -16,8 +16,10 @@ import "react-datepicker/dist/react-datepicker.css";
 
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
-import {run_model, load} from '../../tensorflow/ObjectDetection';
 import { Edit } from '../../annotations/segmentation_edit';
+
+import {run_model, load} from '../../tensorflow/ObjectDetection';
+import { run_model_segment } from '../../tensorflow/SemanticSegmentation';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
@@ -189,7 +191,7 @@ export default function CustomNavBar(props){
 				<div>
 					{
 						model.length > 0 &&
-						<Button id="run" variant="outline-info" onClick={(event) => {run_model(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
+						<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>{' '}
