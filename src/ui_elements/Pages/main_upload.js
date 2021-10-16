@@ -65,7 +65,8 @@ var current_screen_height = window.screen.height;
 // globally accessable fabricCanvas instance
 var fabricCanvas = new fabric.Canvas('c', {
 	uniScaleTransform: true,
-	uniformScaling: false
+	uniformScaling: false,
+	includeDefaultValues: false
 });
 
 fabricCanvas.on('mouse:over', function(e) {

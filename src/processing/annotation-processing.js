@@ -13,25 +13,6 @@ export default class ExtractingAnnotation{
     }
 }
 
-export class ExportingAnnotation{
-    constructor(annotation_data){
-        this.frame_data = annotation_data
-    }
-
-    get_frame_json(){
-        for(var i = 0; i < this.frame_data.length; i++){
-            var frame_objects = this.frame_data[i]['objects']
-            for(var j = 0; j < this.frame_objects.length; j++){
-                var x = frame_objects[j]['left']
-                var y = frame_objects[j]['']
-            }
-        }
-    }
-
-    get_frame_coco(){
-
-    }
-}
 //This is the parser for the Multi-Camera pig tracking output JSON code. 
 /*
 class MCPT_Processing {

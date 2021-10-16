@@ -21,6 +21,8 @@ import { Edit } from '../../annotations/segmentation_edit';
 import {run_model, load} from '../../tensorflow/ObjectDetection';
 import { run_model_segment } from '../../tensorflow/SemanticSegmentation';
 
+import ExportingAnnotation from '../../processing/exporting_annotation';
+
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
@@ -40,7 +42,8 @@ export default function CustomNavBar(props){
 	const handleUploadShow = () => setUploadShow(true)
 
 	const handleDownloadJSON = () => {
-		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.frame_data, props.annotation_data, props.VIDEO_METADATA)
+		var converted_annot = new ExportingAnnotation(props.frame_data, props.fabricCanvas).get_frame_json()
+		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
 
 	const handleDownloadCSV = () => {

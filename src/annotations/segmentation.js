@@ -18,6 +18,7 @@ class Segmentation {
         canvas.forEachObject(function(object){ 
             object.selectable = false; 
         });
+        canvas.selection = false;
 
         var prototypefabric = new function () {
                 //canvas = window._canvas = new fabric.Canvas('c');
@@ -26,6 +27,8 @@ class Segmentation {
                 canvas.selection = false;
         
                 canvas.on('mouse:down', function (options) {
+                    canvas.selection = false;
+
                     if(options.target && options.target.id === pointArray[0].id){
                         if(generate_flag == false){
                             prototypefabric.polygon.generatePolygon(pointArray);
