@@ -63,7 +63,18 @@ var current_screen_height = window.screen.height;
 }
 
 // globally accessable fabricCanvas instance
-var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
+var fabricCanvas = new fabric.Canvas('c', {
+	uniScaleTransform: true,
+	uniformScaling: false
+});
+
+fabricCanvas.on('mouse:over', function(e) {
+	if(e.target == null){
+		return;
+	}
+    e.target.set('fill', 'red');
+    fabricCanvas.renderAll();
+  });
 
 var video_width = 0;
 var video_height = 0;
