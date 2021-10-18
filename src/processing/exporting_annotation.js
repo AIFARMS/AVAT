@@ -6,7 +6,7 @@ export default class ExportingAnnotation{
     }
 
     get_frame_json(){
-        var standard_annot = []
+        var standard_annot = new Array(this.frame_data.length)
         console.log(this.metadata)
         for(var i = 0; i < this.frame_data.length; i++){
             var curr = []
@@ -18,13 +18,15 @@ export default class ExportingAnnotation{
                 continue;
             }
             for(var j = 0; j < frame_objects.length; j++){
+                console.log(frame_objects[j])
                 var x = (frame_objects[j]['left'] / this.canvas.width) * this.metadata['horizontal_res']
                 var y = (frame_objects[j]['top'] / this.canvas.height) * this.metadata['vertical_res']
                 var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.canvas.width) * this.metadata['horizontal_res']
                 var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.canvas.height )* this.metadata['vertical_res']
-                curr.push({"x": x, "y": y, "width": width, "height": height})
+                var local_id = frame_objects[j]['objects'][1]['text']
+                curr.push({"x": x, "y": y, "width": width, "height": height, "local_id": local_id})
             }
-            standard_annot.push(curr)
+            standard_annot[i] = curr
         }
         return standard_annot
     }
