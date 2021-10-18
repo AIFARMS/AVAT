@@ -63,7 +63,19 @@ var current_screen_height = window.screen.height;
 }
 
 // globally accessable fabricCanvas instance
-var fabricCanvas = new fabric.Canvas('c', {uniScaleTransform: true});
+var fabricCanvas = new fabric.Canvas('c', {
+	uniScaleTransform: true,
+	uniformScaling: false,
+	includeDefaultValues: false
+});
+
+fabricCanvas.on('mouse:over', function(e) {
+	if(e.target == null){
+		return;
+	}
+    e.target.set('fill', 'red');
+    fabricCanvas.renderAll();
+  });
 
 var video_width = 0;
 var video_height = 0;
@@ -97,8 +109,8 @@ function save_data(frame_num){
 function save_localstorage(){
 	console.log(frame_data)
 	try{
-		localStorage.setItem('frame_data', JSON.stringify(frame_data))
-		localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
+		//localStorage.setItem('frame_data', JSON.stringify(frame_data))
+		//localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
 	} catch (error){
 		console.log("Local storage failed!")
 	}
@@ -259,21 +271,21 @@ export default function MainUpload() {
 		if(typeof(event) === "string"){
 			setVideoFileURL(event)
 			ANNOTATION_VIDEO_NAME = event
-			if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
+			/*if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
 				if(window.confirm("Past annotation for same video detected. Do you want to use the last saved annotations?")){
 					annotation_data = JSON.parse(localStorage.getItem('annotation_data'))
 					frame_data = JSON.parse(localStorage.getItem('frame_data'))
 				}
 			}else{
 				localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
-			}
+			}*/
 			upload = true;
 			return;
 		}
 		
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		//File upload
-		if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
+		/*if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
 			if(window.confirm("Past annotation for same video detected. Do you want to use the last saved annotations?")){
 				annotation_data = JSON.parse(localStorage.getItem('annotation_data'))
 				frame_data = JSON.parse(localStorage.getItem('frame_data'))
@@ -281,7 +293,7 @@ export default function MainUpload() {
 			}
 		}else{
 			localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
-		}
+		}*/
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
 		video_to_img(event.target.files[0], fabricCanvas)
 		upload = true;

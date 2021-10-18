@@ -14,7 +14,6 @@ class BoundingBox {
     rectangle(){
         return new fabric.Rect({
             hasRotatingPoint: false,
-            uniScaleTransform: true,
             height: this.height,
             width: this.width,
             fill: this.color,
@@ -34,41 +33,28 @@ class BoundingBox {
           });
     }
 
-    behavior(){
-
-    }
-
     generate_no_behavior(canvas){
-        var group = new fabric.Group();
-        group.addWithUpdate(this.rectangle())
-        group.addWithUpdate(this.id_text())
-        group.borderColor = '#000000'
-        group.hasBorders = true
-
-        var temp = this.id 
-        /*group.toObject = (function(toObject) {
-            return function(propertiesToInclude) {
-                return fabric.util.object.extend(toObject.call(this, propertiesToInclude), {
-                    local_id: temp
-                });
-            };
-        })(group.toObject);*/
-        group.local_id = temp
-        console.log(group.toJSON())
-
-        //canvas.add(group)
+        var group = new fabric.Group([this.rectangle(), this.id_text()],{
+            borderColor: '#000000',
+            hasBorders: true,
+            uniScaleTransform: true
+        });
 
         function onChange(obj) {
-            var circle = obj.target.item(1),
+            var text_box = obj.target.item(1),
                 group = obj.target,
                 scaleX = group.width / (group.width * group.scaleX),
                 scaleY = group.height / (group.height * group.scaleY);
-            circle.set('scaleX', scaleX);
-            circle.set('scaleY', scaleY);
+            text_box.set('scaleX', scaleX);
+            text_box.set('scaleY', scaleY);
         }
         canvas.on({
             'object:scaling': onChange
         })
+
+        var temp = this.id 
+        group.local_id = temp
+        console.log(group.toJSON())
         return group
     }
 
@@ -131,14 +117,6 @@ class BoundingBox {
         });
     }
 
-    generate_with_behavior(){
-
-    }
 }
 
-
-function genetate_bounding_box(){
-
-}
-
-export {BoundingBox, genetate_bounding_box}
+export {BoundingBox}

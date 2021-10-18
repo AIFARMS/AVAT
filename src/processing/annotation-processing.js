@@ -13,7 +13,6 @@ export default class ExtractingAnnotation{
     }
 }
 
-
 //This is the parser for the Multi-Camera pig tracking output JSON code. 
 /*
 class MCPT_Processing {
