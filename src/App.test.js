@@ -1,4 +1,4 @@
-import React from 'react';
+/*import React from 'react';
 import { render } from '@testing-library/react';
 
 import SelectionScreen from '../src/ui_elements/Pages/selection_screen';
@@ -45,9 +45,9 @@ test('CustomNavBar - Youtube', () => {
 }); */
 
 //========= CustomNavBar =========//
-
+/*
 test('AnnotationTable - EditSeg', () => {
   const AnnotationTable_test = render(<AnnotationTable annotation_data={[]} columns={columns}/>);
   expect(AnnotationTable_test.getByRole('option', {name: "EditSeg"}));
 });
-
+*/
