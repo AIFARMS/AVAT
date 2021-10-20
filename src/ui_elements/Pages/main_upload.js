@@ -69,21 +69,25 @@ var fabricCanvas = new fabric.Canvas('c', {
 	includeDefaultValues: false
 });
 
+var temp_color;
+
 fabricCanvas.on('mouse:over', function(e) {
-	if(e.target == null){
+	if(e.target == null | segmentation_flag == true){
 		return;
 	}
 	console.log(e.target['_objects'][0])
-    e.target['_objects'][0].set('fill', 'white');
-	console.log(e.target['_objects'][0])
+    temp_color = e.target['_objects'][0].get('fill')
+	e.target['_objects'][0].set('fill', "#39FF14");
     fabricCanvas.renderAll();
 });
 
-fabricCanvas.on('mouse:over', function(e) {
-	if(e.target == null){
+fabricCanvas.on('mouse:out', function(e) {
+	if(e.target == null | segmentation_flag == true){
 		return;
 	}
-    e.target.set('borderColor', 'white');
+	e.target['_objects'][0].set('fill', temp_color);
+	console.log(e.target['_objects'][0])
+
     fabricCanvas.renderAll();
 });
 
