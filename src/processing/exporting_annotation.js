@@ -26,10 +26,16 @@ export default class ExportingAnnotation{
                     var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.canvas.width) * this.metadata['horizontal_res']
                     var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.canvas.height )* this.metadata['vertical_res']
                     var local_id = frame_objects[j]['objects'][1]['text']
-                    curr.push({"x": x, "y": y, "width": width, "height": height, "local_id": local_id})
+                    curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id})
                 }else if (frame_objects[j]['objects'][0]['type'] === "polygon"){
-                    var points = frame_objects[j]['objects'][0]['points']
-                    curr.push({"points": points})
+                    var raw_points = frame_objects[j]['objects'][0]['points']
+                    var points = []
+                    for(var k = 0; k < raw_points.length; k++){
+                        var x = (raw_points[k]['x'] / this.canvas.width) * this.metadata['horizontal_res']
+                        var y = (raw_points[k]['y'] / this.canvas.height) * this.metadata['vertical_res']
+                        points.push({"x": x, "y": y})
+                    }
+                    curr.push({"type": "segmentation", "points": points})
                 }
 
             }
