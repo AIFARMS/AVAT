@@ -55,7 +55,7 @@ class BoundingBox {
         var temp = this.id 
         group.local_id = temp
         console.log(group.toJSON())
-        return group
+        return group.toJSON()
     }
 
     generate_mouse_no_behavior(canvas){

@@ -304,7 +304,7 @@ export default function MainUpload() {
 		var promise = downloadOldAnnotation(event)
 		promise.then(function (result) {
 			if(result != null){
-				setOldAnnotation(new ExtractingAnnotation(result));
+				setOldAnnotation(new ExtractingAnnotation(result, fabricCanvas));
 			}else{
 				alert("Error in processing Annotation")
 			}
