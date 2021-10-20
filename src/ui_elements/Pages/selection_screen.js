@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Button from 'react-bootstrap/Button'
 import Modal from 'react-bootstrap/Modal'
+import Carousel from 'react-bootstrap/Carousel'
 
 import MainUpload from './main_upload'
 import MainMultiview from './main_muiltiview'
@@ -54,27 +55,27 @@ function SelectionScreen(){
                             </p>
                         </Container>
                     </Jumbotron>
-                        <Row>
+                        <Carousel controls={false} fade style={{"width": "70%", "margin-left": "auto", "margin-right": "auto"}}>
                             {
                                 selection_items.map((item, key) => {
                                     return(
-                                        <Col md='6' class>
+                                        <Carousel.Item interval={item.slide_time}>
                                             <Card 
                                                 className="mb-5 box-shadow" 
                                                 top
                                                 width='100%'
                                             >
-                                                <Card.Img variant="top" src={process.env.PUBLIC_URL + item.src} />
-                                                <Card.Body>
+                                                <Card.Img width="60%" variant="top" src={process.env.PUBLIC_URL + item.src} />
+                                                <Card.Body style={{"text-align": "center"}}>
                                                     <Card.Title>{item.altText}</Card.Title>
                                                     <Card.Text>{item.description}</Card.Text>
                                                 </Card.Body>
                                             </Card>
-                                        </Col>
+                                        </Carousel.Item>
                                     )
                                 })
                             }
-                        </Row>
+                        </Carousel>
                 </main>
             </div>
         )

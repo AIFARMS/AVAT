@@ -73,7 +73,17 @@ fabricCanvas.on('mouse:over', function(e) {
 	if(e.target == null){
 		return;
 	}
-    e.target.set('fill', 'red');
+	console.log(e.target['_objects'][0])
+    e.target['_objects'][0].set('fill', 'white');
+	console.log(e.target['_objects'][0])
+    fabricCanvas.renderAll();
+});
+
+fabricCanvas.on('mouse:over', function(e) {
+	if(e.target == null){
+		return;
+	}
+    e.target.set('borderColor', 'white');
     fabricCanvas.renderAll();
 });
 
