@@ -224,6 +224,7 @@ class Segmentation {
                 })
                 grouppo.lockMovementY = true;
                 grouppo.lockMovementX = true;
+                grouppo.selectable = false;
                 grouppo['local_id'] = id
 
                 canvas.add(grouppo)

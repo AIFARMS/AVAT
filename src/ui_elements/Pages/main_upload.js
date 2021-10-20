@@ -75,6 +75,9 @@ fabricCanvas.on('mouse:over', function(e) {
 	if(e.target == null | segmentation_flag == true){
 		return;
 	}
+/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
+		return;
+	} */
 	console.log(e.target['_objects'][0])
     temp_color = e.target['_objects'][0].get('fill')
 	e.target['_objects'][0].set('fill', "#39FF14");
@@ -85,6 +88,9 @@ fabricCanvas.on('mouse:out', function(e) {
 	if(e.target == null | segmentation_flag == true){
 		return;
 	}
+/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
+		return;
+	} */
 	e.target['_objects'][0].set('fill', temp_color);
 	console.log(e.target['_objects'][0])
 
@@ -149,7 +155,12 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 
-	
+	if(segmentation_flag){
+		fabricCanvas.forEachObject(object => {
+			object.selectable = false;
+			object.evented = false;
+		});
+	}
 
 	const handleSetCurrentFrame = (val) => {
 		var total_frames = duration * frame_rate
