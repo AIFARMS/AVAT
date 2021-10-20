@@ -18,13 +18,20 @@ export default class ExportingAnnotation{
                 continue;
             }
             for(var j = 0; j < frame_objects.length; j++){
-                console.log(frame_objects[j])
-                var x = (frame_objects[j]['left'] / this.canvas.width) * this.metadata['horizontal_res']
-                var y = (frame_objects[j]['top'] / this.canvas.height) * this.metadata['vertical_res']
-                var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.canvas.width) * this.metadata['horizontal_res']
-                var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.canvas.height )* this.metadata['vertical_res']
-                var local_id = frame_objects[j]['objects'][1]['text']
-                curr.push({"x": x, "y": y, "width": width, "height": height, "local_id": local_id})
+
+                if(frame_objects[j]['objects'][0]['type'] === "rect"){
+                    console.log(frame_objects[j])
+                    var x = (frame_objects[j]['left'] / this.canvas.width) * this.metadata['horizontal_res']
+                    var y = (frame_objects[j]['top'] / this.canvas.height) * this.metadata['vertical_res']
+                    var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.canvas.width) * this.metadata['horizontal_res']
+                    var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.canvas.height )* this.metadata['vertical_res']
+                    var local_id = frame_objects[j]['objects'][1]['text']
+                    curr.push({"x": x, "y": y, "width": width, "height": height, "local_id": local_id})
+                }else if (frame_objects[j]['objects'][0]['type'] === "polygon"){
+                    var points = frame_objects[j]['objects'][0]['points']
+                    curr.push({"points": points})
+                }
+
             }
             standard_annot[i] = curr
         }
