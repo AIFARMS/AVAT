@@ -75,7 +75,7 @@ fabricCanvas.on('mouse:over', function(e) {
 	}
     e.target.set('fill', 'red');
     fabricCanvas.renderAll();
-  });
+});
 
 var video_width = 0;
 var video_height = 0;
@@ -237,7 +237,7 @@ export default function MainUpload() {
 		if (annotationType === ANNOTATION_BBOX){
 			annotation_type_txt = "b"
 			var new_bbox = new BoundingBox(fabricCanvas.height/2, fabricCanvas.width/2, 50, 50, color, boxCount+'b', "None").generate_no_behavior(fabricCanvas)
-			fabricCanvas.add(new_bbox)
+			//fabricCanvas.add(new_bbox)
 		}else if (annotationType === ANNOTATION_KEYPOINT){
 			//TODO fix KeyPoint
 			alert("KeyPoint annotation are currently unavailable")
