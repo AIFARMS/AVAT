@@ -35,7 +35,8 @@ export default class ExportingAnnotation{
                         var y = (raw_points[k]['y'] / this.canvas.height) * this.metadata['vertical_res']
                         points.push({"x": x, "y": y})
                     }
-                    curr.push({"type": "segmentation", "points": points})
+                    var local_id = frame_objects[j]['objects'][1]['text']
+                    curr.push({"type": "segmentation", "points": points, "local_id": local_id})
                 }
 
             }
