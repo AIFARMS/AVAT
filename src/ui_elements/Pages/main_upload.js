@@ -69,11 +69,31 @@ var fabricCanvas = new fabric.Canvas('c', {
 	includeDefaultValues: false
 });
 
+var temp_color;
+
 fabricCanvas.on('mouse:over', function(e) {
-	if(e.target == null){
+	if(e.target == null | segmentation_flag == true){
 		return;
 	}
-    e.target.set('fill', 'red');
+/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
+		return;
+	} */
+	console.log(e.target['_objects'][0])
+    temp_color = e.target['_objects'][0].get('fill')
+	e.target['_objects'][0].set('fill', "#39FF14");
+    fabricCanvas.renderAll();
+});
+
+fabricCanvas.on('mouse:out', function(e) {
+	if(e.target == null | segmentation_flag == true){
+		return;
+	}
+/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
+		return;
+	} */
+	e.target['_objects'][0].set('fill', temp_color);
+	console.log(e.target['_objects'][0])
+
     fabricCanvas.renderAll();
 });
 
@@ -135,7 +155,12 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 
-	
+	if(segmentation_flag){
+		fabricCanvas.forEachObject(object => {
+			object.selectable = false;
+			object.evented = false;
+		});
+	}
 
 	const handleSetCurrentFrame = (val) => {
 		var total_frames = duration * frame_rate

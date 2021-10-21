@@ -2,31 +2,37 @@
     {
         "src": "/assets/tensorflow.gif",
         "altText": "Model assisted annotation",
-        "description": "Supports integration with pre-trained Tensorflow models to accelerate annotation"
+        "description": "Supports integration with pre-trained Tensorflow models to accelerate annotation",
+        "slide_time": 10000
     },
     {
         "src": "/assets/add_remove.gif",
         "altText": "Quickly add and remove annotations",
-        "description": "Add and remove annotations with ease with individual edits or whole frame edits"
+        "description": "Add and remove annotations with ease with individual edits or whole frame edits",
+        "slide_time": 8000
     },
     {
         "src": "/assets/segmentation.png",
         "altText": "Segmentation",
-        "description": "Multiple dots across an object to help train AI models to identify objects in frame. This annotation can be coupled with behavior data."
+        "description": "Multiple dots across an object to help train AI models to identify objects in frame. This annotation can be coupled with behavior data.",
+        "slide_time": 4000
     },
     {
         "src": "/assets/bounding_box.png",
         "altText": "Bounding Box",
-        "description": "Rectangle that serves as a point of refrence for training object detection AI models. This annotation can be coupled with behavior data."
+        "description": "Rectangle that serves as a point of refrence for training object detection AI models. This annotation can be coupled with behavior data.",
+        "slide_time": 4000
     },
     {
         "src": "/assets/annotation_count.png",
         "altText": "Keep track of multiple annotations accross frames",
-        "description": "Full frame data summary helps keep track of multiple annotations by local and global id."
+        "description": "Full frame data summary helps keep track of multiple annotations by local and global id.",
+        "slide_time": 4000
     },
     {
         "src": "/assets/youtube.png",
         "altText": "Video Support",
-        "description": "Supports videos from Local Files, Youtube, Vimeo and Dailymotion"
+        "description": "Supports videos from Local Files, Youtube, Vimeo and Dailymotion",
+        "slide_time": 4000
     }
 ]

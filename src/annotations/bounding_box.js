@@ -55,7 +55,7 @@ class BoundingBox {
         var temp = this.id 
         group.local_id = temp
         canvas.add(group)
-        console.log(group.toJSON())
+        //console.log(group.toJSON())
         return group.toJSON()
     }
 
