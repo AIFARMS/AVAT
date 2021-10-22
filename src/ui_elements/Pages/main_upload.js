@@ -206,6 +206,11 @@ export default function MainUpload() {
 				setCurrentFrame(frame_calc)
 				temp_flag = false;
 			}
+			if(play_button_text === "Pause"){
+			}
+			sliderPercent = ((val['played']))
+			console.log(sliderPercent)
+			setVisualToggle(Math.floor(Math.random() * 999999999999))
 		}
 	}
 
@@ -398,15 +403,19 @@ export default function MainUpload() {
 	const handleSeekChange = e => {
 		sliderPercent = (parseFloat(e.target.value))
 		console.log(sliderPercent)
+		player.seekTo(sliderPercent)
 	}
 
 	const handleSeekMouseDown = e => {
 		setSeeking(true)
+		sliderPercent = (parseFloat(e.target.value))
+		//player.seekTo(parseFloat(e.target.value))
 	}
 
 	const handleSeekMouseUp = e => {
 		setSeeking(false)
-		player.seekTo(parseFloat(e.target.value))
+		sliderPercent = (parseFloat(e.target.value))
+		//player.seekTo(parseFloat(e.target.value))
 	}
 
 	const handleSetPlayer = val => {
@@ -729,8 +738,8 @@ export default function MainUpload() {
 							style={{width: scaling_factor_width}}
 							type='range' min={0} max={0.999999} step='any'
 							value={sliderPercent}
-							onMouseDown={handleSeekMouseDown}
 							onChange={handleSeekChange}
+							onMouseDown={handleSeekMouseDown}
 							onMouseUp={handleSeekMouseUp}
 						/>
 					</div>
