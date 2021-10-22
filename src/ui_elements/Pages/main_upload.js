@@ -69,12 +69,14 @@ var fabricCanvas = new fabric.Canvas('c', {
 	includeDefaultValues: false
 });
 
-var temp_color;
+
 
 fabricCanvas.on('mouse:over', function(e) {
 	if(e.target == null | segmentation_flag == true){
 		return;
-	}
+	}else if(e.target['_objects'] == undefined){
+		return;
+	}	
 /* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
 		return;
 	} */
@@ -87,6 +89,8 @@ fabricCanvas.on('mouse:over', function(e) {
 fabricCanvas.on('mouse:out', function(e) {
 	if(e.target == null | segmentation_flag == true){
 		return;
+	}else if(e.target['_objects'] == undefined){
+		return;
 	}
 /* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
 		return;
@@ -96,7 +100,20 @@ fabricCanvas.on('mouse:out', function(e) {
 
     fabricCanvas.renderAll();
 });
+/*
+fabricCanvas.on('mouse:wheel', function(opt) {
+	var delta = opt.e.deltaY;
+	var zoom = fabricCanvas.getZoom();
+	zoom *= 0.999 ** delta;
+	if (zoom > 20) zoom = 20;
+	if (zoom < 0.01) zoom = 0.01;
+	fabricCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+	opt.e.preventDefault();
+	opt.e.stopPropagation();
+  });
+*/	  
 
+var temp_color;
 var video_width = 0;
 var video_height = 0;
 var frame_data = [[]];
@@ -114,7 +131,7 @@ var play_button_text = "ERROR"
 var temp_flag = false
 var time_unix = 0;
 var segmentation_flag = false;
-
+var temp_selection_color;
 
 function save_data(frame_num){
 	if(fabricCanvas.getObjects().length != 0){
@@ -155,10 +172,14 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 
-	if(segmentation_flag){
+	if(true){
 		fabricCanvas.forEachObject(object => {
-			object.selectable = false;
+			object._objects[0].selectable = true;
 			object.evented = false;
+			object.lockMovementY = true;
+			object.lockMovementX = true;
+			console.log(object)
+			fabricCanvas.selection = false;
 		});
 	}
 

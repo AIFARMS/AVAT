@@ -24,7 +24,9 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.4",
     "tensorflow-models": "^0.0.1",
-    "testing-library": "^0.0.2"
+    "testing-library": "^0.0.2",
+    "video.js": "^7.15.4",
+    "videojs-rotatezoom": "^0.0.1"
   },
   "scripts": {
     "predeploy": "npm run build",

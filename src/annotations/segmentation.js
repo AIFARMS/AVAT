@@ -17,6 +17,7 @@ class Segmentation {
 
         canvas.forEachObject(function(object){ 
             object.selectable = false; 
+            object.evented = false;
         });
         canvas.selection = false;
 
@@ -27,8 +28,6 @@ class Segmentation {
                 canvas.selection = false;
         
                 canvas.on('mouse:down', function (options) {
-                    canvas.selection = false;
-
                     if(options.target && options.target.id === pointArray[0].id){
                         if(generate_flag == false){
                             prototypefabric.polygon.generatePolygon(pointArray);
@@ -71,9 +70,10 @@ class Segmentation {
             },
             addPoint : function(options) {
                 var CIRCLE_RADIUS = 2;
-                //var random = Math.floor(Math.random() * (max - min + 1)) + min;
-                //var id = new Date().getTime() + random;
+                var random = Math.floor(Math.random() * (max - min + 1)) + min;
+                var temp_id = new Date().getTime() + random;
                 var circle = new fabric.Circle({
+                    id: temp_id,
                     radius: 2,
                     fill: '#ffffff',
                     stroke: '#333333',
