@@ -1,2 +1,4 @@
 /node_modules
 /build
+/test/python_env
+/test/geckodriver.log

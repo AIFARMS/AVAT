@@ -92,7 +92,7 @@ export default class ExtractingAnnotation{
                         uniScaleTransform: false,
                         fill: "white",
                     })
-                    var grouppo = new fabric.Group([po, display_text], {})
+                    var grouppo = new fabric.Group([po, display_text], {perPixelTargetFind: true})
                     console.log(grouppo)
                     grouppo.lockMovementY = true;
                     grouppo.lockMovementX = true;

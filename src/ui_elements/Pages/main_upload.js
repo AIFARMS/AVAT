@@ -172,16 +172,15 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 
-	if(true){
-		fabricCanvas.forEachObject(object => {
-			object._objects[0].selectable = true;
-			object.evented = false;
-			object.lockMovementY = true;
-			object.lockMovementX = true;
-			console.log(object)
-			fabricCanvas.selection = false;
-		});
-	}
+	fabricCanvas.forEachObject(object => {
+		object.selectable = false
+		object.evented = false;
+		object.lockMovementY = true;
+		object.lockMovementX = true;
+		console.log(object)
+		alert("HI")
+	});
+	
 
 	const handleSetCurrentFrame = (val) => {
 		var total_frames = duration * frame_rate

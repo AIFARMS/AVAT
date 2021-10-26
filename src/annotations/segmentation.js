@@ -209,7 +209,9 @@ class Segmentation {
                 //canvas.add(po);
 
                 segmentation_flag();
-
+                /*
+                REMEMBER TO CHANGE THE ANNOTATION UPLOAD CODE TO REFLECT ANY CODE CHANGES DONE HERE ASWELL!
+                */
                 var display_text = new fabric.Text(id.toString(), {
                     fontSize: 20,
                     centerX: "center",
@@ -220,7 +222,7 @@ class Segmentation {
                 })
 
                 var grouppo = new fabric.Group([po, display_text], {
-
+                    perPixelTargetFind: true
                 })
                 grouppo.lockMovementY = true;
                 grouppo.lockMovementX = true;
