@@ -12,7 +12,9 @@ import unittest
 
 class AVAT_video_upload(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()
+        options = webdriver.FirefoxOptions()
+        options.headless = True
+        self.driver = webdriver.Firefox(options=options)
         self.driver.get("http://localhost:3000")
 
     def test_video_upload(self):
@@ -22,7 +24,6 @@ class AVAT_video_upload(unittest.TestCase):
         self.driver.find_element(By.CLASS_NAME, "close").click()
         frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
         assert "Frame #1 / 1200" in frame.text
-        #assert "Add" in video_upload.text
 
     def tearDown(self):
         self.driver.close()

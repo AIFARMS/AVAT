@@ -12,7 +12,9 @@ import unittest
 
 class AVAT_Upload(unittest.TestCase):
     def setUp(self):
-        self.driver = webdriver.Firefox()
+        options = webdriver.FirefoxOptions()
+        options.headless = True
+        self.driver = webdriver.Firefox(options=options)
         self.driver.get("http://localhost:3000")
 
     def test_annotatorName(self):
