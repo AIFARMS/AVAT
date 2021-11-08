@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException
 #import page
 import unittest
 
+import os
 
 class AVAT_video_upload(unittest.TestCase):
     def setUp(self):
@@ -17,10 +18,29 @@ class AVAT_video_upload(unittest.TestCase):
         self.driver = webdriver.Firefox(options=options)
         self.driver.get("http://localhost:3000")
 
-    def test_video_upload(self):
+    def test_video_upload_mp4(self):
         self.driver.find_element(By.TAG_NAME, "button").click()
         video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
-        video_upload.send_keys("/home/pradeepsen99/Desktop/Research/AVAT/test/test_video.mp4")
+        curr_dir = os.getcwd() 
+        video_upload.send_keys(curr_dir + "/test_video.mp4")
+        self.driver.find_element(By.CLASS_NAME, "close").click()
+        frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
+        assert "Frame #1 / 1200" in frame.text
+
+    def test_video_upload_avi(self):
+        self.driver.find_element(By.TAG_NAME, "button").click()
+        video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
+        curr_dir = os.getcwd() 
+        video_upload.send_keys(curr_dir + "/test_video.avi")
+        self.driver.find_element(By.CLASS_NAME, "close").click()
+        frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
+        assert "Frame #1 / 1200" in frame.text
+
+    def test_video_upload_mkv(self):
+        self.driver.find_element(By.TAG_NAME, "button").click()
+        video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
+        curr_dir = os.getcwd() 
+        video_upload.send_keys(curr_dir + "/test_video.mkv")
         self.driver.find_element(By.CLASS_NAME, "close").click()
         frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
         assert "Frame #1 / 1200" in frame.text
