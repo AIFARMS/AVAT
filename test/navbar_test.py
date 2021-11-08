@@ -87,5 +87,5 @@ class AVAT_NavBar(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    print("Starting selenium tests")
-    unittest.main()
+    print("Starting NavBar testing")
+    unittest.main(warnings='ignore')

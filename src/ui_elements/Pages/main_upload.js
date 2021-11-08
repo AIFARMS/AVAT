@@ -100,8 +100,8 @@ fabricCanvas.on('mouse:out', function(e) {
 
     fabricCanvas.renderAll();
 });
-/*
-fabricCanvas.on('mouse:wheel', function(opt) {
+
+/*fabricCanvas.on('mouse:wheel', function(opt) {
 	var delta = opt.e.deltaY;
 	var zoom = fabricCanvas.getZoom();
 	zoom *= 0.999 ** delta;
@@ -110,8 +110,8 @@ fabricCanvas.on('mouse:wheel', function(opt) {
 	fabricCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 	opt.e.preventDefault();
 	opt.e.stopPropagation();
-  });
-*/	  
+  });*/
+
 
 var temp_color;
 var video_width = 0;
@@ -178,7 +178,6 @@ export default function MainUpload() {
 		object.lockMovementY = true;
 		object.lockMovementX = true;
 		console.log(object)
-		alert("HI")
 	});
 	
 

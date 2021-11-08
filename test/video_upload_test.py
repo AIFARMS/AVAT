@@ -10,21 +10,19 @@ from selenium.common.exceptions import TimeoutException
 import unittest
 
 
-class AVAT_SelectionScreen(unittest.TestCase):
+class AVAT_video_upload(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Firefox()
         self.driver.get("http://localhost:3000")
 
-    def test_title(self):
-        assert "AVAT - ALPHA" in self.driver.title
-
-    def test_navButton(self):
-        buttons = self.driver.find_elements(By.TAG_NAME, "button")[0]
-        assert "Video Upload" in buttons.text
-
-    def test_navButton(self):
-        buttons = self.driver.find_elements(By.TAG_NAME, "button")[1]
-        assert "Multiview" in buttons.text
+    def test_video_upload(self):
+        self.driver.find_element(By.TAG_NAME, "button").click()
+        video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
+        video_upload.send_keys("/home/pradeepsen99/Desktop/Research/AVAT/test/test_video.mp4")
+        self.driver.find_element(By.CLASS_NAME, "close").click()
+        frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
+        assert "Frame #1 / 1200" in frame.text
+        #assert "Add" in video_upload.text
 
     def tearDown(self):
         self.driver.close()

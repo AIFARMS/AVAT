@@ -86,5 +86,5 @@ class AVAT_Upload(unittest.TestCase):
         
 
 if __name__ == "__main__":
-    print("Starting selenium tests")
-    unittest.main()
+    print("Starting upload-dialogtesting")
+    unittest.main(warnings='ignore')
