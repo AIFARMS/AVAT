@@ -22,23 +22,25 @@ import {run_model, load} from '../../tensorflow/ObjectDetection';
 import { run_model_segment } from '../../tensorflow/SemanticSegmentation';
 
 import ExportingAnnotation from '../../processing/exporting_annotation';
+import ProcessVideo from './process_video';
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
 	const [startDate, setStartDate] = useState(0);
-	//const [frameRate, setFrameRate] = useState(0)
-	//const [skipValue, setSkipValue] = useState(0)
+	const [frameRate, setFrameRate] = useState(0)
+	const [skipValue, setSkipValue] = useState(0)
 	//const [playbackRate, setPlaybackRate] = useState(0)
-	//const [horizontalRes, setHorizontalRes] = useState(0)
-	//const [verticalRes, setVerticalRes] = useState(0)
+	const [horizontalRes, setHorizontalRes] = useState(0)
+	const [verticalRes, setVerticalRes] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
+	const [process, setProcess] = useState(false)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
-	const handleUploadClose = () => setUploadShow(false)
+	const handleUploadClose = () => {setUploadShow(false); setProcess(true)}
 	const handleUploadShow = () => setUploadShow(true)
 
 	const handleDownloadJSON = () => {
@@ -77,8 +79,12 @@ export default function CustomNavBar(props){
 	}
 
 	const handleVideoLink = (event) => {
-		setVideoLink(event.target.value)
-		console.log(event.target.value)
+		if(typeof(event) === "string"){
+			setVideoLink(event.target.value)
+			console.log(event.target.value)
+		}else{
+			setVideoLink(URL.createObjectURL(event.target.files[0]))
+		}
 	}
 
 	const edit_click = (event) => {
@@ -94,6 +100,13 @@ export default function CustomNavBar(props){
 
 	return (
 		<div>
+		{
+			process == true && 
+			<ProcessVideo
+				frame_rate={frameRate}
+				video_link={videoLink}
+			/>
+		}
 		<Modal show={show} onHide={handleClose} size='lg'>
 			<Modal.Header closeButton>
 			<Modal.Title>Instructions</Modal.Title>
@@ -144,7 +157,7 @@ export default function CustomNavBar(props){
 					</div>
 					{videoFormat === 0 && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={props.handleVideoUpload} />
+							<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
 					}
 					{videoFormat === 1 &&
@@ -158,7 +171,7 @@ export default function CustomNavBar(props){
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
-					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value))}}></input>
+					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
@@ -177,7 +190,7 @@ export default function CustomNavBar(props){
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
-			<Button variant="secondary" onClick={handleUploadClose}>Close</Button>
+			<Button variant="success" onClick={handleUploadClose}>Upload</Button>
 			</Modal.Footer>
 		</Modal>
 		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
