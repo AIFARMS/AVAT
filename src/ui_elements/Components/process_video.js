@@ -26,12 +26,12 @@ export default function ProcessVideo(props){
     const [text, setText] = useState("");
 
     const handleText = (event) => {
-        
+        setText(event)
     }
 
     const handleProcess = (e) => {
         if(props.frame_rate === 0){
-            var temp = videoFrameExtract(1).then(function(ret) {
+            var temp = videoFrameExtract(15, 15, handleText).then(function(ret) {
                 setFrames(ret)
                 test_frame = ret
                 console.log(ret)
@@ -53,6 +53,7 @@ export default function ProcessVideo(props){
                 <div>
                     <video id='process_vid' style={{objectFit: 'contain', height: '100%', width: '100%'}} src={props.video_link}></video>
                     <Button onClick={handleProcess} enable={frames!=null} >Process Video</Button>
+                    {text}
                     {
                         frames != null &&
                         <Carousel controls={true} fade style={{objectFit: 'contain', height: '100%', width: '100%'}}>

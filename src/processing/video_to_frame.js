@@ -1,4 +1,4 @@
-export default async function videoFrameExtract(frame_rate, handleText){
+export default async function videoFrameExtract(frame_rate, skip_val, handleText){
     
     //alert("Video will be extracted into frames - This might take a bit!")
     const video = document.getElementById("process_vid")
@@ -22,10 +22,11 @@ export default async function videoFrameExtract(frame_rate, handleText){
       if(seekResolve) seekResolve();
     });
 
-    for(var i = 1; i < total_frames; i++){
+    for(var i = 1; i < total_frames; i=i+skip_val){
         var new_time = parseFloat((i/total_frames)*video.duration)
         console.log(new_time)
         video.currentTime = new_time
+        handleText(((i/(total_frames-1))*100).toFixed(2).toString() + "%" + "completed" + "    |   " + (i+1).toString() + "/" + total_frames.toString() + " frames processed.")
 
         await new Promise(r => seekResolve=r);
 
