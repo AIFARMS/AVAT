@@ -63,10 +63,15 @@ export default function CustomNavBar(props){
 
 	const handleVideoFormat = (type) => {
 		console.log(type)
+		//TODO Make sure bug is resolved and simply have video format equal type
 		if(type === 0){
 			setVideoFormat(0)
-		}else{
+			props.handleInputType()
+		}else if (type === 1){
 			setVideoFormat(1)
+		}else{
+			setVideoFormat(2)
+			props.handleInputType()
 		}
 	}
 
@@ -133,6 +138,7 @@ export default function CustomNavBar(props){
 						>
 							<option value="0">Upload</option>
 							<option value="1">Youtube</option>
+							<option value="2">Image</option>
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
@@ -157,7 +163,7 @@ export default function CustomNavBar(props){
 					</div>
 					{videoFormat === 0 && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
 					}
 					{videoFormat === 1 &&
@@ -166,6 +172,10 @@ export default function CustomNavBar(props){
 							<input onChange={handleVideoLink}></input>
 							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
 						</div>
+					}{videoFormat === 2 &&
+						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+						</Form>
 					}
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>

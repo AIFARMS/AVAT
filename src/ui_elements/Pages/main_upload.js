@@ -171,6 +171,7 @@ export default function MainUpload() {
 	const [currentFrame, setCurrentFrame] = useState(0)
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
+	const [inputType, setInputType] = useState(0)
 
 	fabricCanvas.forEachObject(object => {
 		object.selectable = false
@@ -179,7 +180,10 @@ export default function MainUpload() {
 		object.lockMovementX = true;
 		console.log(object)
 	});
-	
+
+	const handleInputType = (val) => {
+		
+	}
 
 	const handleSetCurrentFrame = (val) => {
 		var total_frames = duration * frame_rate
@@ -690,6 +694,7 @@ export default function MainUpload() {
 				fabricCanvas={fabricCanvas}
 				save_data={save_data}
 				handle_visual_toggle={handle_visual_toggle}
+				handleInputType={handleInputType}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 
