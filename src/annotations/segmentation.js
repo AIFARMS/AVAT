@@ -17,7 +17,7 @@ class Segmentation {
 
         canvas.forEachObject(function(object){ 
             object.selectable = false; 
-            object.evented = false;
+            //object.evented = false;
         });
         canvas.selection = false;
 
@@ -25,7 +25,7 @@ class Segmentation {
                 //canvas = window._canvas = new fabric.Canvas('c');
                 //canvas.setWidth($(window).width());
                 //canvas.setHeight($(window).height()-$('#nav-bar').height());
-                canvas.selection = false;
+                //canvas.selection = false;
         
                 canvas.on('mouse:down', function (options) {
                     if(options.target && options.target.id === pointArray[0].id){
@@ -43,13 +43,13 @@ class Segmentation {
                 });
                 canvas.on('mouse:move', function (options) {
                     if(activeLine && activeLine.class == "line"){
-                        var pointer = canvas.getPointer(options.e);
-                        activeLine.set({ x2: pointer.x/canvas.getZoom(), y2: pointer.y /canvas.getZoom()});
+                        var pointer = canvas.getPointer(options.e, false);
+                        activeLine.set({ x2: pointer.x, y2: pointer.y });
         
                         var points = activeShape.get("points");
                         points[pointArray.length] = {
-                            x:pointer.x/canvas.getZoom(),
-                            y:pointer.y/canvas.getZoom()
+                            x:pointer.x,
+                            y:pointer.y
                         }
                         activeShape.set({
                             points: points
@@ -69,6 +69,7 @@ class Segmentation {
                 lineArray = new Array();
             },
             addPoint : function(options) {
+                var pointer = canvas.getPointer(options.e, false);
                 var CIRCLE_RADIUS = 2;
                 var random = Math.floor(Math.random() * (max - min + 1)) + min;
                 var temp_id = new Date().getTime() + random;
@@ -78,8 +79,8 @@ class Segmentation {
                     fill: '#ffffff',
                     stroke: '#333333',
                     strokeWidth: 0.5,
-                    left: (options.e.layerX/canvas.getZoom()),
-                    top: (options.e.layerY/canvas.getZoom()),
+                    left: (pointer.x),
+                    top: (pointer.y),
                     selectable: false,
                     hasBorders: false,
                     hasControls: false,
@@ -100,7 +101,7 @@ class Segmentation {
                 }
                 
 
-                var points = [(options.e.layerX/canvas.getZoom()),(options.e.layerY/canvas.getZoom()),(options.e.layerX/canvas.getZoom()),(options.e.layerY/canvas.getZoom())];
+                var points = [(pointer.x),(pointer.y),(pointer.x),(pointer.y)];
                 var line = new fabric.Line(points, {
                     strokeWidth: 2,
                     fill: '#999999',
@@ -115,11 +116,10 @@ class Segmentation {
                         objectCaching:false
                 });
                 if(activeShape){
-                    var pos = canvas.getPointer(options.e);
                     var points = activeShape.get("points");
                     points.push({
-                        x: pos.x,
-                        y: pos.y
+                        x: pointer.x,
+                        y: pointer.y
                     });
                     var polygon = new fabric.Polygon(points,{
                         stroke:'#333333',
@@ -138,7 +138,7 @@ class Segmentation {
                     canvas.renderAll();
                 }
                 else{
-                    var polyPoint = [{x:(options.e.layerX/canvas.getZoom()),y:(options.e.layerY/canvas.getZoom())}];
+                    var polyPoint = [{x:(pointer.x),y:(pointer.y)}];
                     console.log(polyPoint)
                     var polygon = new fabric.Polygon(polyPoint,{
                         stroke:'#333333',
@@ -159,7 +159,7 @@ class Segmentation {
                 pointArray.push(circle);
                 lineArray.push(line);
         
-                canvas.add(line);
+                //canvas.add(line);
                 canvas.add(circle);
                 canvas.selection = false;
             },
@@ -222,7 +222,9 @@ class Segmentation {
                 })
 
                 var grouppo = new fabric.Group([po, display_text], {
-                    perPixelTargetFind: true
+                    perPixelTargetFind: true,
+                    hasControls: false,
+                    hasBorders: false
                 })
                 grouppo.lockMovementY = true;
                 grouppo.lockMovementX = true;

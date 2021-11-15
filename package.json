@@ -10,7 +10,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.1.2",
     "bootstrap": "^4.6.0",
-    "fabric": "^4.1.0",
+    "fabric": "^4.6.0",
     "ffmpeg.js": "^4.2.9003",
     "jquery": "^3.6.0",
     "react": "^16.13.1",
