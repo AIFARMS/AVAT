@@ -106,7 +106,8 @@ export default function CustomNavBar(props){
 	return (
 		<div>
 		{
-			process == true && 
+			//TODO Re-enable this for video processing. 
+			process == 2 && 
 			<ProcessVideo
 				frame_rate={frameRate}
 				video_link={videoLink}

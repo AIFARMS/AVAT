@@ -44,12 +44,12 @@ class Segmentation {
                 canvas.on('mouse:move', function (options) {
                     if(activeLine && activeLine.class == "line"){
                         var pointer = canvas.getPointer(options.e);
-                        activeLine.set({ x2: pointer.x, y2: pointer.y });
+                        activeLine.set({ x2: pointer.x/canvas.getZoom(), y2: pointer.y /canvas.getZoom()});
         
                         var points = activeShape.get("points");
                         points[pointArray.length] = {
-                            x:pointer.x,
-                            y:pointer.y
+                            x:pointer.x/canvas.getZoom(),
+                            y:pointer.y/canvas.getZoom()
                         }
                         activeShape.set({
                             points: points

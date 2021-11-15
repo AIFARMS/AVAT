@@ -101,16 +101,25 @@ fabricCanvas.on('mouse:out', function(e) {
     fabricCanvas.renderAll();
 });
 
-/*fabricCanvas.on('mouse:wheel', function(opt) {
+fabric.Image.prototype.toObject = (function(toObject) {
+	return function() {
+	  return fabric.util.object.extend(toObject.call(this), {
+		src: this.toDataURL()
+	  });
+	};
+  })(fabric.Image.prototype.toObject);
+
+fabricCanvas.on('mouse:wheel', function(opt) {
 	var delta = opt.e.deltaY;
 	var zoom = fabricCanvas.getZoom();
+	console.log(zoom)
 	zoom *= 0.999 ** delta;
 	if (zoom > 20) zoom = 20;
 	if (zoom < 0.01) zoom = 0.01;
 	fabricCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 	opt.e.preventDefault();
 	opt.e.stopPropagation();
-  });*/
+  });
 
 
 var temp_color;
@@ -156,6 +165,8 @@ function save_localstorage(){
 
 //Current frame counter
 export default function MainUpload() {
+	var zoom = fabricCanvas.getZoom();
+	console.log(zoom)
 	const [visualToggle, setVisualToggle] = useState(0);
 	const [annotationType, setAnnotationType] = useState("1")
 	const [boxCount, setBoxCount] = useState(0)
@@ -173,13 +184,13 @@ export default function MainUpload() {
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
 
-	fabricCanvas.forEachObject(object => {
+/* 	fabricCanvas.forEachObject(object => {
 		object.selectable = false
 		object.evented = false;
 		object.lockMovementY = true;
 		object.lockMovementX = true;
 		console.log(object)
-	});
+	}); */
 
 	const handleInputType = (val) => {
 		
@@ -332,6 +343,7 @@ export default function MainUpload() {
 			}else{
 				localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
 			}*/
+			
 			upload = true;
 			return;
 		}
@@ -347,6 +359,7 @@ export default function MainUpload() {
 		}else{
 			localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
 		}*/
+
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
 		video_to_img(event.target.files[0], fabricCanvas)
 		upload = true;
@@ -576,9 +589,7 @@ export default function MainUpload() {
 		return () => document.removeEventListener("keydown", onKeyPress);
 	}, [onKeyPress]);
 	
-	fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
-		fabricCanvas.renderAll();
-	});
+
 
 	const handle_link_open = () => {
 		window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
@@ -658,6 +669,54 @@ export default function MainUpload() {
 		console.log(time)
 	}
 
+	const handleOnReady = val => {
+		var htmlvideo = document.getElementsByTagName('video')[0]
+		var total_frames = htmlvideo.duration * frame_rate
+		console.log(total_frames)
+		console.log(htmlvideo.duration)
+	
+		let canvas = document.createElement('canvas');
+		let context = canvas.getContext('2d');
+		let [w, h] = [scaling_factor_width, scaling_factor_height]
+		canvas.width =  scaling_factor_width;
+		canvas.height = scaling_factor_height;
+	
+		context.drawImage(htmlvideo, 0, 0, w, h);
+		let base64ImageData = canvas.toDataURL();
+		console.log(base64ImageData)
+		
+
+
+		var img = new Image()
+		img.onload = function() {
+			fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
+				console.log(frame_data[currentFrame])
+				fabricCanvas.renderAll();
+			});
+			var f_img = new fabric.Image(img);
+		
+			fabricCanvas.setBackgroundImage(f_img);
+		
+			fabricCanvas.renderAll();
+			canvas.remove()
+			save_data()
+		};
+		img.src = base64ImageData
+/* 
+		var fabric_video = new fabric.Image(img, {
+			left: 0,
+			right:0,
+			width: scaling_factor_width, 
+			height: scaling_factor_height,
+			objectCaching: false,
+		})
+		fabricCanvas.setBackgroundImage(fabric_video)
+		fabricCanvas.renderAll();
+
+		console.log(fabric_video) */
+		//fabricCanvas.add(fabric_video)
+	}
+
 	return (
 		<div>
 			<CustomNavBar 
@@ -708,8 +767,9 @@ export default function MainUpload() {
 			{
 				upload === true && 
 				<div style={{display: "grid"}} show={upload}>
-					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0}}>
+					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: 0}}>
 						<ReactPlayer 
+							onReady={handleOnReady}
 							onProgress={handleSetCurrentFrame} 
 							ref={handleSetPlayer} 
 							onDuration={handleSetDuration} 
