@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react"; 
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
+import fileMetadata from '../../processing/extract_framerate'
 
 //UI Element imports
 import Toast from 'react-bootstrap/Toast'
@@ -229,9 +230,9 @@ export default function MainUpload() {
 	const handleInputType = (val) => {
 		if(val == 0 | val ==1){
 			setInputType(val)
-			alert("Input set to " + val)
+			//alert("Input set to " + val)
 		}else{
-			alert("ERROR VALUE SET")
+			alert("ERROR VALUE SET - Please report this bug!\n")
 		}
 	}
 
@@ -389,7 +390,9 @@ export default function MainUpload() {
 			upload = true;
 			return;
 		}
-		
+		if(inputType !== 1){
+			fileMetadata(event.target.files[0])
+		}
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
 		upload = true;
@@ -725,7 +728,9 @@ export default function MainUpload() {
 					fabricCanvas.renderAll();
 				});
 				var f_img = new fabric.Image(img, {
-					objectCaching: false
+					objectCaching: false,
+					scaleX: scaling_factor_width / img.width,
+					scaleY: scaling_factor_height / img.height
 				});
 				console.log("CURRFRAME: " + currentFrame)
 				fabricCanvas.setBackgroundImage(f_img);
@@ -778,8 +783,7 @@ export default function MainUpload() {
 			setTableFrameNum(currentFrame)
 
 		};
-		img.style.width = scaling_factor_width;
-		img.style.height =  scaling_factor_height;
+
 		img.src = base64ImageData
 	}
 

@@ -13,6 +13,7 @@
     "fabric": "^4.6.0",
     "ffmpeg.js": "^4.2.9003",
     "jquery": "^3.6.0",
+    "mediainfo.js": "^0.1.7",
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.1",
     "react-bootstrap-table-next": "^4.0.3",
