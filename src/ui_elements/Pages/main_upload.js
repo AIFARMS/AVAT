@@ -171,9 +171,11 @@ var temp_flag = false
 var time_unix = 0;
 var segmentation_flag = false;
 var temp_selection_color;
+var on_ready_flag = false;
 
 function save_data(frame_num){
 	if(fabricCanvas.getObjects().length != 0){
+		fabricCanvas.setBackgroundImage(null)
 		frame_data[frame_num] = fabricCanvas.toJSON()
 	}else{
 		frame_data[frame_num] = []
@@ -250,8 +252,6 @@ export default function MainUpload() {
 			}
 			if(play_button_text === "Pause"){
 			}
-			sliderPercent = ((val['played']))
-			console.log(sliderPercent)
 			setVisualToggle(Math.floor(Math.random() * 999999999999))
 		}
 	}
@@ -428,8 +428,6 @@ export default function MainUpload() {
   
 
 	const handlePlaying = (event) => {
-		//if(window.confirm("Are you sure you want to use the play/pause functionality?\n It is currenlty under development and WILL have unintentional bugs and glitches. \nReload the page if any issues arise") === true && play_button_text === "Play"){
-		//}
 		if(play_button_text === "Pause"){
 			temp_flag = true;
 		}
@@ -512,13 +510,14 @@ export default function MainUpload() {
 
 		var total_frames = duration * frame_rate
 		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
-
+		
 		var frameVal = currentFrame + skip_value
 		if(frameVal >= total_frames){
 			handleSetCurrentFrame(total_frames-1)
 		}else{
 			handleSetCurrentFrame(frameVal)
 		}
+		//canvasBackgroundUpdate()
 	}
 
 	const skip_frame_backward = e => {
@@ -531,8 +530,7 @@ export default function MainUpload() {
 		}else{
 			handleSetCurrentFrame(frameVal)
 		}
-		//player.seekTo((frameVal/total_frames) * duration)
-		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) - (skip_value/total_frames))
+		//canvasBackgroundUpdate()
 	}
 
 	const change_skip_value = (event) => {
@@ -722,13 +720,15 @@ export default function MainUpload() {
 				console.log(frame_data[currentFrame])
 				fabricCanvas.renderAll();
 			});
-			var f_img = new fabric.Image(img);
+			var f_img = new fabric.Image(img, {
+				objectCaching: false
+			});
 		
 			fabricCanvas.setBackgroundImage(f_img);
 		
 			fabricCanvas.renderAll();
 			canvas.remove()
-			save_data()
+			//save_data()
 		};
 		img.src = base64ImageData
 /* 
@@ -747,7 +747,17 @@ export default function MainUpload() {
 	}
 
 	const handleOnReady = val => {
+		//canvasBackgroundUpdate()
+		if(on_ready_flag == false){
+			canvasBackgroundUpdate()
+			on_ready_flag = true
+		}
+	}
+
+	const handleOnSeek = val => {
 		canvasBackgroundUpdate()
+		sliderPercent = (currentFrame/(duration * frame_rate))
+		setVisualToggle(Math.floor(Math.random() * 999999999999))
 	}
 
 	return (
@@ -803,6 +813,7 @@ export default function MainUpload() {
 					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: 0}}>
 						<ReactPlayer 
 							onReady={handleOnReady}
+							onSeek={handleOnSeek}
 							onProgress={handleSetCurrentFrame} 
 							ref={handleSetPlayer} 
 							onDuration={handleSetDuration} 
