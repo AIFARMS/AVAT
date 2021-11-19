@@ -64,11 +64,12 @@ export default function CustomNavBar(props){
 	const handleVideoFormat = (type) => {
 		console.log(type)
 		//TODO Make sure bug is resolved and simply have video format equal type
+		type = parseInt(type)
 		if(type === 0){
 			setVideoFormat(0)
 		}else if (type === 1){
 			setVideoFormat(1)
-		}else{
+		}else if (type === 2){
 			setVideoFormat(2)
 			props.handleInputType(1)
 		}

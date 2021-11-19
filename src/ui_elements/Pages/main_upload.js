@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react"; 
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
-import fileMetadata from '../../processing/extract_framerate'
+//import fileMetadata from '../../processing/extract_framerate'
 
 //UI Element imports
 import Toast from 'react-bootstrap/Toast'
@@ -391,7 +391,7 @@ export default function MainUpload() {
 			return;
 		}
 		if(inputType !== 1){
-			fileMetadata(event.target.files[0])
+			//fileMetadata(event.target.files[0])
 		}
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
