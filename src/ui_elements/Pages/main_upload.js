@@ -8,7 +8,6 @@ import Toast from 'react-bootstrap/Toast'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
-import {video_to_img} from '../../processing/frame_extract'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
@@ -172,10 +171,8 @@ var time_unix = 0;
 var segmentation_flag = false;
 var temp_selection_color;
 var on_ready_flag = false;
-//TODO convert to state var once bug fix
-var currentFrame = 0;
-var loading_async = false;
-var saving = false;
+var image_frames = []
+var total_frames
 
 function save_data(frame_num){
 	//return; //TODO Clear up
@@ -186,12 +183,11 @@ function save_data(frame_num){
 	}else{
 		frame_data[frame_num] = []
 	}
-	console.log(frame_data)
 	console.log("SAVED")
 }
 
 function save_localstorage(){
-	console.log(frame_data)
+	//console.log(frame_data)
 	try{
 		//localStorage.setItem('frame_data', JSON.stringify(frame_data))
 		//localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
@@ -204,7 +200,7 @@ function save_localstorage(){
 //Current frame counter
 export default function MainUpload() {
 	var zoom = fabricCanvas.getZoom();
-	console.log(zoom)
+	//console.log(zoom)
 	const [visualToggle, setVisualToggle] = useState(0);
 	const [annotationType, setAnnotationType] = useState("1")
 	const [boxCount, setBoxCount] = useState(0)
@@ -220,6 +216,7 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
+	const [currentFrame, setCurrentFrame] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 
 	if(!segmentation_flag){
@@ -230,14 +227,19 @@ export default function MainUpload() {
 	}
 
 	const handleInputType = (val) => {
-		
+		if(val == 0 | val ==1){
+			setInputType(val)
+			alert("Input set to " + val)
+		}else{
+			alert("ERROR VALUE SET")
+		}
 	}
 
 	const handleSetCurrentFrame = (val) => {
 		var total_frames = duration * frame_rate
 		if(typeof(val) === "number"){
 
-			currentFrame = val
+			setCurrentFrame(val)
 			setVisualToggle(Math.floor(Math.random() * 999999999999))
 			var new_skip = val/(total_frames)
 			if(new_skip > duration){
@@ -251,12 +253,12 @@ export default function MainUpload() {
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
 				if(frame_calc >= total_frames){
-					currentFrame = total_frames-1
+					setCurrentFrame(total_frames-1)
 					setVisualToggle(Math.floor(Math.random() * 999999999999))
 					temp_flag = false;
 					return;
 				}
-				currentFrame = frame_calc
+				setCurrentFrame(frame_calc)
 				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				temp_flag = false;
 			}
@@ -369,38 +371,26 @@ export default function MainUpload() {
 	}
 
 	const handleVideoUpload = (event) => {
+		if(inputType === 1){
+			image_frames = event.target.files
+			total_frames = image_frames.length
+			for(var i = 0; i < total_frames; i++){
+				annotation_data.push([])
+			}
+			canvasBackgroundUpdate() //TODO might cause a breaking change since no return
+			disable_buttons = false;
+		}
 		console.log(typeof(event))
-		//Youtube upload
-		if(typeof(event) === "string"){
+		
+		if(typeof(event) === "string"){//Youtube upload
 			setVideoFileURL(event)
 			ANNOTATION_VIDEO_NAME = event
-			/*if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
-				if(window.confirm("Past annotation for same video detected. Do you want to use the last saved annotations?")){
-					annotation_data = JSON.parse(localStorage.getItem('annotation_data'))
-					frame_data = JSON.parse(localStorage.getItem('frame_data'))
-				}
-			}else{
-				localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
-			}*/
-			
 			upload = true;
 			return;
 		}
 		
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
-		//File upload
-		/*if(localStorage.getItem('ANNOTATION_VIDEO_NAME') != null){
-			if(window.confirm("Past annotation for same video detected. Do you want to use the last saved annotations?")){
-				annotation_data = JSON.parse(localStorage.getItem('annotation_data'))
-				frame_data = JSON.parse(localStorage.getItem('frame_data'))
-				console.log(frame_data)
-			}
-		}else{
-			localStorage.setItem('ANNOTATION_VIDEO_NAME', ANNOTATION_VIDEO_NAME)
-		}*/
-
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
-		video_to_img(event.target.files[0], fabricCanvas)
 		upload = true;
 	};
 
@@ -424,7 +414,7 @@ export default function MainUpload() {
 		frame_data = oldAnnotation.get_frame_data();
 		annotation_data = oldAnnotation.get_annotation_data();
 		handle_visual_toggle()
-	}, oldAnnotation);
+	}, [oldAnnotation]);
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {
@@ -504,27 +494,28 @@ export default function MainUpload() {
 			//upload = false;
 			disable_buttons = false
 		}
+		total_frames = parseInt(val) * frame_rate
 		setDuration(parseInt(val))
 	}
 
 	const [scrubbing, setScrubbing] = useState(true);
 
+
 	const skip_frame_forward = e =>{
 		save_previous_data()
-/* 		if(scrubbing === false){
-			if (annotation_data[currentFrame+skip_value].length === 0){
-				annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
-				frame_data[currentFrame+skip_value] = frame_data[currentFrame];
-			}
-		}
- */
-		var total_frames = duration * frame_rate
-		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
-		
 		var frameVal = currentFrame + skip_value
+		console.log(frameVal)
 		if(frameVal >= total_frames){
+			if(inputType === 1){
+				setCurrentFrame(total_frames-1)
+				return;
+			}
 			handleSetCurrentFrame(total_frames-1)
 		}else{
+			if(inputType === 1){
+				setCurrentFrame(frameVal)
+				return;
+			}
 			handleSetCurrentFrame(frameVal)
 		}
 		//canvasBackgroundUpdate()
@@ -532,16 +523,31 @@ export default function MainUpload() {
 
 	const skip_frame_backward = e => {
 		save_previous_data()
-		var total_frames = duration * frame_rate
 
 		var frameVal = currentFrame - skip_value
+		console.log(frameVal)
 		if(frameVal < 0){
+			if(inputType === 1){
+				setCurrentFrame(0)
+				return;
+			}
 			handleSetCurrentFrame(0)
 		}else{
+			if(inputType === 1){
+				setCurrentFrame(frameVal)
+				return;
+			}
 			handleSetCurrentFrame(frameVal)
 		}
 		//canvasBackgroundUpdate()
 	}
+
+	useEffect(() => {
+		//alert("")
+		if(inputType === 1){
+			canvasBackgroundUpdate()
+		}
+	}, [currentFrame]);
 
 	const change_skip_value = (event) => {
 		skip_value = event
@@ -617,7 +623,7 @@ export default function MainUpload() {
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
 			frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
-			canvasBackgroundUpdate()
+			canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
 			changeSave(true)
 		}
 	}  
@@ -708,6 +714,29 @@ export default function MainUpload() {
 	}
 
 	const canvasBackgroundUpdate = () => {
+		if(inputType == 1){ //This is for when images are uploaded
+			var img = new Image()
+			img.onload = function() {
+				fabricCanvas.clear()
+				fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
+					console.log("Refresh canvas" + currentFrame)
+					fabricCanvas.renderAll();
+				});
+				var f_img = new fabric.Image(img, {
+					objectCaching: false
+				});
+				console.log("CURRFRAME: " + currentFrame)
+				fabricCanvas.setBackgroundImage(f_img);
+			
+				fabricCanvas.renderAll();
+				//save_data()
+				setTableFrameNum(currentFrame)
+	
+			};
+			img.src = URL.createObjectURL(image_frames[currentFrame])
+			return;
+		}
+		
 		//TODO cleanup variabkle
 		var temp = parseInt(JSON.parse(JSON.stringify(currentFrame)));
 
@@ -730,12 +759,10 @@ export default function MainUpload() {
 
 		var img = new Image()
 		img.onload = function() {
-			loading_async = true;
 			fabricCanvas.loadFromJSON(frame_data[temp], function() {
 				console.log(frame_data[temp])
 				console.log("Refresh canvas" + temp)
 				fabricCanvas.renderAll();
-				loading_async = false;
 			});
 			var f_img = new fabric.Image(img, {
 				objectCaching: false
@@ -749,20 +776,9 @@ export default function MainUpload() {
 			setTableFrameNum(currentFrame)
 
 		};
+		img.style.width = scaling_factor_width;
+		img.style.height =  scaling_factor_height;
 		img.src = base64ImageData
-/* 
-		var fabric_video = new fabric.Image(img, {
-			left: 0,
-			right:0,
-			width: scaling_factor_width, 
-			height: scaling_factor_height,
-			objectCaching: false,
-		})
-		fabricCanvas.setBackgroundImage(fabric_video)
-		fabricCanvas.renderAll();
-
-		console.log(fabric_video) */
-		//fabricCanvas.add(fabric_video)
 	}
 
 	const handleOnReady = val => {
@@ -791,7 +807,7 @@ export default function MainUpload() {
 				handleOldAnnotation={handleOldAnnotation}
 				handleVideoUpload={handleVideoUpload}
 				currentFrame={currentFrame}
-				display_frame_num={"Frame #" + parseInt(currentFrame+1)+' / '+parseInt(duration * frame_rate)}
+				display_frame_num={"Frame #" + parseInt(currentFrame+1)+' / '+parseInt(total_frames)}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
 				handlePlaying={handlePlaying}
@@ -830,24 +846,27 @@ export default function MainUpload() {
 				upload === true && 
 				<div style={{display: "grid"}} show={upload}>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: 0}}>
-						<ReactPlayer 
-							onReady={handleOnReady}
-							onSeek={handleOnSeek}
-							ref={handleSetPlayer} 
-							onDuration={handleSetDuration} 
-							url={videoFilePath} 
-							width='100%'
-							height='100%'
-							playing={playing} 
-							controls={false} 
-							style={{position:'absolute', float:'left', top:0, left:0}}
-							volume={0}
-							muted={true}
-							pip={false}
-							playbackRate={playbackRate}
-							onPlay={handleOnPlay}
-							id="myvideo"
-						/>
+						{
+							inputType==0 && 
+							<ReactPlayer 
+								onReady={handleOnReady}
+								onSeek={handleOnSeek}
+								ref={handleSetPlayer} 
+								onDuration={handleSetDuration} 
+								url={videoFilePath} 
+								width='100%'
+								height='100%'
+								playing={playing} 
+								controls={false} 
+								style={{position:'absolute', float:'left', top:0, left:0}}
+								volume={0}
+								muted={true}
+								pip={false}
+								playbackRate={playbackRate}
+								onPlay={handleOnPlay}
+								id="myvideo"
+							/>
+						}
 					</div>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
 						<FabricRender 
