@@ -10,8 +10,10 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.1.2",
     "bootstrap": "^4.6.0",
-    "fabric": "^4.1.0",
+    "fabric": "^4.6.0",
+    "ffmpeg.js": "^4.2.9003",
     "jquery": "^3.6.0",
+    "mediainfo.js": "^0.1.7",
     "react": "^16.13.1",
     "react-bootstrap": "^1.6.1",
     "react-bootstrap-table-next": "^4.0.3",
@@ -24,7 +26,9 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^3.4.4",
     "tensorflow-models": "^0.0.1",
-    "testing-library": "^0.0.2"
+    "testing-library": "^0.0.2",
+    "video.js": "^7.15.4",
+    "videojs-rotatezoom": "^0.0.1"
   },
   "scripts": {
     "predeploy": "npm run build",
