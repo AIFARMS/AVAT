@@ -236,7 +236,8 @@ export default function MainUpload() {
 	}
 
 	const handleSetCurrentFrame = (val) => {
-		var total_frames = duration * frame_rate
+		total_frames = duration * frame_rate
+		handle_visual_toggle()
 		if(typeof(val) === "number"){
 
 			setCurrentFrame(val)
@@ -691,6 +692,7 @@ export default function MainUpload() {
 
 		num_frames = Math.round(duration * frame_rate);
 		if(annotation_data[0].length == 0){
+			total_frames = duration * framerate
 			console.log("Resetting frame_data and annotation_data")
 			frame_data = new Array(num_frames)
 			annotation_data = new Array(num_frames)
