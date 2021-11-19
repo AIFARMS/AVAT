@@ -727,6 +727,7 @@ export default function MainUpload() {
 					console.log("Refresh canvas" + currentFrame)
 					fabricCanvas.renderAll();
 				});
+				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
 				var f_img = new fabric.Image(img, {
 					objectCaching: false,
 					scaleX: scaling_factor_width / img.width,
