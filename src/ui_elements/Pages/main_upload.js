@@ -172,11 +172,16 @@ var time_unix = 0;
 var segmentation_flag = false;
 var temp_selection_color;
 var on_ready_flag = false;
+//TODO convert to state var once bug fix
+var currentFrame = 0;
+var loading_async = false;
+var saving = false;
 
 function save_data(frame_num){
+	//return; //TODO Clear up
 	if(fabricCanvas.getObjects().length != 0){
-		fabricCanvas.setBackgroundImage(null)
-		frame_data[frame_num] = fabricCanvas.toJSON()
+		//fabricCanvas.setBackgroundImage(null)
+		frame_data[frame_num] = fabricCanvas.toObject()
 	}else{
 		frame_data[frame_num] = []
 	}
@@ -211,7 +216,6 @@ export default function MainUpload() {
 	const [save, changeSave] = useState(false);
 	const [seeking, setSeeking] = useState(false)
 	const [playing, setPlaying] = useState(false);
-	const [currentFrame, setCurrentFrame] = useState(0)
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
@@ -230,7 +234,9 @@ export default function MainUpload() {
 	const handleSetCurrentFrame = (val) => {
 		var total_frames = duration * frame_rate
 		if(typeof(val) === "number"){
-			setCurrentFrame(val)
+
+			currentFrame = val
+			setVisualToggle(Math.floor(Math.random() * 999999999999))
 			var new_skip = val/(total_frames)
 			if(new_skip > duration){
 				new_skip = duration
@@ -243,11 +249,13 @@ export default function MainUpload() {
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
 				if(frame_calc >= total_frames){
-					setCurrentFrame(total_frames-1)
+					currentFrame = total_frames-1
+					setVisualToggle(Math.floor(Math.random() * 999999999999))
 					temp_flag = false;
 					return;
 				}
-				setCurrentFrame(frame_calc)
+				currentFrame = frame_calc
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				temp_flag = false;
 			}
 			if(play_button_text === "Pause"){
@@ -501,13 +509,13 @@ export default function MainUpload() {
 
 	const skip_frame_forward = e =>{
 		save_previous_data()
-		if(scrubbing === false){
+/* 		if(scrubbing === false){
 			if (annotation_data[currentFrame+skip_value].length === 0){
 				annotation_data[currentFrame+skip_value] = JSON.parse(JSON.stringify(annotation_data[currentFrame]));
 				frame_data[currentFrame+skip_value] = frame_data[currentFrame];
 			}
 		}
-
+ */
 		var total_frames = duration * frame_rate
 		//player.seekTo((((player.getCurrentTime()/duration)*total_frames))/(total_frames) + (skip_value/total_frames))
 		
@@ -697,6 +705,9 @@ export default function MainUpload() {
 	}
 
 	const canvasBackgroundUpdate = () => {
+		//TODO cleanup variabkle
+		var temp = parseInt(JSON.parse(JSON.stringify(currentFrame)));
+
 		var htmlvideo = document.getElementsByTagName('video')[0]
 		var total_frames = htmlvideo.duration * frame_rate
 		console.log(total_frames)
@@ -716,10 +727,21 @@ export default function MainUpload() {
 
 		var img = new Image()
 		img.onload = function() {
-			fabricCanvas.loadFromJSON(frame_data[currentFrame], function() {
-				console.log(frame_data[currentFrame])
+			loading_async = true;
+			if(frame_data[currentFrame].length > 0){
+				fabricCanvas.clear()
+				for(var i = 0; i < frame_data[currentFrame].length; i++){
+					console.log(frame_data[currentFrame][i])
+					fabricCanvas.add(frame_data[currentFrame][i])
+				}
 				fabricCanvas.renderAll();
-			});
+			}
+			/* fabricCanvas.loadFromJSON(frame_data[temp], function() {
+				console.log(frame_data[temp])
+				console.log("Refresh canvas" + temp)
+				fabricCanvas.renderAll();
+				loading_async = false;
+			}); */
 			var f_img = new fabric.Image(img, {
 				objectCaching: false
 			});
@@ -814,7 +836,6 @@ export default function MainUpload() {
 						<ReactPlayer 
 							onReady={handleOnReady}
 							onSeek={handleOnSeek}
-							onProgress={handleSetCurrentFrame} 
 							ref={handleSetPlayer} 
 							onDuration={handleSetDuration} 
 							url={videoFilePath} 
