@@ -181,7 +181,8 @@ function save_data(frame_num){
 	//return; //TODO Clear up
 	if(fabricCanvas.getObjects().length != 0){
 		//fabricCanvas.setBackgroundImage(null)
-		frame_data[frame_num] = fabricCanvas.toObject()
+		frame_data[frame_num] = fabricCanvas.toJSON()
+		frame_data[frame_num]["backgroundImage"] = null
 	}else{
 		frame_data[frame_num] = []
 	}
@@ -219,6 +220,7 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
+	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 
 	if(!segmentation_flag){
 		fabricCanvas.forEachObject(object => {
@@ -615,6 +617,7 @@ export default function MainUpload() {
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
 			frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
+			canvasBackgroundUpdate()
 			changeSave(true)
 		}
 	}  
@@ -728,20 +731,12 @@ export default function MainUpload() {
 		var img = new Image()
 		img.onload = function() {
 			loading_async = true;
-			if(frame_data[currentFrame].length > 0){
-				fabricCanvas.clear()
-				for(var i = 0; i < frame_data[currentFrame].length; i++){
-					console.log(frame_data[currentFrame][i])
-					fabricCanvas.add(frame_data[currentFrame][i])
-				}
-				fabricCanvas.renderAll();
-			}
-			/* fabricCanvas.loadFromJSON(frame_data[temp], function() {
+			fabricCanvas.loadFromJSON(frame_data[temp], function() {
 				console.log(frame_data[temp])
 				console.log("Refresh canvas" + temp)
 				fabricCanvas.renderAll();
 				loading_async = false;
-			}); */
+			});
 			var f_img = new fabric.Image(img, {
 				objectCaching: false
 			});
@@ -751,6 +746,8 @@ export default function MainUpload() {
 			fabricCanvas.renderAll();
 			canvas.remove()
 			//save_data()
+			setTableFrameNum(currentFrame)
+
 		};
 		img.src = base64ImageData
 /* 
@@ -874,7 +871,7 @@ export default function MainUpload() {
 					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
 						<AnnotationTable
 							annotation_data={annotation_data}
-							currentFrame={currentFrame}
+							currentFrame={tableFrameNum}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
 							remove_table_index={remove_table_index}
