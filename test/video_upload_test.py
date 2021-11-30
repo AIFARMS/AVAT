@@ -13,9 +13,9 @@ import os
 
 class AVAT_video_upload(unittest.TestCase):
     def setUp(self):
-        options = webdriver.FirefoxOptions()
+        options = webdriver.ChromeOptions()
         options.headless = True
-        self.driver = webdriver.Firefox(options=options)
+        self.driver = webdriver.Chrome(options=options)
         self.driver.get("http://localhost:3000")
 
     def test_video_upload_mp4(self):
