@@ -72,3 +72,4 @@ const columns = (remove_table_index) => [{
 }
 ]
 export {columns}
+ 
