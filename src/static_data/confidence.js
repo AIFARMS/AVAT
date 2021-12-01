@@ -1,18 +1,18 @@
 const confidence = [{
-    value: 'Unambigous',
-    label: 'Unambigous'
+    value: 'No occlusion',
+    label: 'No occlusion'
   },{
-    value: 'Reliable',
-    label: 'Reliable'
+    value: 'Minor occlusion',
+    label: 'Minor occlusion'
   },{
-    value: 'Seperated',
-    label: 'Seperated'
+    value: 'Split occlusion',
+    label: 'Split occlusion'
   },{
-    value: 'Part-missing',
-    label: 'Part-missing'
+    value: 'End occlusion',
+    label: 'End occlusion'
   },{
-    value: 'Suspected',
-    label: 'Suspected'
+    value: 'Critical occlusion',
+    label: 'Critical occlusion'
   },
 ]
 export {confidence};
