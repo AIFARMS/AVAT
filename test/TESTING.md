@@ -1,26 +1,30 @@
 # AVAT Testing
 
 ## Goals
-This folder serves as the main hub for running all the tests for the current version of AVAT. The testing has been made to be device agnostic so that should not be a limiting factor. The only thing that stays constant is that you will have to use Chrome and Chrome webdriver.
+This folder serves as the main hub for running all the tests for the current version of AVAT. 
 
 An alternative option would be to use docker-compose to run the tests as that automatically sets up an environment which can run the tests easily.
 
-## Install
+## Install and Run
 
 To get it working you need:
-1) Selenium
-2) Chrome
-3) Chrome webdriver
+* Docker and docker-compose
+    * Please refer to your specific system insturctions
+* Python
+    * venv python package should be installed.
 
-The above really depends based off of your system.
+Run ```./test.sh``` to automatically install the docker containers, install python dependencies and run 
 
 _For systems running Apple Silicon make sure to have an updated version of pip otherwise some of the installations might fail._
 
-Install the python virtual environment using the requirements.txt
+## Manual Testing
 
+### Browser Docker Containers
+
+Make sure you have the docker containers pre-installed and running:
 ```docker pull selenium/standalone-chrome```
 ```docker pull selenium/standalone-firefox```
 
-## Manual Testing
+### run_tests.py 
 
-To run the tests do ```python3 run_tests.py``` and it will be run automatically.
+To run the tests, do ```python3 run_tests.py``` and it will be run automatically.  with different browers that was setup from the docker containers. 
