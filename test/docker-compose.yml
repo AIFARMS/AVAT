@@ -37,7 +37,15 @@ services:
       - HUB_HOST=selenium-hub
       - HUB_PORT=4444
 
-  avat:
-    image: avat
-    ports:
-      - "3000:3000"
+  edge:
+    image: selenium/node-edge:4.1.0-20211123
+    container_name: edge
+    deploy:
+      replicas: 5
+    volumes:
+      - /dev/shm:/dev/shm
+    depends_on:
+      - selenium-hub
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444

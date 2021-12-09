@@ -3,3 +3,4 @@
 /test/python_env
 /test/geckodriver.log
 .package-lock.json
+/test/nohup.out
