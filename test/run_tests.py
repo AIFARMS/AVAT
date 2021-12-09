@@ -3,7 +3,7 @@ import os
 import sys, getopt
 
 def main(argv):
-    files = ['selection_test.py', 'upload_dialog_test.py', 'navbar_test.py']
+    files = ['selection_test.py', 'upload_dialog_test.py', 'navbar_test.py', 'boundingbox_test.py', 'video_upload_test.py']
     
     threaded = False
 
@@ -18,8 +18,10 @@ def main(argv):
             threaded = bool(args)
 
     if threaded:
+        print("Running threaded tests")
         run_tests_threaded(files)
     else:
+        print("Running tests in sequential order")
         run_tests_normal(files)
 
 def run_tests_normal(files):
@@ -40,7 +42,7 @@ def run_tests_threaded(files):
         i.join()
 
 def run_file(fp):
-    os.system("python3 " + fp + " | grep Ran")
+    os.system("python3 " + fp)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
