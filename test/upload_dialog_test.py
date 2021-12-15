@@ -8,14 +8,20 @@ from selenium.common.exceptions import TimeoutException
 
 #import page
 import unittest
-
+import json
 
 class AVAT_Upload(unittest.TestCase):
     def setUp(self):
-        options = webdriver.FirefoxOptions()
-        options.headless = True
-        self.driver = webdriver.Firefox(options=options)
-        self.driver.get("http://localhost:3000")
+        with open("SELENIUM_ENV.json", "r") as f: #https://stackoverflow.com/questions/49196889/getting-variables-from-a-external-json-file-python
+            options = json.load(f)
+        self.driver = webdriver.Remote(
+            command_executor='http://localhost:4444/wd/hub',
+            desired_capabilities={
+                'browserName': options['browserName'],
+                'javascriptEnabled': True
+            }
+        )
+        self.driver.get("https://aifarms.github.io/AVAT/")
 
     def test_annotatorName(self):
         self.driver.find_element(By.TAG_NAME, "button").click()
@@ -84,7 +90,7 @@ class AVAT_Upload(unittest.TestCase):
         assert len(frame_rate) is 2
 
     def tearDown(self):
-        self.driver.close()
+        self.driver.quit()
         
 
 if __name__ == "__main__":

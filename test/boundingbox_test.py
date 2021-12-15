@@ -24,32 +24,19 @@ class AVAT_video_upload(unittest.TestCase):
         )
         self.driver.get("https://aifarms.github.io/AVAT/")
 
-    def test_video_upload_mp4(self):
+    def test_bbox(self):
+        #uplaod video
         self.driver.find_element(By.TAG_NAME, "button").click()
         video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
         curr_dir = os.getcwd() 
         video_upload.send_keys(curr_dir + "/test_video.mp4")
         self.driver.find_element(By.CLASS_NAME, "close").click()
         frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
+        #Check video was uploaded
         assert "Frame #1 / 1200" in frame.text
-
-    def test_video_upload_avi(self):
-        self.driver.find_element(By.TAG_NAME, "button").click()
-        video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
-        curr_dir = os.getcwd() 
-        video_upload.send_keys(curr_dir + "/test_video.avi")
-        self.driver.find_element(By.CLASS_NAME, "close").click()
-        frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
-        assert "Frame #1 / 1200" in frame.text
-
-    def test_video_upload_mkv(self):
-        self.driver.find_element(By.TAG_NAME, "button").click()
-        video_upload = self.driver.find_elements(By.TAG_NAME, "input")[2]
-        curr_dir = os.getcwd() 
-        video_upload.send_keys(curr_dir + "/test_video.mkv")
-        self.driver.find_element(By.CLASS_NAME, "close").click()
-        frame = self.driver.find_elements(By.CLASS_NAME, "btn-secondary")[0]
-        assert "Frame #1 / 1200" in frame.text
+        #Switch mode and transfer to
+        self.driver.send_keys('2')
+        self.driver.send_keys('a')
 
     def tearDown(self):
         self.driver.quit()
