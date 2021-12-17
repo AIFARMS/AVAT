@@ -3,6 +3,7 @@ import { Type } from 'react-bootstrap-table2-editor';
 import {behaviors} from './behaviors'
 import {posture} from './posture'
 import {status} from './status'
+import {confidence} from './confidence'
 import Button from 'react-bootstrap/Button'
 
 const columns = (remove_table_index) => [{
@@ -19,19 +20,26 @@ const columns = (remove_table_index) => [{
     return { backgroundColor };
   }
 },{
+  dataField: "posture",
+  text: "Posture",
+  editor: {
+      type: Type.SELECT,
+      options: posture,
+  }
+},
+{
   dataField: "behavior",
   text: "Behavior",
   editor: {
       type: Type.SELECT,
       options: behaviors,
   }
-},
-{
-  dataField: "posture",
-  text: "Posture",
+},{
+  dataField: "confidence",
+  text: "Confidence",
   editor: {
       type: Type.SELECT,
-      options: posture,
+      options: confidence,
   }
 },{
   dataField: "remove",
