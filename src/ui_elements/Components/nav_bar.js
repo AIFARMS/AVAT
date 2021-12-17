@@ -44,7 +44,7 @@ export default function CustomNavBar(props){
 	const handleUploadShow = () => setUploadShow(true)
 
 	const handleDownloadJSON = () => {
-		var converted_annot = new ExportingAnnotation(props.frame_data, props.fabricCanvas, props.VIDEO_METADATA).get_frame_json()
+		var converted_annot = new ExportingAnnotation(props.frame_data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
 

@@ -362,7 +362,12 @@ export default function MainUpload() {
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
 		}
-		annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: ""})
+		if(inputType === 1){
+			console.log(image_frames[currentFrame]['name'])
+			annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", dataType: "image", dataName: image_frames[currentFrame]['name']})
+		}else{
+			annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", dataType: "video", dataName: "frame_"+currentFrame})
+		}
 		console.log(annotation_data[currentFrame])
 		save_data(currentFrame)
 		setBoxCount(boxCount + 1);
@@ -842,6 +847,7 @@ export default function MainUpload() {
 				save_data={save_data}
 				handle_visual_toggle={handle_visual_toggle}
 				handleInputType={handleInputType}
+				image_frames={image_frames}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 

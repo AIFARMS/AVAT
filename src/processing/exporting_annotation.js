@@ -1,8 +1,9 @@
 export default class ExportingAnnotation{
-    constructor(annotation_data, canvas, VIDEO_METADATA){
+    constructor(annotation_data, canvas, VIDEO_METADATA, image_data){
         this.frame_data = annotation_data
         this.canvas = canvas
         this.metadata = VIDEO_METADATA
+        this.image_data = image_data
     }
 
     get_frame_json(){
@@ -10,6 +11,12 @@ export default class ExportingAnnotation{
         console.log(this.metadata)
         for(var i = 0; i < this.frame_data.length; i++){
             var curr = []
+            if(this.image_data.length != 0){
+                curr.push({"fileName:": this.image_data[i]['name']})
+            }else{
+                curr.push({"fileName:": this.metadata['name']})
+            }
+
             if(this.frame_data[i] == []){
                 continue;
             }
@@ -40,6 +47,7 @@ export default class ExportingAnnotation{
                 }
 
             }
+
             standard_annot[i] = curr
         }
         return standard_annot
