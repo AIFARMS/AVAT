@@ -3,7 +3,7 @@ const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
 export default class ExtractingAnnotation{
-    constructor(annotation_json, canvas){
+    constructor(annotation_json, canvas, image_data){
         this.frame_data = annotation_json['annotations']
         this.annotation_data = annotation_json['behavior_data']
         this.canvas = canvas
@@ -31,7 +31,6 @@ export default class ExtractingAnnotation{
             }
             //console.log(curr_frame)
             if(curr_frame['objects'] !== undefined){
-                console.log("true")
                 return true;
             }
         }
