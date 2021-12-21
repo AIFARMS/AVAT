@@ -13,6 +13,5 @@ const confidence = [{
   },{
     value: 'Suspected',
     label: 'Suspected'
-  },
-]
+  }]
 export {confidence};

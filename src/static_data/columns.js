@@ -14,11 +14,7 @@ const columns = (remove_table_index) => [{
 },{
   dataField: "global_id",
   text: "Glo",
-  headerStyle: () => { return { width: "50px", left: 0}; },
-  editCellStyle: (cell, row, rowIndex, colIndex) => {
-    const backgroundColor = cell > 2101 ? '#00BFFF' : '#00FFFF';
-    return { backgroundColor };
-  }
+  headerStyle: () => { return { width: "70px", left: 0}; }
 },{
   dataField: "posture",
   text: "Posture",
