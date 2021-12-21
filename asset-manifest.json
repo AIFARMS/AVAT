@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/AVAT/static/css/main.d1b05096.chunk.css",
-    "main.js": "/AVAT/static/js/main.1a4a093a.chunk.js",
-    "main.js.map": "/AVAT/static/js/main.1a4a093a.chunk.js.map",
+    "main.js": "/AVAT/static/js/main.0cbc7bd6.chunk.js",
+    "main.js.map": "/AVAT/static/js/main.0cbc7bd6.chunk.js.map",
     "runtime-main.js": "/AVAT/static/js/runtime-main.aeda676c.js",
     "runtime-main.js.map": "/AVAT/static/js/runtime-main.aeda676c.js.map",
     "static/css/2.a6df0aa1.chunk.css": "/AVAT/static/css/2.a6df0aa1.chunk.css",
     "static/js/2.0b0bce17.chunk.js": "/AVAT/static/js/2.0b0bce17.chunk.js",
     "static/js/2.0b0bce17.chunk.js.map": "/AVAT/static/js/2.0b0bce17.chunk.js.map",
     "index.html": "/AVAT/index.html",
-    "precache-manifest.f58bf7d7da0ed4e0d0acc1b65bd1e4c5.js": "/AVAT/precache-manifest.f58bf7d7da0ed4e0d0acc1b65bd1e4c5.js",
+    "precache-manifest.603d885fb3c275481c6ba34f76a8b1ba.js": "/AVAT/precache-manifest.603d885fb3c275481c6ba34f76a8b1ba.js",
     "service-worker.js": "/AVAT/service-worker.js",
     "static/css/2.a6df0aa1.chunk.css.map": "/AVAT/static/css/2.a6df0aa1.chunk.css.map",
     "static/css/main.d1b05096.chunk.css.map": "/AVAT/static/css/main.d1b05096.chunk.css.map",
@@ -20,6 +20,6 @@
     "static/css/2.a6df0aa1.chunk.css",
     "static/js/2.0b0bce17.chunk.js",
     "static/css/main.d1b05096.chunk.css",
-    "static/js/main.1a4a093a.chunk.js"
+    "static/js/main.0cbc7bd6.chunk.js"
   ]
 }
