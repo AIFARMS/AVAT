@@ -14,7 +14,6 @@ import ExtractingAnnotation from '../../processing/annotation-processing'
 import { BoundingBox } from '../../annotations/bounding_box'
 import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
-import { Edit } from "../../annotations/segmentation_edit";
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
@@ -350,7 +349,7 @@ export default function MainUpload() {
 			//TODO fix KeyPoint
 			alert("KeyPoint annotation are currently unavailable")
 			annotation_type_txt = "k"
-			var keyp = new KeyPoint().generate_stick(fabricCanvas)
+			//var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
 			//TODO Fix segmentation issues
 			annotation_type_txt = "s"	  
@@ -615,6 +614,7 @@ export default function MainUpload() {
 			save_localstorage()
 			skip_frame_backward()
 		}else if (event.key === "w"){
+			canvasBackgroundUpdate()
 			handlePlaying()
 		}else if (event.key === "e"){
 			save_localstorage()
@@ -863,7 +863,7 @@ export default function MainUpload() {
 			{
 				upload === true && 
 				<div style={{display: "grid"}} show={upload}>
-					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: 100}}>
+					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: player_opacity}}>
 						{
 							inputType==0 && 
 							<ReactPlayer 
