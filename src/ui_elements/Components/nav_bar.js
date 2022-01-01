@@ -93,7 +93,7 @@ export default function CustomNavBar(props){
 	}
 
 	const edit_click = (event) => {
-		Edit(props.fabricCanvas)
+		Edit(props.fabricCanvas, props.save_data)
 	}
 
 	/* TODO Add local storgae option
@@ -232,7 +232,7 @@ export default function CustomNavBar(props){
 					</Dropdown>{' '}
 					
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
-					<Button variant="primary" disabled={true} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
+					<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
 					<Dropdown as={ButtonGroup} drop='left'>
 						<Button variant="success" onClick={props.addToCanvas}>Add</Button>
