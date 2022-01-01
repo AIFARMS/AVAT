@@ -19,8 +19,12 @@ export default class ExportingAnnotation{
             if(frame_objects == undefined){
                 continue;
             }
+            
             for(var j = 0; j < frame_objects.length; j++){
-
+                console.log(frame_objects[j])
+                if(frame_objects[j]['type'] !== "group"){
+                    continue;
+                }
                 if(frame_objects[j]['objects'][0]['type'] === "rect"){
                     console.log(frame_objects[j])
                     var x = (frame_objects[j]['left'] / this.canvas.width) * this.metadata['horizontal_res']
