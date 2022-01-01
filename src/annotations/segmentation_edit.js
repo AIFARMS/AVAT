@@ -60,27 +60,23 @@ function Edit(canvas) {
     // may want copy and paste on different moment.
     // and you do not want the changes happened
     // later to reflect on the copy.
-    var group = canvas.getActiveObject();
-    if(group == undefined || group == null){
+    var curr_obj = canvas.getActiveObject();
+    if(curr_obj == undefined || curr_obj == null){
         alert("Please select a segmentation")
         return
-    }
-    
-    if(group._objects == undefined && group.points == undefined){
+    }else if(curr_obj._objects == undefined && curr_obj.points == undefined){
         alert("Please select a segmentation")
         return
     }
     var poly;
-    if(group.points == undefined){
-        poly = group._objects[0]
-        var text = group._objects[1]
-        group.destroy()
-        //canvas.remove(text)
-        //canvas.remove(poly)
-        //canvas.remove(group)
+    if(curr_obj.type === "group"){
+        poly = curr_obj._objects[0]
+        var text = curr_obj._objects[1]
+        curr_obj.destroy()
+        canvas.remove(curr_obj)
         canvas.add(poly)
-    }else{
-        poly = group
+    }else if(curr_obj.type === "polygon"){
+        poly = curr_obj
     }
     
 
@@ -118,8 +114,7 @@ function Edit(canvas) {
         grouppo.lockMovementX = true;
         canvas.remove(poly);
         canvas.add(grouppo);
-        console.log(grouppo);
-
+        console.log(canvas.getObjects())
     }
     poly.hasBorders = !poly.edit;
     canvas.requestRenderAll();

@@ -94,6 +94,7 @@ export default function CustomNavBar(props){
 
 	const edit_click = (event) => {
 		Edit(props.fabricCanvas, props.save_data)
+		props.toggle_segmentation()
 	}
 
 	/* TODO Add local storgae option

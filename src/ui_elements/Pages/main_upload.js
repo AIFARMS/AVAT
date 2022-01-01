@@ -263,7 +263,8 @@ export default function MainUpload() {
 		}
 	}
 
-	const removeRow = (index) => {		var index_num = 0;
+	const removeRow = (index) => {		
+		var index_num = 0;
 		for(var i = 0; i < annotation_data[currentFrame].length; i++){
 			if(annotation_data[currentFrame][i]['id'] == index){
 				index_num = i
@@ -271,12 +272,16 @@ export default function MainUpload() {
 			}
 		}
 
-		if(index.substring(index.length-1, index.length) !== "f"){
+		if(index.substring(index.length-1, index.length) !== "f"){ //Disabled removal of key-point for now
 			var current_objects = fabricCanvas.getObjects()
 			for(var i = 0; i < current_objects.length; i++){
+				console.log(current_objects[i])
 				if(current_objects[i]['_objects'][1]['text'] === index){
+					console.log("REMOVED")
+					console.log(current_objects[i])
 					fabricCanvas.remove(current_objects[i]);
 					fabricCanvas.fire('saveData');
+					fabricCanvas.renderAll();
 					break;
 				}
 			}
@@ -552,7 +557,10 @@ export default function MainUpload() {
 		if(keyCheck === false){
 			return;
 		}
-
+		if(segmentation_flag === true){
+			alert("Please finish your current action!")
+			return;
+		}
 		if (event.key === ANNOTATION_BBOX){
 			toast_text = "Mode Switch: Bounding Box"
 			changeSave(true)
@@ -818,6 +826,7 @@ export default function MainUpload() {
 				handle_visual_toggle={handle_visual_toggle}
 				handleInputType={handleInputType}
 				image_frames={image_frames}
+				toggle_segmentation={toggle_segmentation}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 
