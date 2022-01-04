@@ -620,7 +620,7 @@ export default function MainUpload() {
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
-			frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
+			frame_data[currentFrame] = previous_canvas_annotation.slice();
 			canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
 			changeSave(true)
 		}
