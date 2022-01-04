@@ -4,3 +4,4 @@
 /test/geckodriver.log
 .package-lock.json
 /test/nohup.out
+.DS_Store

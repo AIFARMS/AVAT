@@ -71,7 +71,8 @@ function Edit(canvas) {
     var poly;
     if(curr_obj.type === "group"){
         poly = curr_obj._objects[0]
-        var text = curr_obj._objects[1]
+        var text = curr_obj._objects[1]['text']
+        poly['local_id'] = text
         curr_obj.destroy()
         canvas.remove(curr_obj)
         canvas.add(poly)
@@ -85,7 +86,7 @@ function Edit(canvas) {
     if (poly.edit) {
         var lastControl = poly.points.length - 1;
         poly.cornerStyle = 'circle';
-        poly.cornerColor = 'rgba(0,0,255,0.5)';
+        poly.cornerColor = 'rgba(0,0,255,1)';
         poly.controls = poly.points.reduce(function(acc, point, index) {
                 acc['p' + index] = new fabric.Control({
                     positionHandler: polygonPositionHandler,
@@ -99,7 +100,9 @@ function Edit(canvas) {
         poly.cornerColor = 'blue';
         poly.cornerStyle = 'rect';
         poly.controls = fabric.Object.prototype.controls;
-        
+        if(poly.local_id == undefined){
+            alert("Error - missing poly.local_id. Please report this bug in the bug tracker and the steps taken to reproduce this.")
+        }
         var display_text = new fabric.Text(poly.local_id.toString(), {
             fontSize: 20,
             top: poly.points[0].y,
