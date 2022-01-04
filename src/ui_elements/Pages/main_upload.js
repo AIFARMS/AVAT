@@ -620,9 +620,16 @@ export default function MainUpload() {
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
-			frame_data[currentFrame] = previous_canvas_annotation.slice();
-			canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
-			changeSave(true)
+			frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
+			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
+				console.log(objects)	
+				frame_data[currentFrame] = objects	
+				for(var i = 0; i < objects.length; i++){
+					frame_data[currentFrame][i]['local_id'] = previous_canvas_annotation[i]['local_id']
+				}
+				canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
+				changeSave(true)
+			});
 		}
 	}  
 
