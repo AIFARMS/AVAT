@@ -409,6 +409,8 @@ export default function MainUpload() {
 		frame_data = oldAnnotation.get_frame_data();
 		annotation_data = oldAnnotation.get_annotation_data();
 		handle_visual_toggle()
+		canvasBackgroundUpdate()
+		console.log(oldAnnotation.get_frame_data())
 	}, [oldAnnotation]);
 
 	const downloadOldAnnotation = (file) => {
