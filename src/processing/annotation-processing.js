@@ -98,10 +98,10 @@ export default class ExtractingAnnotation{
                     grouppo.selectable = false;
 
                     this.canvas.add(grouppo)
-                    temp_data.push(grouppo.toJSON())
+                    temp_data.push(grouppo)
                 }
             }
-            new_annotations.push({"objects": temp_data})
+            new_annotations.push(temp_data)
         }
         console.log(new_annotations)
         return new_annotations
