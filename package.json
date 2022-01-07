@@ -2,7 +2,7 @@
   "name": "avat",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://eddie0131.github.io/AVAT/",
+  "homepage": ".",
   "dependencies": {
     "@tensorflow-models/coco-ssd": "^2.2.2",
     "@tensorflow-models/deeplab": "^0.2.1",
