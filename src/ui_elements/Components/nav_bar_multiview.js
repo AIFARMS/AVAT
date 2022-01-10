@@ -26,7 +26,7 @@ import ProcessVideo from './process_video';
 
 
 
-export default function CustomNavBar(props){
+export default function MultiviewCustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
 	const [startDate, setStartDate] = useState(0);
@@ -35,7 +35,7 @@ export default function CustomNavBar(props){
 	//const [playbackRate, setPlaybackRate] = useState(0)
 	const [horizontalRes, setHorizontalRes] = useState(0)
 	const [verticalRes, setVerticalRes] = useState(0)
-	const [videoFormat, setVideoFormat] = useState(0)
+	const [videoFormat, setVideoFormat] = useState(2)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
@@ -49,6 +49,10 @@ export default function CustomNavBar(props){
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(props.frame_data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
+	}
+
+	const handleDownloadCSV = () => {
+		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data, props.columns)
 	}
 
 	const handleSetStartDate = (date) => {
@@ -99,11 +103,6 @@ export default function CustomNavBar(props){
 		handleEditSeg();		
 		Edit(props.fabricCanvas, props.save_data);
 		props.toggle_segmentation();
-		props.save_data()
-	}
-
-	const handle_link_open = () => {
-		window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
 	}
 
 	/* TODO Add local storgae option
@@ -147,8 +146,6 @@ export default function CustomNavBar(props){
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="0">Upload</option>
-							<option value="1">Youtube</option>
 							<option value="2">Image</option>
 						</Form.Control>
 						<NavDropdown.Divider />
@@ -184,9 +181,17 @@ export default function CustomNavBar(props){
 							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
 						</div>
 					}{videoFormat === 2 &&
-						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
-						</Form>
+                        <div>
+                            <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+                                <Form.File multiple id="file" label="Image-set 1 Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+                            </Form>
+                            <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+                                <Form.File multiple id="file" label="Image-set 2 Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+                            </Form>
+                            <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+                                <Form.File multiple id="file" label="Image-set 3 Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+                            </Form>
+                        </div>
 					}
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
@@ -220,9 +225,10 @@ export default function CustomNavBar(props){
 						<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">
 							<NavDropdown.Item onClick={handleDownloadJSON}>JSON</NavDropdown.Item>
 							<NavDropdown.Divider />
+							<NavDropdown.Item onClick={handleDownloadCSV}>CSV</NavDropdown.Item>
 						</NavDropdown>
 						<NavLink onClick={handleShow}>Instructions</NavLink>
-						<NavLink onClick={handle_link_open}>Report</NavLink>
+						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
 					{
@@ -231,7 +237,10 @@ export default function CustomNavBar(props){
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					{
-						props.fabricCanvas != undefined && props.fabricCanvas.getActiveObject() !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+						editSeg === false && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+					}
+					{
+						editSeg === true && <Button variant="outline-success" onClick={edit_click}>Confirm</Button>
 					}
 					{' '}
 					<Dropdown as={ButtonGroup}>
