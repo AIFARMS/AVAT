@@ -102,10 +102,6 @@ export default function CustomNavBar(props){
 		props.save_data()
 	}
 
-	const handle_link_open = () => {
-		window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
-	}
-
 	/* TODO Add local storgae option
 	if (localStorage.getItem('frame_data') != null){
 		alert("There is some data stored")
@@ -222,7 +218,7 @@ export default function CustomNavBar(props){
 							<NavDropdown.Divider />
 						</NavDropdown>
 						<NavLink onClick={handleShow}>Instructions</NavLink>
-						<NavLink onClick={handle_link_open}>Report</NavLink>
+						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
 					{
@@ -231,7 +227,8 @@ export default function CustomNavBar(props){
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					{
-						props.fabricCanvas != undefined && props.fabricCanvas.getActiveObject() !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+						//props.fabricCanvas != undefined &&props.fabricCanvas.getActiveObject !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+						<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
 					}
 					{' '}
 					<Dropdown as={ButtonGroup}>

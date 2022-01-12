@@ -602,19 +602,20 @@ export default function MainUpload() {
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(annotation_data[previousFrameNumber]))
 			frame_data[currentFrame] = JSON.parse(JSON.stringify(frame_data[previousFrameNumber]))
-			/* fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
+			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
 				console.log(objects)	
 				frame_data[currentFrame] = objects	
 				for(var i = 0; i < objects.length; i++){
 					frame_data[currentFrame][i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
 				}
-				canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
-				changeSave(true)
-			}); */
-			for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
+				//canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
+				//changeSave(true)
+			}); 
+			/* for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
 				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
-			}
-			save_data(currentFrame)
+			} */
+			console.log(frame_data[currentFrame][0])
+			//save_data(currentFrame)
 			changeSave(true)
 			canvasBackgroundUpdate()
 		}
