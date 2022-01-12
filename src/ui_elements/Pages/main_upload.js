@@ -146,7 +146,6 @@ fabricCanvas.on('mouse:up', function(opt) {
   });
 	  
 
-
 var temp_color;
 var video_width = 0;
 var video_height = 0;
@@ -154,10 +153,7 @@ var frame_data = [[]];
 var annotation_data = [[]];
 var upload = false;
 var disable_buttons = true;
-var sliderPercent = 0
 var toast_text = ""
-var previous_annotation = []
-var previous_canvas_annotation = []
 var ANNOTATOR_NAME = ""
 var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
@@ -165,7 +161,6 @@ var play_button_text = "ERROR"
 var temp_flag = false
 var time_unix = 0;
 var segmentation_flag = false;
-var temp_selection_color;
 var on_ready_flag = false;
 var image_frames = []
 var total_frames
@@ -213,6 +208,8 @@ export default function MainUpload() {
 	const [inputType, setInputType] = useState(0)
 	const [currentFrame, setCurrentFrame] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
+	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
+	const [customColumns, setCustomColumns] = useState(columns)
 
 	if(!segmentation_flag){
 		fabricCanvas.forEachObject(object => {
@@ -311,8 +308,8 @@ export default function MainUpload() {
 		if(annotation_data[currentFrame].length == 0){
 			return;
 		}
-		previous_annotation = annotation_data[currentFrame]
-		previous_canvas_annotation = frame_data[currentFrame]
+		console.log(frame_data[currentFrame])
+		setPreviousFrameNumber(currentFrame)
 	}
 
 	const addToCanvas = () =>{
@@ -441,23 +438,6 @@ export default function MainUpload() {
 		player_opacity = 0
 	}
 
-	const handleSeekChange = e => {
-		sliderPercent = (parseFloat(e.target.value))
-		player.seekTo(sliderPercent)
-	}
-
-	const handleSeekMouseDown = e => {
-		setSeeking(true)
-		sliderPercent = (parseFloat(e.target.value))
-		//player.seekTo(parseFloat(e.target.value))
-	}
-
-	const handleSeekMouseUp = e => {
-		setSeeking(false)
-		sliderPercent = (parseFloat(e.target.value))
-		//player.seekTo(parseFloat(e.target.value))
-	}
-
 	const handleSetPlayer = val => {
 		if(val != null){
 		if(val['player'] != null){
@@ -515,7 +495,6 @@ export default function MainUpload() {
 			}
 			handleSetCurrentFrame(frameVal)
 		}
-		//canvasBackgroundUpdate()
 	}
 
 	const skip_frame_backward = e => {
@@ -535,12 +514,12 @@ export default function MainUpload() {
 			}
 			handleSetCurrentFrame(frameVal)
 		}
-		//canvasBackgroundUpdate()
 	}
 
 	useEffect(() => {
-		//alert("")
 		if(inputType === 1){
+			canvasBackgroundUpdate()
+		}else if(duration != 0){
 			canvasBackgroundUpdate()
 		}
 	}, [currentFrame]);
@@ -621,17 +600,24 @@ export default function MainUpload() {
 			}
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
-			annotation_data[currentFrame] = JSON.parse(JSON.stringify(previous_annotation))
-			frame_data[currentFrame] = JSON.parse(JSON.stringify(previous_canvas_annotation))
+			annotation_data[currentFrame] = JSON.parse(JSON.stringify(annotation_data[previousFrameNumber]))
+			frame_data[currentFrame] = JSON.parse(JSON.stringify(frame_data[previousFrameNumber]))
 			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
 				console.log(objects)	
 				frame_data[currentFrame] = objects	
 				for(var i = 0; i < objects.length; i++){
-					frame_data[currentFrame][i]['local_id'] = previous_canvas_annotation[i]['local_id']
+					frame_data[currentFrame][i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
 				}
-				canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
-				changeSave(true)
-			});
+				//canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
+				//changeSave(true)
+			}); 
+			/* for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
+				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
+			} */
+			console.log(frame_data[currentFrame][0])
+			//save_data(currentFrame)
+			changeSave(true)
+			canvasBackgroundUpdate()
 		}
 	}  
 
@@ -641,10 +627,6 @@ export default function MainUpload() {
 	}, [onKeyPress]);
 	
 
-
-	const handle_link_open = () => {
-		window.open("https://forms.gle/CrJuYEoT39uFgnR17", "_blank")
-	}
 
 	const change_annotator_name = (event) => {
 		ANNOTATOR_NAME = event
@@ -740,47 +722,42 @@ export default function MainUpload() {
 			};
 			img.src = URL.createObjectURL(image_frames[currentFrame])
 			return;
-		}
+		}else if(inputType == 0){ //This is for when videos are uploaded
+			//TODO cleanup variabkle
+			console.log("updated canvas")
+			var htmlvideo = document.getElementsByTagName('video')[0]
+			let canvas = document.createElement('canvas');
+			let context = canvas.getContext('2d');
+			let [w, h] = [scaling_factor_width, scaling_factor_height]
+			canvas.width =  scaling_factor_width;
+			canvas.height = scaling_factor_height;
 		
-		//TODO cleanup variabkle
-		var temp = parseInt(JSON.parse(JSON.stringify(currentFrame)));
+			context.drawImage(htmlvideo, 0, 0, w, h);
+			let base64ImageData = canvas.toDataURL();
 
-		var htmlvideo = document.getElementsByTagName('video')[0]
-		var total_frames = htmlvideo.duration * frame_rate
-		console.log(total_frames)
-		console.log(htmlvideo.duration)
-	
-		let canvas = document.createElement('canvas');
-		let context = canvas.getContext('2d');
-		let [w, h] = [scaling_factor_width, scaling_factor_height]
-		canvas.width =  scaling_factor_width;
-		canvas.height = scaling_factor_height;
-	
-		context.drawImage(htmlvideo, 0, 0, w, h);
-		let base64ImageData = canvas.toDataURL();
-
-		var img = new Image()
-		img.onload = function() {
-			fabricCanvas.clear()
-			if(frame_data[currentFrame] != undefined){
-				for(var i = 0; i < frame_data[currentFrame].length; i++){
-					fabricCanvas.add(frame_data[currentFrame][i])
+			var img = new Image()
+			img.onload = function() {
+				fabricCanvas.clear()
+				if(frame_data[currentFrame] != undefined){
+					for(var i = 0; i < frame_data[currentFrame].length; i++){
+						fabricCanvas.add(frame_data[currentFrame][i])
+					}
 				}
-			}
-			var f_img = new fabric.Image(img, {
-				objectCaching: false
-			});
-		
-			fabricCanvas.setBackgroundImage(f_img);
-		
-			fabricCanvas.renderAll();
-			canvas.remove()
-			//save_data()
-			setTableFrameNum(currentFrame)
+				var f_img = new fabric.Image(img, {
+					objectCaching: false
+				});
+			
+				fabricCanvas.setBackgroundImage(f_img);
+			
+				fabricCanvas.renderAll();
+				canvas.remove()
+				//save_data()
+				setTableFrameNum(currentFrame)
 
-		};
+			};
 
-		img.src = base64ImageData
+			img.src = base64ImageData
+		}
 	}
 
 	const handleOnReady = val => {
@@ -791,12 +768,6 @@ export default function MainUpload() {
 		}
 	}
 
-	const handleOnSeek = val => {
-		canvasBackgroundUpdate()
-		sliderPercent = (currentFrame/(duration * frame_rate))
-		setVisualToggle(Math.floor(Math.random() * 999999999999))
-	}
-
 	return (
 		<div>
 			<CustomNavBar 
@@ -805,7 +776,6 @@ export default function MainUpload() {
 				video_height={video_height} 
 				skip_value={skip_value} 
 				ANNOTATOR_NAME={ANNOTATOR_NAME}
-				handle_link_open={handle_link_open}
 				handleOldAnnotation={handleOldAnnotation}
 				handleVideoUpload={handleVideoUpload}
 				currentFrame={currentFrame}
@@ -824,7 +794,6 @@ export default function MainUpload() {
 				VIDEO_METADATA={VIDEO_METADATA}
 				scaling_factor_height={scaling_factor_height}
 				scaling_factor_width={scaling_factor_width}
-				columns={columns}
 				handleSetPlaybackRate={handleSetPlaybackRate}
 				toggleKeyCheck={toggleKeyCheck}
 				setFrameRate={setFrameRate}
@@ -854,7 +823,6 @@ export default function MainUpload() {
 							inputType==0 && 
 							<ReactPlayer 
 								onReady={handleOnReady}
-								onSeek={handleOnSeek}
 								ref={handleSetPlayer} 
 								onDuration={handleSetDuration} 
 								url={videoFilePath} 
@@ -878,16 +846,6 @@ export default function MainUpload() {
 							save_data={save_data}
 							scaling_factor_height={scaling_factor_height}
 							scaling_factor_width={scaling_factor_width}
-						/>
-					</div>
-					<div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
-						<input
-							style={{width: scaling_factor_width}}
-							type='range' min={0} max={0.999999} step='any'
-							value={sliderPercent}
-							onChange={handleSeekChange}
-							onMouseDown={handleSeekMouseDown}
-							onMouseUp={handleSeekMouseUp}
 						/>
 					</div>
 					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>

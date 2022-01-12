@@ -24,6 +24,8 @@ import { run_model_segment } from '../../tensorflow/SemanticSegmentation';
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 
+
+
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
@@ -37,6 +39,7 @@ export default function CustomNavBar(props){
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
+	const [editSeg, setEditSeg] = useState(false)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -46,10 +49,6 @@ export default function CustomNavBar(props){
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(props.frame_data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
-	}
-
-	const handleDownloadCSV = () => {
-		downloadFileCSV(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, props.annotation_data, props.columns)
 	}
 
 	const handleSetStartDate = (date) => {
@@ -92,9 +91,15 @@ export default function CustomNavBar(props){
 		}
 	}
 
+	const handleEditSeg = (event) => {
+		setEditSeg(!editSeg)
+	}
+
 	const edit_click = (event) => {
-		Edit(props.fabricCanvas, props.save_data)
-		props.toggle_segmentation()
+		handleEditSeg();		
+		Edit(props.fabricCanvas, props.save_data);
+		props.toggle_segmentation();
+		props.save_data()
 	}
 
 	/* TODO Add local storgae option
@@ -211,7 +216,6 @@ export default function CustomNavBar(props){
 						<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">
 							<NavDropdown.Item onClick={handleDownloadJSON}>JSON</NavDropdown.Item>
 							<NavDropdown.Divider />
-							<NavDropdown.Item onClick={handleDownloadCSV}>CSV</NavDropdown.Item>
 						</NavDropdown>
 						<NavLink onClick={handleShow}>Instructions</NavLink>
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
@@ -222,7 +226,11 @@ export default function CustomNavBar(props){
 						<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
-					<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>{' '}
+					{
+						//props.fabricCanvas != undefined &&props.fabricCanvas.getActiveObject !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+						<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+					}
+					{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
 						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
@@ -241,8 +249,7 @@ export default function CustomNavBar(props){
 						<Dropdown.Menu>
 							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("1")}}>Behavior Annotation</Dropdown.Item>
 							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("2")}}>BoundingBox</Dropdown.Item>
-							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("3")}}>KeyPoint</Dropdown.Item>
-							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("4")}}>Segmentation</Dropdown.Item>
+							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("3")}}>Segmentation</Dropdown.Item>
 						</Dropdown.Menu>
 					</Dropdown>
 					{/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}

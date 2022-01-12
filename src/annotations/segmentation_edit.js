@@ -1,8 +1,6 @@
 const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
-// define a function that can locate the controls.
-// this function will be used both for drawing and for interaction.
 function polygonPositionHandler(dim, finalMatrix, fabricObject) {
     var x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x),
         y = (fabricObject.points[this.pointIndex].y - fabricObject.pathOffset.y);
@@ -16,12 +14,6 @@ function polygonPositionHandler(dim, finalMatrix, fabricObject) {
     );
 }
 
-// define a function that will define what the control does
-// this function will be called on every mouse move after a control has been
-// clicked and is being dragged.
-// The function receive as argument the mouse event, the current trasnform object
-// and the current position in canvas coordinate
-// transform.target is a reference to the current object being transformed,
 function actionHandler(eventData, transform, x, y) {
     var polygon = transform.target,
         currentControl = polygon.controls[polygon.__corner],
@@ -36,8 +28,6 @@ function actionHandler(eventData, transform, x, y) {
     return true;
 }
 
-// define a function that can keep the polygon in the same position when we change its
-// width/height/top/left.
 function anchorWrapper(anchorIndex, fn) {
     return function(eventData, transform, x, y) {
         var fabricObject = transform.target,
@@ -61,13 +51,14 @@ function Edit(canvas) {
     // and you do not want the changes happened
     // later to reflect on the copy.
     var curr_obj = canvas.getActiveObject();
+    console.log(curr_obj)
     if(curr_obj == undefined || curr_obj == null){
         alert("Please select a segmentation")
         return
-    }else if(curr_obj._objects == undefined && curr_obj.points == undefined){
+    }/* else if(curr_obj._objects == undefined && curr_obj.points == undefined){
         alert("Please select a segmentation")
         return
-    }
+    } */
     var poly;
     if(curr_obj.type === "group"){
         poly = curr_obj._objects[0]
@@ -103,6 +94,19 @@ function Edit(canvas) {
         if(poly.local_id == undefined){
             alert("Error - missing poly.local_id. Please report this bug in the bug tracker and the steps taken to reproduce this.")
         }
+        var points = poly.get('points')
+        var new_polygon = new fabric.Polygon(points, {
+            strokeWidth: 1,
+            stroke: 'green',
+            opacity: .5,
+            scaleX: 1,
+            scaleY: 1,
+            objectCaching: false,
+            transparentCorners: false,
+            cornerColor: 'blue',
+            originX: 'center',
+            originY: 'center'
+        });
         var display_text = new fabric.Text(poly.local_id.toString(), {
             fontSize: 20,
             top: poly.points[0].y,
@@ -111,10 +115,11 @@ function Edit(canvas) {
             fill: "white",
         })
 
-        var grouppo = new fabric.Group([poly, display_text]);
+        var grouppo = new fabric.Group([new_polygon, display_text]);
         grouppo['local_id'] = poly.local_id;
         grouppo.lockMovementY = true;
         grouppo.lockMovementX = true;
+        grouppo.selectable = true;
         canvas.remove(poly);
         canvas.add(grouppo);
         console.log(canvas.getObjects())
