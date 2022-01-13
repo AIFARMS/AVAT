@@ -270,15 +270,13 @@ export default function MainUpload() {
 		}
 
 		if(index.substring(index.length-1, index.length) !== "f"){ //Disabled removal of key-point for now
-			var current_objects = fabricCanvas.getObjects()
+			var current_objects = frame_data[currentFrame]
 			for(var i = 0; i < current_objects.length; i++){
 				console.log(current_objects[i])
 				if(current_objects[i]['_objects'][1]['text'] === index){
 					console.log("REMOVED")
 					console.log(current_objects[i])
-					fabricCanvas.remove(current_objects[i]);
-					fabricCanvas.fire('saveData');
-					fabricCanvas.renderAll();
+					canvasBackgroundUpdate()
 					break;
 				}
 			}
