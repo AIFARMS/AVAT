@@ -77,7 +77,9 @@ export default function AnnotationTable(props){
                 onBlur={(event) => {props.toggleKeyCheck(true)}}
             />
           </div>
-        )
+        ),
+        showExpandColumn: true,
+        expandByColumnOnly: true
     };
 
     const handleOnChange = (event, rowIndex) => {
