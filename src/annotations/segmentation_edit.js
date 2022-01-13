@@ -76,8 +76,8 @@ function Edit(canvas) {
     poly.edit = !poly.edit;
     if (poly.edit) {
         var lastControl = poly.points.length - 1;
-        poly.cornerStyle = 'circle';
-        poly.cornerColor = 'rgba(0,0,255,1)';
+        poly.cornerStyle = 'rectangle';
+        poly.cornerColor = 'yellow';
         poly.controls = poly.points.reduce(function(acc, point, index) {
                 acc['p' + index] = new fabric.Control({
                     positionHandler: polygonPositionHandler,

@@ -34,8 +34,19 @@ export default class ExtractingAnnotation{
                 return true;
             }
         }
-        console.log("false")
         return false;
+    }
+
+    find_highest_localid(){
+        var localid = []
+        for(var i = 0; i < this.annotation_data.length; i++){
+            for(var j = 0; j < this.annotation_data[i].length; j++){
+                console.log(this.annotation_data[i][j])
+                localid.push(parseInt(this.annotation_data[i][j]['id'].replace(/\D/g, "")))
+            }
+        }
+        console.log(Math.max(...localid))
+        return Math.max(...localid)+1
     }
 
     scale_annotations(){
@@ -70,7 +81,6 @@ export default class ExtractingAnnotation{
                         var y_scaled = (curr_points[k]['y'] / this.metadata['vertical_res'] * this.canvas.height)
                         points.push({x: x_scaled, y: y_scaled})
                     }
-                    console.log(points)
                     var po = new fabric.Polygon(points, {
                         strokeWidth: 1,
                         stroke: 'green',
@@ -92,7 +102,6 @@ export default class ExtractingAnnotation{
                         fill: "white",
                     })
                     var grouppo = new fabric.Group([po, display_text], {perPixelTargetFind: true})
-                    console.log(grouppo)
                     grouppo.lockMovementY = true;
                     grouppo.lockMovementX = true;
                     grouppo.selectable = false;

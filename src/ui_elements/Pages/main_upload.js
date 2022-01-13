@@ -171,7 +171,7 @@ function save_data(frame_num){
 	if(fabricCanvas.getObjects().length != 0){
 		//fabricCanvas.setBackgroundImage(null)
 		frame_data[frame_num] = fabricCanvas.getObjects()
-		frame_data[frame_num]["backgroundImage"] = null
+		//frame_data[frame_num]["backgroundImage"] = null
 	}else{
 		frame_data[frame_num] = []
 	}
@@ -358,7 +358,11 @@ export default function MainUpload() {
 	}
 
 	const toggle_segmentation = (event) => {
-		segmentation_flag = !segmentation_flag
+		if (event == undefined){
+			segmentation_flag = !segmentation_flag
+		}else{
+			segmentation_flag = event
+		}
 	}
 
 	const handleVideoUpload = (event) => {
@@ -405,6 +409,7 @@ export default function MainUpload() {
 		}
 		frame_data = oldAnnotation.get_frame_data();
 		annotation_data = oldAnnotation.get_annotation_data();
+		setBoxCount(oldAnnotation.find_highest_localid())
 		handle_visual_toggle()
 		canvasBackgroundUpdate()
 		console.log(oldAnnotation.get_frame_data())
@@ -480,6 +485,10 @@ export default function MainUpload() {
 
 
 	const skip_frame_forward = e =>{
+		if(segmentation_flag === true){
+			alert("Please finish your current action!")
+			return;
+		}
 		save_previous_data()
 		var frameVal = currentFrame + skip_value
 		if(frameVal >= total_frames){
@@ -498,6 +507,10 @@ export default function MainUpload() {
 	}
 
 	const skip_frame_backward = e => {
+		if(segmentation_flag === true){
+			alert("Please finish your current action!")
+			return;
+		}
 		save_previous_data()
 
 		var frameVal = currentFrame - skip_value
@@ -536,10 +549,6 @@ export default function MainUpload() {
 	const onKeyPress = (event) =>{
 		//Making sure input for textbox doesnt get counted as a mode change
 		if(keyCheck === false){
-			return;
-		}
-		if(segmentation_flag === true){
-			alert("Please finish your current action!")
 			return;
 		}
 		if (event.key === ANNOTATION_BBOX){
@@ -602,20 +611,25 @@ export default function MainUpload() {
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(annotation_data[previousFrameNumber]))
 			frame_data[currentFrame] = JSON.parse(JSON.stringify(frame_data[previousFrameNumber]))
-			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
-				console.log(objects)	
-				frame_data[currentFrame] = objects	
+/* 			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
+				console.log(objects)
 				for(var i = 0; i < objects.length; i++){
-					frame_data[currentFrame][i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
+					objects[i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
 				}
+				frame_data[currentFrame] = objects	
 				//canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
-				//changeSave(true)
-			}); 
-			/* for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
-				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
-			} */
-			console.log(frame_data[currentFrame][0])
+				//return;
+			}); */
+ 			frame_data[currentFrame] = []
+			for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
+				frame_data[previousFrameNumber][i].clone(function(clonedObj) {
+					frame_data[currentFrame].push(clonedObj)
+				}, ['local_id'])
+			} 
 			//save_data(currentFrame)
+			console.log(frame_data[currentFrame] === frame_data[previousFrameNumber])
+			console.log(frame_data[currentFrame])
+			console.log(frame_data[previousFrameNumber])
 			changeSave(true)
 			canvasBackgroundUpdate()
 		}
@@ -702,9 +716,13 @@ export default function MainUpload() {
 				fabricCanvas.clear()
 				console.log(frame_data[currentFrame])
 				if(frame_data[currentFrame] != undefined){
-					for(var i = 0; i < frame_data[currentFrame].length; i++){
-						fabricCanvas.add(frame_data[currentFrame][i])
-					}
+					fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
+						frame_data[currentFrame] = objects	
+						for(var i = 0; i < frame_data[currentFrame].length; i++){
+							fabricCanvas.add(frame_data[currentFrame][i])
+						}
+					});
+					
 				}
 				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
 				var f_img = new fabric.Image(img, {
@@ -715,7 +733,7 @@ export default function MainUpload() {
 				console.log("CURRFRAME: " + currentFrame)
 				fabricCanvas.setBackgroundImage(f_img);
 			
-				fabricCanvas.renderAll();
+				fabricCanvas.requestRenderAll();
 				//save_data()
 				setTableFrameNum(currentFrame)
 	
@@ -863,5 +881,3 @@ export default function MainUpload() {
 		</div>
 	);
 }
-
-
