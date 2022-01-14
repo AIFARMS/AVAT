@@ -182,6 +182,7 @@ function save_localstorage(){
 	}
 }
 
+var currentFrame = 0
 
 //Current frame counter
 export default function MainUpload() {
@@ -200,7 +201,6 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
-	const [currentFrame, setCurrentFrame] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
 	const [customColumns, setCustomColumns] = useState(columns)
@@ -226,7 +226,7 @@ export default function MainUpload() {
 		handle_visual_toggle()
 		if(typeof(val) === "number"){
 
-			setCurrentFrame(val)
+			currentFrame =(val)
 			setVisualToggle(Math.floor(Math.random() * 999999999999))
 			var new_skip = val/(total_frames)
 			if(new_skip > duration){
@@ -239,12 +239,12 @@ export default function MainUpload() {
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
 				if(frame_calc >= total_frames){
-					setCurrentFrame(total_frames-1)
+					currentFrame =(total_frames-1)
 					setVisualToggle(Math.floor(Math.random() * 999999999999))
 					temp_flag = false;
 					return;
 				}
-				setCurrentFrame(frame_calc)
+				currentFrame =(frame_calc)
 				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				temp_flag = false;
 			}
@@ -268,16 +268,19 @@ export default function MainUpload() {
 		}
 
 		if(index.substring(index.length-1, index.length) !== "f"){ //Disabled removal of key-point for now
-			var current_objects = frame_data[currentFrame]
-			console.log(current_objects)
+			var current_objects = fabricCanvas.getObjects()
 			for(var i = 0; i < current_objects.length; i++){
-				if(current_objects[i].local_id == index){
-					frame_data[currentFrame].splice(i, 1);
+				console.log(current_objects[i])
+				if(current_objects[i]['_objects'][1]['text'] === index){
+					console.log("REMOVED")
+					fabricCanvas.remove(current_objects[i]);
+					fabricCanvas.fire('saveData');
+					fabricCanvas.renderAll();
 					break;
 				}
 			}
 		}
-		console.log(index_num)
+		console.log("CURRENT FRAME: " + currentFrame)
 		var length_before = annotation_data[currentFrame].length
 		annotation_data[currentFrame].splice(index_num, 1)
 		if (annotation_data[currentFrame].length == length_before){
@@ -483,13 +486,15 @@ export default function MainUpload() {
 		var frameVal = currentFrame + skip_value
 		if(frameVal >= total_frames){
 			if(inputType === 1){
-				setCurrentFrame(total_frames-1)
+				currentFrame = (total_frames-1)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(total_frames-1)
 		}else{
 			if(inputType === 1){
-				setCurrentFrame(frameVal)
+				currentFrame =(frameVal)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(frameVal)
@@ -502,13 +507,15 @@ export default function MainUpload() {
 		var frameVal = currentFrame - skip_value
 		if(frameVal < 0){
 			if(inputType === 1){
-				setCurrentFrame(0)
+				currentFrame =(0)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(0)
 		}else{
 			if(inputType === 1){
-				setCurrentFrame(frameVal)
+				currentFrame =(frameVal)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(frameVal)
