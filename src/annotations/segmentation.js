@@ -228,7 +228,6 @@ class Segmentation {
                 })
                 grouppo.lockMovementY = true;
                 grouppo.lockMovementX = true;
-                grouppo.selectable = true;
                 grouppo['local_id'] = id
                 console.log(grouppo)
 

@@ -40,9 +40,6 @@ var scaling_factor_width = 1920;
 var scaling_factor_height = 1080;
 var skip_value = 1;
 
-console.log(window.screen.width)
-console.log(window.screen.height)
-
 //var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
 
@@ -169,13 +166,10 @@ var player_opacity = 0
 function save_data(frame_num){
 	//return; //TODO Clear up
 	if(fabricCanvas.getObjects().length != 0){
-		//fabricCanvas.setBackgroundImage(null)
 		frame_data[frame_num] = fabricCanvas.getObjects()
-		frame_data[frame_num]["backgroundImage"] = null
 	}else{
 		frame_data[frame_num] = []
 	}
-	console.log("SAVED")
 }
 
 function save_localstorage(){
@@ -184,10 +178,11 @@ function save_localstorage(){
 		//localStorage.setItem('frame_data', JSON.stringify(frame_data))
 		//localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
 	} catch (error){
-		console.log("Local storage failed!")
+		//console.log("Local storage failed!")
 	}
 }
 
+var currentFrame = 0
 
 //Current frame counter
 export default function MainUpload() {
@@ -206,7 +201,6 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
-	const [currentFrame, setCurrentFrame] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
 	const [customColumns, setCustomColumns] = useState(columns)
@@ -232,7 +226,7 @@ export default function MainUpload() {
 		handle_visual_toggle()
 		if(typeof(val) === "number"){
 
-			setCurrentFrame(val)
+			currentFrame =(val)
 			setVisualToggle(Math.floor(Math.random() * 999999999999))
 			var new_skip = val/(total_frames)
 			if(new_skip > duration){
@@ -245,12 +239,12 @@ export default function MainUpload() {
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
 				if(frame_calc >= total_frames){
-					setCurrentFrame(total_frames-1)
+					currentFrame =(total_frames-1)
 					setVisualToggle(Math.floor(Math.random() * 999999999999))
 					temp_flag = false;
 					return;
 				}
-				setCurrentFrame(frame_calc)
+				currentFrame =(frame_calc)
 				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				temp_flag = false;
 			}
@@ -260,13 +254,17 @@ export default function MainUpload() {
 		}
 	}
 
-	const removeRow = (index) => {		
-		var index_num = 0;
+	const removeRow = (index) => {	
+		console.log(index)	
+		var index_num = 1;
 		for(var i = 0; i < annotation_data[currentFrame].length; i++){
 			if(annotation_data[currentFrame][i]['id'] == index){
 				index_num = i
 				break;
 			}
+		}
+		if (index_num === -1){
+			alert("bug: " + index)
 		}
 
 		if(index.substring(index.length-1, index.length) !== "f"){ //Disabled removal of key-point for now
@@ -275,7 +273,6 @@ export default function MainUpload() {
 				console.log(current_objects[i])
 				if(current_objects[i]['_objects'][1]['text'] === index){
 					console.log("REMOVED")
-					console.log(current_objects[i])
 					fabricCanvas.remove(current_objects[i]);
 					fabricCanvas.fire('saveData');
 					fabricCanvas.renderAll();
@@ -283,9 +280,13 @@ export default function MainUpload() {
 				}
 			}
 		}
+		console.log("CURRENT FRAME: " + currentFrame)
+		var length_before = annotation_data[currentFrame].length
 		annotation_data[currentFrame].splice(index_num, 1)
+		if (annotation_data[currentFrame].length == length_before){
+			alert("Delete error, please note this error down in the bug tracker - Size of array: " + annotation_data[currentFrame].length )
+		}
 		save_data(currentFrame)
-		
 	}
 
 	const remove_table_index = (index) => {
@@ -298,6 +299,8 @@ export default function MainUpload() {
 		}else{
 			removeRow(index)
 		}
+		console.log(annotation_data[currentFrame])
+		canvasBackgroundUpdate()
 		//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
 		setVisualToggle(Math.floor(Math.random() * 999999999999))
 	}
@@ -308,7 +311,7 @@ export default function MainUpload() {
 		if(annotation_data[currentFrame].length == 0){
 			return;
 		}
-		console.log(frame_data[currentFrame])
+		//console.log(frame_data[currentFrame])
 		setPreviousFrameNumber(currentFrame)
 	}
 
@@ -407,7 +410,6 @@ export default function MainUpload() {
 		annotation_data = oldAnnotation.get_annotation_data();
 		handle_visual_toggle()
 		canvasBackgroundUpdate()
-		console.log(oldAnnotation.get_frame_data())
 	}, [oldAnnotation]);
 
 	const downloadOldAnnotation = (file) => {
@@ -484,13 +486,15 @@ export default function MainUpload() {
 		var frameVal = currentFrame + skip_value
 		if(frameVal >= total_frames){
 			if(inputType === 1){
-				setCurrentFrame(total_frames-1)
+				currentFrame = (total_frames-1)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(total_frames-1)
 		}else{
 			if(inputType === 1){
-				setCurrentFrame(frameVal)
+				currentFrame =(frameVal)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(frameVal)
@@ -503,13 +507,15 @@ export default function MainUpload() {
 		var frameVal = currentFrame - skip_value
 		if(frameVal < 0){
 			if(inputType === 1){
-				setCurrentFrame(0)
+				currentFrame =(0)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(0)
 		}else{
 			if(inputType === 1){
-				setCurrentFrame(frameVal)
+				currentFrame =(frameVal)
+				setVisualToggle(Math.floor(Math.random() * 999999999999))
 				return;
 			}
 			handleSetCurrentFrame(frameVal)
@@ -581,7 +587,6 @@ export default function MainUpload() {
 			canvasBackgroundUpdate()
 			handlePlaying()
 		}else if (event.key === "e"){
-			console.log(fabricCanvas.toJSON())
 			save_localstorage()
 			skip_frame_forward()
 		}else if (event.key === "s"){
@@ -603,7 +608,6 @@ export default function MainUpload() {
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(annotation_data[previousFrameNumber]))
 			frame_data[currentFrame] = JSON.parse(JSON.stringify(frame_data[previousFrameNumber]))
 			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
-				console.log(objects)	
 				frame_data[currentFrame] = objects	
 				for(var i = 0; i < objects.length; i++){
 					frame_data[currentFrame][i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
@@ -614,7 +618,6 @@ export default function MainUpload() {
 			/* for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
 				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
 			} */
-			console.log(frame_data[currentFrame][0])
 			//save_data(currentFrame)
 			changeSave(true)
 			canvasBackgroundUpdate()
@@ -667,8 +670,6 @@ export default function MainUpload() {
 			frame_rate = 1;
 			return;
 		}
-		console.log(Number.isFinite(frame_rate))
-		console.log(frame_rate)
 
 		num_frames = Math.round(duration * frame_rate);
 		if(annotation_data[0].length == 0){
@@ -692,15 +693,14 @@ export default function MainUpload() {
 	const setDateTime = (time) => {
 		time_unix = time;
 		VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
-		console.log(time)
 	}
 
 	const canvasBackgroundUpdate = () => {
+		console.log("updated canvas")
 		if(inputType == 1){ //This is for when images are uploaded
 			var img = new Image()
 			img.onload = function() {
 				fabricCanvas.clear()
-				console.log(frame_data[currentFrame])
 				if(frame_data[currentFrame] != undefined){
 					for(var i = 0; i < frame_data[currentFrame].length; i++){
 						fabricCanvas.add(frame_data[currentFrame][i])
@@ -724,7 +724,6 @@ export default function MainUpload() {
 			return;
 		}else if(inputType == 0){ //This is for when videos are uploaded
 			//TODO cleanup variabkle
-			console.log("updated canvas")
 			var htmlvideo = document.getElementsByTagName('video')[0]
 			let canvas = document.createElement('canvas');
 			let context = canvas.getContext('2d');

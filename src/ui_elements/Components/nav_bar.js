@@ -91,12 +91,8 @@ export default function CustomNavBar(props){
 		}
 	}
 
-	const handleEditSeg = (event) => {
-		setEditSeg(!editSeg)
-	}
-
 	const edit_click = (event) => {
-		handleEditSeg();		
+		setEditSeg(!editSeg);
 		Edit(props.fabricCanvas, props.save_data);
 		props.toggle_segmentation();
 		props.save_data()

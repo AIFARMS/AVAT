@@ -34,8 +34,19 @@ export default class ExtractingAnnotation{
                 return true;
             }
         }
-        console.log("false")
         return false;
+    }
+
+    find_highest_localid(){
+        var localid = []
+        for(var i = 0; i < this.annotation_data.length; i++){
+            for(var j = 0; j < this.annotation_data[i].length; j++){
+                console.log(this.annotation_data[i][j])
+                localid.push(parseInt(this.annotation_data[i][j]['id'].replace(/\D/g, "")))
+            }
+        }
+        console.log(Math.max(...localid))
+        return Math.max(...localid)+1
     }
 
     scale_annotations(){
@@ -54,13 +65,11 @@ export default class ExtractingAnnotation{
                     var y = (curr_frame[j]['y'] / this.metadata['vertical_res'] * this.canvas.height)
                     var width = ((curr_frame[j]['width']) / this.metadata['horizontal_res'] * this.canvas.width)
                     var height = ((curr_frame[j]['height']) / this.metadata['vertical_res'] * this.canvas.height)
-                    //console.log(x)
-                    //console.log(curr_frame[j])
-                    //console.log(this.metadata)
-                    //console.log(this.canvas.width)
+
                     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
                     var new_bbox = new BoundingBox(y, x, width, height, color, curr_frame[j]['local_id'], "None").generate_no_behavior(this.canvas)
                     //this.canvas.add(new_bbox)
+                    new_bbox.local_id = curr_frame[j]['local_id']
                     temp_data.push(new_bbox)
                 }else if(curr_frame[j]['type'] === "segmentation"){
                     var points = []
@@ -70,7 +79,6 @@ export default class ExtractingAnnotation{
                         var y_scaled = (curr_points[k]['y'] / this.metadata['vertical_res'] * this.canvas.height)
                         points.push({x: x_scaled, y: y_scaled})
                     }
-                    console.log(points)
                     var po = new fabric.Polygon(points, {
                         strokeWidth: 1,
                         stroke: 'green',
@@ -92,11 +100,10 @@ export default class ExtractingAnnotation{
                         fill: "white",
                     })
                     var grouppo = new fabric.Group([po, display_text], {perPixelTargetFind: true})
-                    console.log(grouppo)
                     grouppo.lockMovementY = true;
                     grouppo.lockMovementX = true;
                     grouppo.selectable = false;
-
+                    grouppo.local_id = curr_frame[j]['local_id']
                     this.canvas.add(grouppo)
                     temp_data.push(grouppo)
                 }
