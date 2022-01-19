@@ -694,7 +694,7 @@ export default function MainUpload() {
 		time_unix = time;
 		VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
 	}
-
+ 
 	const canvasBackgroundUpdate = () => {
 		console.log("updated canvas")
 		if(inputType == 1){ //This is for when images are uploaded
@@ -702,9 +702,12 @@ export default function MainUpload() {
 			img.onload = function() {
 				fabricCanvas.clear()
 				if(frame_data[currentFrame] != undefined){
-					for(var i = 0; i < frame_data[currentFrame].length; i++){
-						fabricCanvas.add(frame_data[currentFrame][i])
-					}
+					fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
+						for(var i = 0; i < frame_data[currentFrame].length; i++){
+							objects[i].local_id = frame_data[currentFrame][i].local_id
+							fabricCanvas.add(objects[i])
+						}
+					}); 
 				}
 				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
 				var f_img = new fabric.Image(img, {
