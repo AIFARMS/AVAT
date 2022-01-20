@@ -5,22 +5,22 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 
 import { Provider } from 'react-redux'
-import store from './redux/store'
+import store from './store'
 
-ReactDOM.render(
+/* ReactDOM.render(
     <App/>,
     document.getElementById('root')
 );
+ */
 
-/*
-REDUX code
+//REDUX code
 ReactDOM.render(
     <Provider store={store}>
       <App/>,
     </Provider>,
     document.getElementById('root')
 );
-*/
+
 
 /**
  * IF NEED TO RE-ENABLE STRICT MODE THEN UNNCOMMENT AND ADD BACK
