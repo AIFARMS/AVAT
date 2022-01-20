@@ -1,5 +1,3 @@
-import { data } from 'jquery'
-import {INIT_FRAME, MODIFY_FRAME, REFRESH_FRAME} from '../action/action_types'
 import {createSlice} from '@reduxjs/toolkit'
 
 const initialState = {data: []}
@@ -22,16 +20,18 @@ const frameDataSlice = createSlice({
     name: 'frame_data',
     initialState,
     reducers:{
-        init(state, frame_count){
+        init(state, payload){
+            console.log(payload.payload)
             var data = [];
-            for(var i = 0; i < frame_count; i++){
+            for(var i = 0; i < payload.payload; i++){
                 data.push([]);
             }
             state.data = data;
         },
-        modifyFrame(state, currentFrame, data){
+        modifyFrame(state, payload){
+            console.log(payload.payload)
             var temp = state.data
-            temp[currentFrame] = data
+            temp[payload.payload.currentFrame] = payload.payload.data
             state.data = temp
         },
 

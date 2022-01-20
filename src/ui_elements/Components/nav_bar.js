@@ -98,12 +98,6 @@ export default function CustomNavBar(props){
 		props.save_data()
 	}
 
-	/* TODO Add local storgae option
-	if (localStorage.getItem('frame_data') != null){
-		alert("There is some data stored")
-		props.annotation_data = localStorage.getItem('annotation_data');
-		props.frame_data = localStorage.getItem('frame_data');
-	}*/
 
 	return (
 		<div>
@@ -150,7 +144,7 @@ export default function CustomNavBar(props){
 						<NavDropdown.Divider />
 					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-						<text>Date and Time: </text>
+						{"Date and Time:"}
 						<DatePicker
 							selected={startDate}
 							onChange={(date) => {handleSetStartDate(date)}}
@@ -171,7 +165,7 @@ export default function CustomNavBar(props){
 					}
 					{videoFormat === 1 &&
 						<div>
-							<text>Youtube URL: </text>
+							{'Youtube URL:'}
 							<input onChange={handleVideoLink}></input>
 							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
 						</div>

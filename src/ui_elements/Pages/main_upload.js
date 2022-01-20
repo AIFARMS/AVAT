@@ -25,11 +25,10 @@ import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
-//TODO add local storage functionality to auto-save
-if (typeof(Storage) === "undefined") {
-  // Code for localStorage/sessionStorage.
-  alert('Your browser does not support local storage. \nSome autosaving features of the app will not work as intended.\nPlease see the documentation to find supported browsers and their versions')
-}
+import store from '../../store' 
+import { useDispatch } from 'react-redux'
+import {init, modifyFrame} from '../../reducer/frame_data'
+import {nanoid} from '@reduxjs/toolkit'
 
 const fabric = require("fabric").fabric;
 
@@ -162,6 +161,7 @@ var on_ready_flag = false;
 var image_frames = []
 var total_frames
 var player_opacity = 0
+var currentFrame = 0
 
 function save_data(frame_num){
 	//return; //TODO Clear up
@@ -172,17 +172,17 @@ function save_data(frame_num){
 	}
 }
 
-function save_localstorage(){
-	//console.log(frame_data)
-	try{
-		//localStorage.setItem('frame_data', JSON.stringify(frame_data))
-		//localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
-	} catch (error){
-		//console.log("Local storage failed!")
-	}
-}
+store.dispatch({
+	type: "frame_data/init",
+	payload: 10
+})
+store.dispatch({
+	type: "frame_data/modifyFrame",
+	payload: {currentFrame: currentFrame, data: [123409]}
+})
+console.log(store.getState())
 
-var currentFrame = 0
+
 
 //Current frame counter
 export default function MainUpload() {
@@ -311,7 +311,6 @@ export default function MainUpload() {
 		if(annotation_data[currentFrame].length == 0){
 			return;
 		}
-		//console.log(frame_data[currentFrame])
 		setPreviousFrameNumber(currentFrame)
 	}
 
@@ -581,13 +580,11 @@ export default function MainUpload() {
 			}
 			addToCanvas()
 		}else if (event.key === "q"){
-			save_localstorage()
 			skip_frame_backward()
 		}else if (event.key === "w"){
 			canvasBackgroundUpdate()
 			handlePlaying()
 		}else if (event.key === "e"){
-			save_localstorage()
 			skip_frame_forward()
 		}else if (event.key === "s"){
 			toast_text = "Annotation Saved"
