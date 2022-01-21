@@ -26,9 +26,7 @@ import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
 import store from '../../store' 
-import { useDispatch } from 'react-redux'
-import {init, modifyFrame} from '../../reducer/frame_data'
-import {nanoid} from '@reduxjs/toolkit'
+import { current } from "@reduxjs/toolkit";
 
 const fabric = require("fabric").fabric;
 
@@ -145,7 +143,6 @@ fabricCanvas.on('mouse:up', function(opt) {
 var temp_color;
 var video_width = 0;
 var video_height = 0;
-var frame_data = [[]];
 var annotation_data = [[]];
 var upload = false;
 var disable_buttons = true;
@@ -166,23 +163,32 @@ var currentFrame = 0
 function save_data(frame_num){
 	//return; //TODO Clear up
 	if(fabricCanvas.getObjects().length != 0){
-		frame_data[frame_num] = fabricCanvas.getObjects()
+		updateFrameData(frame_num, fabricCanvas.getObjects())
 	}else{
-		frame_data[frame_num] = []
+		updateFrameData(frame_num, [])
 	}
 }
 
-store.dispatch({
-	type: "frame_data/init",
-	payload: 10
-})
-store.dispatch({
-	type: "frame_data/modifyFrame",
-	payload: {currentFrame: currentFrame, data: [123409]}
-})
+
+
 console.log(store.getState())
 
-
+function initFrameData(frame_count){
+	store.dispatch({
+		type: "frame_data/init",
+		payload: frame_count
+	})
+}
+function updateFrameData(frame_number, data){
+	store.dispatch({
+		type: "frame_data/modifyFrame",
+		payload: {currentFrame: frame_number, data: data}
+	})
+}
+function getFrameData(frame_number){
+	console.log(store.getState())
+	return store.getState().frame_data.data[frame_number]
+}
 
 //Current frame counter
 export default function MainUpload() {
@@ -190,20 +196,19 @@ export default function MainUpload() {
 	const [annotationType, setAnnotationType] = useState("1")
 	const [boxCount, setBoxCount] = useState(0)
 	const [videoFilePath, setVideoFileURL] = useState(null);
-	const [videoFilePath1, setVideoFileURL1] = useState(null);
 	const [oldAnnotation, setOldAnnotation] = useState(null)
 	const [player, setPlayer] = useState(null)
 	const [duration, setDuration] = useState(0);
-	const [show, setShow] = useState(false);
 	const [save, changeSave] = useState(false);
-	const [seeking, setSeeking] = useState(false)
 	const [playing, setPlaying] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
-	const [customColumns, setCustomColumns] = useState(columns)
+
+	//New state vars
+	const [currFrameData, setCurrFrameData] = useState([])
 
 	if(!segmentation_flag){
 		fabricCanvas.forEachObject(object => {
@@ -405,7 +410,11 @@ export default function MainUpload() {
 		if(oldAnnotation == null){
 			return;
 		}
-		frame_data = oldAnnotation.get_frame_data();
+		store.dispatch({
+			type: "frame_data/initOldAnnotation",
+			payload: oldAnnotation.get_frame_data()
+		});
+		currFrameData = getFrameData(0)
 		annotation_data = oldAnnotation.get_annotation_data();
 		handle_visual_toggle()
 		canvasBackgroundUpdate()
@@ -461,11 +470,10 @@ export default function MainUpload() {
 
 			if(annotation_data[0].length == 0){
 				console.log("Resetting frame_data and annotation_data")
-				frame_data = new Array(num_frames)
+				initFrameData(num_frames)
 				annotation_data = new Array(num_frames)
 				//TODO Update this later
 				for (var i = 0; i < num_frames; i++){
-					frame_data[i] = []
 					annotation_data[i] = []
 				}
 			}
@@ -483,6 +491,7 @@ export default function MainUpload() {
 	const skip_frame_forward = e =>{
 		save_previous_data()
 		var frameVal = currentFrame + skip_value
+		setCurrFrameData(getFrameData(frameVal))
 		if(frameVal >= total_frames){
 			if(inputType === 1){
 				currentFrame = (total_frames-1)
@@ -504,6 +513,7 @@ export default function MainUpload() {
 		save_previous_data()
 
 		var frameVal = currentFrame - skip_value
+		setCurrFrameData(getFrameData(frameVal))
 		if(frameVal < 0){
 			if(inputType === 1){
 				currentFrame =(0)
@@ -586,10 +596,6 @@ export default function MainUpload() {
 			handlePlaying()
 		}else if (event.key === "e"){
 			skip_frame_forward()
-		}else if (event.key === "s"){
-			toast_text = "Annotation Saved"
-			changeSave(true)
-			frame_data[currentFrame] = fabricCanvas.toJSON()
 		}else if (event.key === "f"){
 			if(scrubbing === false){
 				toast_text = "Scrubbing Mode Activated"
@@ -603,14 +609,13 @@ export default function MainUpload() {
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
 			annotation_data[currentFrame] = JSON.parse(JSON.stringify(annotation_data[previousFrameNumber]))
-			frame_data[currentFrame] = JSON.parse(JSON.stringify(frame_data[previousFrameNumber]))
-			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
-				frame_data[currentFrame] = objects	
+
+			var previous_frame_data = getFrameData(previousFrameNumber);
+			fabric.util.enlivenObjects(previousFrameNumber, function(objects) {		
 				for(var i = 0; i < objects.length; i++){
-					frame_data[currentFrame][i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
+					objects[i]['local_id'] = previousFrameNumber[i]['local_id']
 				}
-				//canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
-				//changeSave(true)
+				setCurrFrameData(objects)
 			}); 
 			/* for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
 				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
@@ -672,11 +677,11 @@ export default function MainUpload() {
 		if(annotation_data[0].length == 0){
 			total_frames = duration * framerate
 			console.log("Resetting frame_data and annotation_data")
-			frame_data = new Array(num_frames)
+			
+			initFrameData(num_frames)
 			annotation_data = new Array(num_frames)
 			//TODO Update this later
 			for (var i = 0; i < num_frames; i++){
-				frame_data[i] = []
 				annotation_data[i] = []
 			}
 			//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
@@ -698,10 +703,10 @@ export default function MainUpload() {
 			var img = new Image()
 			img.onload = function() {
 				fabricCanvas.clear()
-				if(frame_data[currentFrame] != undefined){
-					fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
-						for(var i = 0; i < frame_data[currentFrame].length; i++){
-							objects[i].local_id = frame_data[currentFrame][i].local_id
+				if(currFrameData != undefined){
+					fabric.util.enlivenObjects(currFrameData, function(objects) {		
+						for(var i = 0; i < currFrameData.length; i++){
+							objects[i].local_id = currFrameData[i].local_id
 							fabricCanvas.add(objects[i])
 						}
 					}); 
@@ -737,9 +742,9 @@ export default function MainUpload() {
 			var img = new Image()
 			img.onload = function() {
 				fabricCanvas.clear()
-				if(frame_data[currentFrame] != undefined){
-					for(var i = 0; i < frame_data[currentFrame].length; i++){
-						fabricCanvas.add(frame_data[currentFrame][i])
+				if(currFrameData != undefined){
+					for(var i = 0; i < currFrameData.length; i++){
+						fabricCanvas.add(currFrameData[i])
 					}
 				}
 				var f_img = new fabric.Image(img, {
@@ -785,7 +790,6 @@ export default function MainUpload() {
 				play_button_text={play_button_text}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
-				frame_data={frame_data}
 				change_skip_value={change_skip_value}
 				change_annotator_name={change_annotator_name}
 				change_annotation_type={change_annotation_type}

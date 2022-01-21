@@ -28,6 +28,9 @@ const frameDataSlice = createSlice({
             }
             state.data = data;
         },
+        initOldAnnotation(state, payload){
+            state.data = payload.payload
+        },
         modifyFrame(state, payload){
             console.log(payload.payload)
             var temp = state.data
