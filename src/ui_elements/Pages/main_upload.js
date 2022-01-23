@@ -12,12 +12,10 @@ import ExtractingAnnotation from '../../processing/annotation-processing'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
-import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
-//import {columns_LPS} from '../../static_data/columns'
 import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} from '../../static_data/constants'
 
 //Components
@@ -26,8 +24,6 @@ import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
 import store from '../../store' 
-import { current } from "@reduxjs/toolkit";
-
 const fabric = require("fabric").fabric;
 
 //TODO ADD DYNAMIC SOLUTION 
@@ -62,17 +58,12 @@ var fabricCanvas = new fabric.Canvas('c', {
 	includeDefaultValues: false
 });
 
-
-
 fabricCanvas.on('mouse:over', function(e) {
 	if(e.target == null | segmentation_flag == true){
 		return;
 	}else if(e.target['_objects'] == undefined){
 		return;
 	}	
-/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
-		return;
-	} */
     temp_color = e.target['_objects'][0].get('fill')
 	e.target['_objects'][0].set('fill', "#39FF14");
     fabricCanvas.renderAll();
@@ -84,9 +75,6 @@ fabricCanvas.on('mouse:out', function(e) {
 	}else if(e.target['_objects'] == undefined){
 		return;
 	}
-/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
-		return;
-	} */
 	e.target['_objects'][0].set('fill', temp_color);
     fabricCanvas.renderAll();
 });
@@ -169,10 +157,6 @@ function save_data(frame_num){
 	}
 }
 
-
-
-console.log(store.getState())
-
 function initFrameData(frame_count){
 	store.dispatch({
 		type: "frame_data/init",
@@ -186,7 +170,6 @@ function updateFrameData(frame_number, data){
 	})
 }
 function getFrameData(frame_number){
-	console.log(store.getState())
 	return store.getState().frame_data.data[frame_number]
 }
 

@@ -1,20 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit'
 
 const initialState = {data: []}
-/* 
-export const frame_data = (state = initial_frame_data, action) => {
-    switch (action.type){
-        case INIT_FRAME: {
-            data = []
-            for(var i = 0; i < action.payload; i++){
-                data.push([])
-            }
-            return data
-        }``
-        case MODIFY_FRAME:
-            return 
-    }
-} */
 
 const frameDataSlice = createSlice({
     name: 'frame_data',

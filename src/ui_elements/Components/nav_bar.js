@@ -31,10 +31,6 @@ export default function CustomNavBar(props){
 	const [uploadShow, setUploadShow] = useState(true);
 	const [startDate, setStartDate] = useState(0);
 	const [frameRate, setFrameRate] = useState(0)
-	const [skipValue, setSkipValue] = useState(0)
-	//const [playbackRate, setPlaybackRate] = useState(0)
-	const [horizontalRes, setHorizontalRes] = useState(0)
-	const [verticalRes, setVerticalRes] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
