@@ -12,12 +12,10 @@ import ExtractingAnnotation from '../../processing/annotation-processing'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
-import { KeyPoint } from '../../annotations/key_point'
 import { Segmentation } from '../../annotations/segmentation'
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
-//import {columns_LPS} from '../../static_data/columns'
 import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} from '../../static_data/constants'
 
 //Components
@@ -25,11 +23,8 @@ import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
-//TODO add local storage functionality to auto-save
-if (typeof(Storage) === "undefined") {
-  // Code for localStorage/sessionStorage.
-  alert('Your browser does not support local storage. \nSome autosaving features of the app will not work as intended.\nPlease see the documentation to find supported browsers and their versions')
-}
+import store from '../../store' 
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
 
 const fabric = require("fabric").fabric;
 
@@ -65,17 +60,12 @@ var fabricCanvas = new fabric.Canvas('c', {
 	includeDefaultValues: false
 });
 
-
-
 fabricCanvas.on('mouse:over', function(e) {
 	if(e.target == null | segmentation_flag == true){
 		return;
 	}else if(e.target['_objects'] == undefined){
 		return;
 	}	
-/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
-		return;
-	} */
     temp_color = e.target['_objects'][0].get('fill')
 	e.target['_objects'][0].set('fill', "#39FF14");
     fabricCanvas.renderAll();
@@ -87,9 +77,6 @@ fabricCanvas.on('mouse:out', function(e) {
 	}else if(e.target['_objects'] == undefined){
 		return;
 	}
-/* 	if(e.target['type'] !== 'rect' | e.target['type'] !== 'polygon'){
-		return;
-	} */
 	e.target['_objects'][0].set('fill', temp_color);
     fabricCanvas.renderAll();
 });
@@ -146,8 +133,6 @@ fabricCanvas.on('mouse:up', function(opt) {
 var temp_color;
 var video_width = 0;
 var video_height = 0;
-var frame_data = [[]];
-var annotation_data = [[]];
 var upload = false;
 var disable_buttons = true;
 var toast_text = ""
@@ -162,27 +147,11 @@ var on_ready_flag = false;
 var image_frames = []
 var total_frames
 var player_opacity = 0
-
-function save_data(frame_num){
-	//return; //TODO Clear up
-	if(fabricCanvas.getObjects().length != 0){
-		frame_data[frame_num] = fabricCanvas.getObjects()
-	}else{
-		frame_data[frame_num] = []
-	}
-}
-
-function save_localstorage(){
-	//console.log(frame_data)
-	try{
-		//localStorage.setItem('frame_data', JSON.stringify(frame_data))
-		//localStorage.setItem('annotation_data', JSON.stringify(annotation_data))
-	} catch (error){
-		//console.log("Local storage failed!")
-	}
-}
-
 var currentFrame = 0
+
+//TODO remove after fixing null exceptions
+initAnnotationData(1)
+initFrameData(1)
 
 //Current frame counter
 export default function MainUpload() {
@@ -190,26 +159,33 @@ export default function MainUpload() {
 	const [annotationType, setAnnotationType] = useState("1")
 	const [boxCount, setBoxCount] = useState(0)
 	const [videoFilePath, setVideoFileURL] = useState(null);
-	const [videoFilePath1, setVideoFileURL1] = useState(null);
 	const [oldAnnotation, setOldAnnotation] = useState(null)
 	const [player, setPlayer] = useState(null)
 	const [duration, setDuration] = useState(0);
-	const [show, setShow] = useState(false);
 	const [save, changeSave] = useState(false);
-	const [seeking, setSeeking] = useState(false)
 	const [playing, setPlaying] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
-	const [customColumns, setCustomColumns] = useState(columns)
+
+	//New state vars
+	const [currFrameData, setCurrFrameData] = useState([])
+	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
 	if(!segmentation_flag){
-		fabricCanvas.forEachObject(object => {
-			object.selectable = true
-			object.evented = true;
-		});
+		fabricCanvas.forEachObject(object => { object.selectable = true; object.evented = true;});
+	}
+
+	const save_data = (frame_num) => {
+		//return; //TODO Clear up
+		if(fabricCanvas.getObjects().length != 0){
+			updateFrameData(frame_num, fabricCanvas.getObjects())
+		}else{
+			updateFrameData(frame_num, [])
+		}
+		updateAnnotationData(frame_num, currAnnotationData)
 	}
 
 	const handleInputType = (val) => {
@@ -257,8 +233,8 @@ export default function MainUpload() {
 	const removeRow = (index) => {	
 		console.log(index)	
 		var index_num = 1;
-		for(var i = 0; i < annotation_data[currentFrame].length; i++){
-			if(annotation_data[currentFrame][i]['id'] == index){
+		for(var i = 0; i < currAnnotationData.length; i++){
+			if(currAnnotationData[i]['id'] == index){
 				index_num = i
 				break;
 			}
@@ -281,10 +257,11 @@ export default function MainUpload() {
 			}
 		}
 		console.log("CURRENT FRAME: " + currentFrame)
-		var length_before = annotation_data[currentFrame].length
-		annotation_data[currentFrame].splice(index_num, 1)
-		if (annotation_data[currentFrame].length == length_before){
-			alert("Delete error, please note this error down in the bug tracker - Size of array: " + annotation_data[currentFrame].length )
+		var length_before = currAnnotationData.length;
+		var temp_array = [...currAnnotationData]; temp_array.splice(index_num, 1);
+		setCurrAnnotationData(temp_array);
+		if (currAnnotationData.length == length_before){
+			alert("Delete error, please note this error down in the bug tracker - Size of array: " + currAnnotationData.length )
 		}
 		save_data(currentFrame)
 	}
@@ -292,14 +269,14 @@ export default function MainUpload() {
 	const remove_table_index = (index) => {
 		if (index === undefined) {
 			var indiciesToDelete = []
-			for(var i = 0; i < annotation_data[currentFrame].length; i++){
-				indiciesToDelete.push(annotation_data[currentFrame][i]['id'])
+			for(var i = 0; i < currAnnotationData.length; i++){
+				indiciesToDelete.push(currAnnotationData[i]['id'])
 			}
 			indiciesToDelete.map(x => removeRow(x))
 		}else{
 			removeRow(index)
 		}
-		console.log(annotation_data[currentFrame])
+		console.log(currAnnotationData)
 		canvasBackgroundUpdate()
 		//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
 		setVisualToggle(Math.floor(Math.random() * 999999999999))
@@ -308,18 +285,17 @@ export default function MainUpload() {
 	
 
 	const save_previous_data = () => {
-		if(annotation_data[currentFrame].length == 0){
+		if(currAnnotationData.length == 0){
 			return;
 		}
-		//console.log(frame_data[currentFrame])
 		setPreviousFrameNumber(currentFrame)
 	}
 
 	const addToCanvas = () =>{
 		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
 		
-		if(annotation_data[currentFrame] == null){
-			annotation_data[currentFrame] = []
+		if(currAnnotationData == null){
+			setCurrAnnotationData([])
 		}
 		if (segmentation_flag == true){
 			alert("Please finish your current segmentation!")
@@ -350,12 +326,13 @@ export default function MainUpload() {
 		}
 
 		if(inputType === 1){
-			annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
+			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
-			annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
+			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
+			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
 		}
-    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
-		save_data(currentFrame)
+	    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
 	}
@@ -367,10 +344,8 @@ export default function MainUpload() {
 	const handleVideoUpload = (event) => {
 		if(inputType === 1){
 			image_frames = event.target.files
-			total_frames = image_frames.length
-			for(var i = 0; i < total_frames; i++){
-				annotation_data.push([])
-			}
+			initAnnotationData(image_frames.length)
+			initFrameData(image_frames.length)
 			canvasBackgroundUpdate() //TODO might cause a breaking change since no return
 			disable_buttons = false;
 		}
@@ -406,9 +381,17 @@ export default function MainUpload() {
 		if(oldAnnotation == null){
 			return;
 		}
-		frame_data = oldAnnotation.get_frame_data();
-		annotation_data = oldAnnotation.get_annotation_data();
-		handle_visual_toggle()
+		store.dispatch({
+			type: "frame_data/initOldAnnotation",
+			payload: oldAnnotation.get_frame_data()
+		});
+		store.dispatch({
+			type: "annotation_data/initOldAnnotation",
+			payload: oldAnnotation.get_frame_data()
+		});
+		setCurrFrameData(getFrameData(0))
+		setCurrAnnotationData(getAnnotationData[0])
+
 		canvasBackgroundUpdate()
 	}, [oldAnnotation]);
 
@@ -460,15 +443,10 @@ export default function MainUpload() {
 		if(upload === true && player != null){      
 			num_frames = Math.round(val * frame_rate);
 
-			if(annotation_data[0].length == 0){
+			if(currAnnotationData.length == 0){
 				console.log("Resetting frame_data and annotation_data")
-				frame_data = new Array(num_frames)
-				annotation_data = new Array(num_frames)
-				//TODO Update this later
-				for (var i = 0; i < num_frames; i++){
-					frame_data[i] = []
-					annotation_data[i] = []
-				}
+				initFrameData(num_frames)
+				initAnnotationData(num_frames)
 			}
 
 			//upload = false;
@@ -483,7 +461,10 @@ export default function MainUpload() {
 
 	const skip_frame_forward = e =>{
 		save_previous_data()
+		save_data(currentFrame)
 		var frameVal = currentFrame + skip_value
+		setCurrFrameData(getFrameData(frameVal))
+		setCurrAnnotationData(getAnnotationData(frameVal))
 		if(frameVal >= total_frames){
 			if(inputType === 1){
 				currentFrame = (total_frames-1)
@@ -503,8 +484,10 @@ export default function MainUpload() {
 
 	const skip_frame_backward = e => {
 		save_previous_data()
-
+		save_data(currentFrame)
 		var frameVal = currentFrame - skip_value
+		setCurrFrameData(getFrameData(frameVal))
+		setCurrAnnotationData(getAnnotationData(frameVal))
 		if(frameVal < 0){
 			if(inputType === 1){
 				currentFrame =(0)
@@ -581,18 +564,12 @@ export default function MainUpload() {
 			}
 			addToCanvas()
 		}else if (event.key === "q"){
-			save_localstorage()
 			skip_frame_backward()
 		}else if (event.key === "w"){
 			canvasBackgroundUpdate()
 			handlePlaying()
 		}else if (event.key === "e"){
-			save_localstorage()
 			skip_frame_forward()
-		}else if (event.key === "s"){
-			toast_text = "Annotation Saved"
-			changeSave(true)
-			frame_data[currentFrame] = fabricCanvas.toJSON()
 		}else if (event.key === "f"){
 			if(scrubbing === false){
 				toast_text = "Scrubbing Mode Activated"
@@ -605,22 +582,20 @@ export default function MainUpload() {
 			}
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
-			annotation_data[currentFrame] = JSON.parse(JSON.stringify(annotation_data[previousFrameNumber]))
-			frame_data[currentFrame] = JSON.parse(JSON.stringify(frame_data[previousFrameNumber]))
-			fabric.util.enlivenObjects(frame_data[currentFrame], function(objects) {		
-				frame_data[currentFrame] = objects	
+			setCurrAnnotationData(JSON.parse(JSON.stringify(getAnnotationData(previousFrameNumber))))
+
+			var previous_frame_data = getFrameData(previousFrameNumber);
+			fabric.util.enlivenObjects(previous_frame_data, function(objects) {		
 				for(var i = 0; i < objects.length; i++){
-					frame_data[currentFrame][i]['local_id'] = frame_data[previousFrameNumber][i]['local_id']
+					objects[i]['local_id'] = previous_frame_data[i]['local_id']
+					fabricCanvas.add(objects[i])
 				}
-				//canvasBackgroundUpdate() //TODO Might run into performance issues. If performance issues persist, refine this approach.
-				//changeSave(true)
+				setCurrFrameData(objects)
 			}); 
 			/* for(var i = 0; i < frame_data[previousFrameNumber].length; i++){
 				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
 			} */
-			//save_data(currentFrame)
 			changeSave(true)
-			canvasBackgroundUpdate()
 		}
 	}  
 
@@ -672,18 +647,12 @@ export default function MainUpload() {
 		}
 
 		num_frames = Math.round(duration * frame_rate);
-		if(annotation_data[0].length == 0){
+		if(currAnnotationData.length == 0){
 			total_frames = duration * framerate
 			console.log("Resetting frame_data and annotation_data")
-			frame_data = new Array(num_frames)
-			annotation_data = new Array(num_frames)
-			//TODO Update this later
-			for (var i = 0; i < num_frames; i++){
-				frame_data[i] = []
-				annotation_data[i] = []
-			}
-			//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
-			setVisualToggle(Math.floor(Math.random() * 999999999999))
+			
+			initFrameData(num_frames)
+			initAnnotationData(num_frames)
 
 		}else{
 			alert("There is data currently annotated! To change frame rate refresh the page and re-upload!")
@@ -694,17 +663,20 @@ export default function MainUpload() {
 		time_unix = time;
 		VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
 	}
-
+ 
 	const canvasBackgroundUpdate = () => {
 		console.log("updated canvas")
 		if(inputType == 1){ //This is for when images are uploaded
 			var img = new Image()
 			img.onload = function() {
 				fabricCanvas.clear()
-				if(frame_data[currentFrame] != undefined){
-					for(var i = 0; i < frame_data[currentFrame].length; i++){
-						fabricCanvas.add(frame_data[currentFrame][i])
-					}
+				if(currFrameData != undefined){
+					fabric.util.enlivenObjects(currFrameData, function(objects) {		
+						for(var i = 0; i < currFrameData.length; i++){
+							objects[i].local_id = currFrameData[i].local_id
+							fabricCanvas.add(objects[i])
+						}
+					}); 
 				}
 				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
 				var f_img = new fabric.Image(img, {
@@ -737,9 +709,9 @@ export default function MainUpload() {
 			var img = new Image()
 			img.onload = function() {
 				fabricCanvas.clear()
-				if(frame_data[currentFrame] != undefined){
-					for(var i = 0; i < frame_data[currentFrame].length; i++){
-						fabricCanvas.add(frame_data[currentFrame][i])
+				if(currFrameData != undefined){
+					for(var i = 0; i < currFrameData.length; i++){
+						fabricCanvas.add(currFrameData[i])
 					}
 				}
 				var f_img = new fabric.Image(img, {
@@ -767,6 +739,10 @@ export default function MainUpload() {
 		}
 	}
 
+	const handleChangeAnnot = val => {
+		setCurrAnnotationData(val)
+	}
+
 	return (
 		<div>
 			<CustomNavBar 
@@ -785,14 +761,10 @@ export default function MainUpload() {
 				play_button_text={play_button_text}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
-				frame_data={frame_data}
 				change_skip_value={change_skip_value}
 				change_annotator_name={change_annotator_name}
 				change_annotation_type={change_annotation_type}
-				annotation_data={annotation_data}
 				VIDEO_METADATA={VIDEO_METADATA}
-				scaling_factor_height={scaling_factor_height}
-				scaling_factor_width={scaling_factor_width}
 				handleSetPlaybackRate={handleSetPlaybackRate}
 				toggleKeyCheck={toggleKeyCheck}
 				setFrameRate={setFrameRate}
@@ -849,7 +821,8 @@ export default function MainUpload() {
 					</div>
 					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
 						<AnnotationTable
-							annotation_data={annotation_data}
+							annotation_data={currAnnotationData}
+							change_annotation_data={handleChangeAnnot}
 							currentFrame={tableFrameNum}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
@@ -862,5 +835,3 @@ export default function MainUpload() {
 		</div>
 	);
 }
-
-

@@ -19,10 +19,11 @@ import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 import { Edit } from '../../annotations/segmentation_edit';
 
 import {run_model, load} from '../../tensorflow/ObjectDetection';
-import { run_model_segment } from '../../tensorflow/SemanticSegmentation';
+import { run_model_segment } from '../../tensorflow/SemanticSegmentation'; 
 
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
+import store from '../../store' 
 
 
 
@@ -31,10 +32,6 @@ export default function CustomNavBar(props){
 	const [uploadShow, setUploadShow] = useState(true);
 	const [startDate, setStartDate] = useState(0);
 	const [frameRate, setFrameRate] = useState(0)
-	const [skipValue, setSkipValue] = useState(0)
-	//const [playbackRate, setPlaybackRate] = useState(0)
-	const [horizontalRes, setHorizontalRes] = useState(0)
-	const [verticalRes, setVerticalRes] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
@@ -47,7 +44,7 @@ export default function CustomNavBar(props){
 	const handleUploadShow = () => setUploadShow(true)
 
 	const handleDownloadJSON = () => {
-		var converted_annot = new ExportingAnnotation(props.frame_data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
+		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
 
@@ -98,12 +95,6 @@ export default function CustomNavBar(props){
 		props.save_data()
 	}
 
-	/* TODO Add local storgae option
-	if (localStorage.getItem('frame_data') != null){
-		alert("There is some data stored")
-		props.annotation_data = localStorage.getItem('annotation_data');
-		props.frame_data = localStorage.getItem('frame_data');
-	}*/
 
 	return (
 		<div>
@@ -150,7 +141,7 @@ export default function CustomNavBar(props){
 						<NavDropdown.Divider />
 					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-						<text>Date and Time: </text>
+						{"Date and Time:"}
 						<DatePicker
 							selected={startDate}
 							onChange={(date) => {handleSetStartDate(date)}}
@@ -171,7 +162,7 @@ export default function CustomNavBar(props){
 					}
 					{videoFormat === 1 &&
 						<div>
-							<text>Youtube URL: </text>
+							{'Youtube URL:'}
 							<input onChange={handleVideoLink}></input>
 							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
 						</div>

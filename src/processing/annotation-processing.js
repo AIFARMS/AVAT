@@ -104,7 +104,7 @@ export default class ExtractingAnnotation{
                     grouppo.lockMovementX = true;
                     grouppo.selectable = false;
                     grouppo.local_id = curr_frame[j]['local_id']
-                    this.canvas.add(grouppo)
+                    //this.canvas.add(grouppo)
                     temp_data.push(grouppo)
                 }
             }

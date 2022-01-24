@@ -1,3 +1,4 @@
+import { boundingbox } from '../fabric_types/fabric_boundingbox'
 const fabric = require("fabric").fabric;
 
 class BoundingBox {
@@ -39,6 +40,16 @@ class BoundingBox {
             hasBorders: true,
             uniScaleTransform: true
         });
+        /* var box = new boundingbox({
+            hasRotatingPoint: false,
+            height: this.height,
+            width: this.width,
+            fill: this.color,
+            opacity: '.4',
+            top: this.top,
+            left: this.left,
+            label: this.id.toString()
+        }) */
 
         function onChange(obj) {
             var text_box = obj.target.item(1),
