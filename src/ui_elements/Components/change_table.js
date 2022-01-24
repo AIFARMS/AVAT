@@ -96,8 +96,7 @@ export default function AnnotationTable(props){
 
     var data = getAnnotationTableCount(props.annotation_data)
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
-    console.log(props.annotation_data)
-    //console.log(input.data)
+
     return (
         <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
             <Tab eventKey="home" title="Current">
@@ -110,7 +109,6 @@ export default function AnnotationTable(props){
                     cellEdit={
                         cellEditFactory({ mode: 'click', blurToSave: true,
                             afterSaveCell: (oldValue, newValue, row, column) => {
-                                console.log(row)
                                 props.change_annotation_data(annotation_data)
                                 props.toggleKeyCheck(true)
                             },

@@ -375,10 +375,7 @@ export default function MainUpload() {
 			}
 		})
 	}
-/* 	useEffect(() => {
-		save_data(currentFrame)
-	}, [currAnnotationData, currFrameData])
- */
+
 	useEffect(() => {
 		//TODO Find a more elegant solution. This is a temporay patch work.
 		if(oldAnnotation == null){
@@ -585,12 +582,13 @@ export default function MainUpload() {
 			}
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
-			setCurrAnnotationData(JSON.parse(JSON.stringify(getAnnotationData[previousFrameNumber])))
+			setCurrAnnotationData(JSON.parse(JSON.stringify(getAnnotationData(previousFrameNumber))))
 
 			var previous_frame_data = getFrameData(previousFrameNumber);
 			fabric.util.enlivenObjects(previous_frame_data, function(objects) {		
 				for(var i = 0; i < objects.length; i++){
 					objects[i]['local_id'] = previous_frame_data[i]['local_id']
+					fabricCanvas.add(objects[i])
 				}
 				setCurrFrameData(objects)
 			}); 
@@ -598,7 +596,6 @@ export default function MainUpload() {
 				fabricCanvas.add(JSON.parse(JSON.stringify(frame_data[previousFrameNumber][i])))
 			} */
 			changeSave(true)
-			canvasBackgroundUpdate()
 		}
 	}  
 
