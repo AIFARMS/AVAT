@@ -11,6 +11,8 @@ import Tab from 'react-bootstrap/Tab'
 import Button from 'react-bootstrap/Button'
 import { FormControl } from "react-bootstrap";
 
+import store from '../../store'
+
 const anno_col = (handler) => [
     {
         dataField: "frame_num",
@@ -47,8 +49,12 @@ const anno_col = (handler) => [
       }
 ]
 
-function getAnnotationTableCount(annotation_data) {
+function getAnnotationTableCount() {
+    var annotation_data = store.getState().annotation_data.data
     var data = []
+    if (!annotation_data){
+        return data
+    }
     for(var i = 0; i < annotation_data.length; i++){
         if(annotation_data[i].length !== 0){
             var txt_id = ""
@@ -71,7 +77,7 @@ export default function AnnotationTable(props){
           <div>
             <FormControl 
                 as="textarea" aria-label="With textarea" 
-                defaultValue={props.annotation_data[props.currentFrame][rowIndex]['notes']} 
+                defaultValue={props.annotation_data[rowIndex]['notes']} 
                 onChange={(event)=> {handleOnChange(event, rowIndex)}}
                 onClick={(event) => {props.toggleKeyCheck(false)}} 
                 onBlur={(event) => {props.toggleKeyCheck(true)}}
@@ -83,19 +89,21 @@ export default function AnnotationTable(props){
     };
 
     const handleOnChange = (event, rowIndex) => {
-        console.log(props.annotation_data[props.currentFrame]);
-        props.annotation_data[props.currentFrame][rowIndex]['notes'] = (event.target.value);
-        console.log(props.annotation_data[props.currentFrame]) 
+        console.log(props.annotation_data);
+        props.annotation_data[rowIndex]['notes'] = (event.target.value);
+        console.log(props.annotation_data) 
     }
 
     var data = getAnnotationTableCount(props.annotation_data)
+    var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
+    console.log(props.annotation_data)
     //console.log(input.data)
     return (
         <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
             <Tab eventKey="home" title="Current">
                 <BootstrapTable
                     keyField='id'
-                    data={props.annotation_data[props.currentFrame]} 
+                    data={annotation_data} 
                     columns={props.columns(props.remove_table_index)}
                     table
                     noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
@@ -103,9 +111,7 @@ export default function AnnotationTable(props){
                         cellEditFactory({ mode: 'click', blurToSave: true,
                             afterSaveCell: (oldValue, newValue, row, column) => {
                                 console.log(row)
-                                //var notes = props.annotation_data[props.currentFrame][row['id']]['notes']
-                                //props.annotation_data[props.currentFrame][row['id']] = row
-                                //props.annotation_data[props.currentFrame][row['id']]['notes'] = notes
+                                props.change_annotation_data(annotation_data)
                                 props.toggleKeyCheck(true)
                             },
                             onStartEdit: (row, column, rowIndex, columnIndex) => {
