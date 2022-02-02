@@ -278,7 +278,6 @@ export default function MainUpload() {
 		}
 		console.log(currAnnotationData)
 		canvasBackgroundUpdate()
-		//TODO make this more elegant - Currently makes a random number since the state change using an incremental update to the integer caused a stop of state updates and did not respond to any changes. This forces the values to be changed on random and should not have any dependence of the previous value of the visual toggle state.
 		setVisualToggle(Math.floor(Math.random() * 999999999999))
 	}
 	
@@ -387,10 +386,10 @@ export default function MainUpload() {
 		});
 		store.dispatch({
 			type: "annotation_data/initOldAnnotation",
-			payload: oldAnnotation.get_frame_data()
+			payload: oldAnnotation.get_annotation_data()
 		});
-		setCurrFrameData(getFrameData(0))
-		setCurrAnnotationData(getAnnotationData[0])
+		setCurrFrameData(oldAnnotation.get_frame_data()[0])
+		setCurrAnnotationData(oldAnnotation.get_annotation_data()[0])
 
 		canvasBackgroundUpdate()
 	}, [oldAnnotation]);
@@ -463,21 +462,26 @@ export default function MainUpload() {
 		save_previous_data()
 		save_data(currentFrame)
 		var frameVal = currentFrame + skip_value
-		setCurrFrameData(getFrameData(frameVal))
-		setCurrAnnotationData(getAnnotationData(frameVal))
+
 		if(frameVal >= total_frames){
 			if(inputType === 1){
 				currentFrame = (total_frames-1)
-				setVisualToggle(Math.floor(Math.random() * 999999999999))
+				setCurrFrameData(getFrameData(total_frames-1))
+				setCurrAnnotationData(getAnnotationData(total_frames-1))
 				return;
 			}
+			setCurrFrameData(getFrameData(total_frames-1))
+			setCurrAnnotationData(getAnnotationData(total_frames-1))
 			handleSetCurrentFrame(total_frames-1)
 		}else{
 			if(inputType === 1){
 				currentFrame =(frameVal)
-				setVisualToggle(Math.floor(Math.random() * 999999999999))
+				setCurrFrameData(getFrameData(frameVal))
+				setCurrAnnotationData(getAnnotationData(frameVal))
 				return;
 			}
+			setCurrFrameData(getFrameData(frameVal))
+			setCurrAnnotationData(getAnnotationData(frameVal))
 			handleSetCurrentFrame(frameVal)
 		}
 	}
@@ -486,21 +490,25 @@ export default function MainUpload() {
 		save_previous_data()
 		save_data(currentFrame)
 		var frameVal = currentFrame - skip_value
-		setCurrFrameData(getFrameData(frameVal))
-		setCurrAnnotationData(getAnnotationData(frameVal))
 		if(frameVal < 0){
 			if(inputType === 1){
 				currentFrame =(0)
-				setVisualToggle(Math.floor(Math.random() * 999999999999))
+				setCurrFrameData(getFrameData(0))
+				setCurrAnnotationData(getAnnotationData(0))
 				return;
 			}
+			setCurrFrameData(getFrameData(frameVal))
+			setCurrAnnotationData(getAnnotationData(frameVal))
 			handleSetCurrentFrame(0)
 		}else{
 			if(inputType === 1){
 				currentFrame =(frameVal)
-				setVisualToggle(Math.floor(Math.random() * 999999999999))
+				setCurrFrameData(getFrameData(frameVal))
+				setCurrAnnotationData(getAnnotationData(frameVal))
 				return;
 			}
+			setCurrFrameData(getFrameData(frameVal))
+			setCurrAnnotationData(getAnnotationData(frameVal))
 			handleSetCurrentFrame(frameVal)
 		}
 	}

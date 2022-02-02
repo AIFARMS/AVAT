@@ -94,7 +94,8 @@ export default function AnnotationTable(props){
         console.log(props.annotation_data) 
     }
 
-    var data = getAnnotationTableCount(props.annotation_data)
+    var data = getAnnotationTableCount()
+    console.log(props.annotation_data)
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
 
     return (

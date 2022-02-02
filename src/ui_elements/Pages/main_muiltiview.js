@@ -24,6 +24,7 @@ import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} 
 import MultiviewCustomNavBar from "../Components/nav_bar_multiview";
 import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
+import { configureCallbacks } from "@tensorflow/tfjs-layers/dist/base_callbacks";
 
 //TODO add local storage functionality to auto-save
 if (typeof(Storage) === "undefined") {
@@ -168,6 +169,8 @@ var segmentation_flag = false;
 var temp_selection_color;
 var on_ready_flag = false;
 var image_frames = []
+var image_frames1 = []
+var image_frames2 = []
 var total_frames
 var player_opacity = 0
 
@@ -201,6 +204,7 @@ export default function MainMultiview() {
 	const [boxCount, setBoxCount] = useState(0)
 	const [videoFilePath, setVideoFileURL] = useState(null);
 	const [videoFilePath1, setVideoFileURL1] = useState(null);
+	const [videoFilePath2, setVideoFileURL2] = useState(null);
 	const [oldAnnotation, setOldAnnotation] = useState(null)
 	const [player, setPlayer] = useState(null)
 	const [duration, setDuration] = useState(0);
@@ -210,7 +214,7 @@ export default function MainMultiview() {
 	const [playing, setPlaying] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
-	const [inputType, setInputType] = useState(0)
+	const [inputType, setInputType] = useState(1)
 	const [currentFrame, setCurrentFrame] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 
@@ -219,15 +223,6 @@ export default function MainMultiview() {
 			object.selectable = true
 			object.evented = true;
 		});
-	}
-
-	const handleInputType = (val) => {
-		if(val == 0 | val ==1){
-			setInputType(val)
-			//alert("Input set to " + val)
-		}else{
-			alert("ERROR VALUE SET - Please report this bug!\n")
-		}
 	}
 
 	const handleSetCurrentFrame = (val) => {
@@ -374,20 +369,33 @@ export default function MainMultiview() {
 			canvasBackgroundUpdate() //TODO might cause a breaking change since no return
 			disable_buttons = false;
 		}
-		
-		if(typeof(event) === "string"){//Youtube upload
-			setVideoFileURL(event)
-			ANNOTATION_VIDEO_NAME = event
-			upload = true;
-			return;
-		}
-		if(inputType !== 1){
-			//fileMetadata(event.target.files[0])
-		}
+
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
 		upload = true;
 	};
+
+	const handleVideoUpload1 = (event) => {
+		image_frames1 = event.target.files
+		total_frames = image_frames1.length
+		for(var i = 0; i < total_frames; i++){
+			annotation_data.push([])
+		}
+		canvasBackgroundUpdate() //TODO might cause a breaking change since no return
+		disable_buttons = false;
+		setVideoFileURL1(URL.createObjectURL(event.target.files[0]));
+	}
+
+	const handleVideoUpload2= (event) => {
+		image_frames2 = event.target.files
+		total_frames = image_frames2.length
+		for(var i = 0; i < total_frames; i++){
+			annotation_data.push([])
+		}
+		canvasBackgroundUpdate() //TODO might cause a breaking change since no return
+		disable_buttons = false;
+		setVideoFileURL2(URL.createObjectURL(event.target.files[0]));
+	}
 
 	//ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
 	const handleOldAnnotation = (event) => {
@@ -713,89 +721,25 @@ export default function MainMultiview() {
 		console.log(time)
 	}
 
-	const canvasBackgroundUpdate = () => {
-		if(inputType == 1){ //This is for when images are uploaded
-			var img = new Image()
-			img.onload = function() {
-				fabricCanvas.clear()
-				console.log(frame_data[currentFrame])
-				if(frame_data[currentFrame] != undefined){
-					for(var i = 0; i < frame_data[currentFrame].length; i++){
-						fabricCanvas.add(frame_data[currentFrame][i])
-					}
-				}
-				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
-				var f_img = new fabric.Image(img, {
-					objectCaching: false,
-					scaleX: scaling_factor_width / img.width,
-					scaleY: scaling_factor_height / img.height
-				});
-				console.log("CURRFRAME: " + currentFrame)
-				fabricCanvas.setBackgroundImage(f_img);
-			
-				fabricCanvas.renderAll();
-				//save_data()
-				setTableFrameNum(currentFrame)
 	
-			};
-			img.src = URL.createObjectURL(image_frames[currentFrame])
+	console.log(document.getElementsByTagName('img')[0])
+	const canvasBackgroundUpdate = () => {
+		console.log("hi")
+		if(image_frames.length == 0){
+			return;
+		}else if (image_frames1.length == 0){
+			return;
+		}else if (image_frames2.length == 0){
 			return;
 		}
-		
-		//TODO cleanup variabkle
-		var temp = parseInt(JSON.parse(JSON.stringify(currentFrame)));
-
-		var htmlvideo = document.getElementsByTagName('video')[0]
-		var total_frames = htmlvideo.duration * frame_rate
-		console.log(total_frames)
-		console.log(htmlvideo.duration)
-	
-		let canvas = document.createElement('canvas');
-		let context = canvas.getContext('2d');
-		let [w, h] = [scaling_factor_width, scaling_factor_height]
-		canvas.width =  scaling_factor_width;
-		canvas.height = scaling_factor_height;
-	
-		context.drawImage(htmlvideo, 0, 0, w, h);
-		let base64ImageData = canvas.toDataURL();
-
-		var img = new Image()
-		img.onload = function() {
-			fabricCanvas.clear()
-			if(frame_data[currentFrame] != undefined){
-				for(var i = 0; i < frame_data[currentFrame].length; i++){
-					fabricCanvas.add(frame_data[currentFrame][i])
-				}
-			}
-			var f_img = new fabric.Image(img, {
-				objectCaching: false
-			});
-		
-			fabricCanvas.setBackgroundImage(f_img);
-		
-			fabricCanvas.renderAll();
-			canvas.remove()
-			//save_data()
-			setTableFrameNum(currentFrame)
-
-		};
-
-		img.src = base64ImageData
-	}
-
-	const handleOnReady = val => {
-		//canvasBackgroundUpdate()
-		if(on_ready_flag == false){
-			canvasBackgroundUpdate()
-			on_ready_flag = true
+		if(inputType == 1){ //This is for when images are uploaded
+			document.getElementsByTagName('img')[0].src = URL.createObjectURL(image_frames[currentFrame])
+			document.getElementsByTagName('img')[1].src = URL.createObjectURL(image_frames1[currentFrame])
+			document.getElementsByTagName('img')[2].src = URL.createObjectURL(image_frames2[currentFrame])
 		}
 	}
 
-	const handleOnSeek = val => {
-		canvasBackgroundUpdate()
-		sliderPercent = (currentFrame/(duration * frame_rate))
-		setVisualToggle(Math.floor(Math.random() * 999999999999))
-	}
+	canvasBackgroundUpdate()
 
 	return (
 		<div>
@@ -833,7 +777,6 @@ export default function MainMultiview() {
 				fabricCanvas={fabricCanvas}
 				save_data={save_data}
 				handle_visual_toggle={handle_visual_toggle}
-				handleInputType={handleInputType}
 				image_frames={image_frames}
 				toggle_segmentation={toggle_segmentation}
 			/>
@@ -850,45 +793,13 @@ export default function MainMultiview() {
 				upload === true && 
 				<div style={{display: "grid"}} show={upload}>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: player_opacity}}>
-						{
-							inputType==0 && 
-							<ReactPlayer 
-								onReady={handleOnReady}
-								onSeek={handleOnSeek}
-								ref={handleSetPlayer} 
-								onDuration={handleSetDuration} 
-								url={videoFilePath} 
-								width='100%'
-								height='100%'
-								playing={playing} 
-								controls={false} 
-								style={{position:'absolute', float:'left', top:0, left:0}}
-								volume={0}
-								muted={true}
-								pip={false}
-								playbackRate={playbackRate}
-								id="myvideo"
-							/>
-						}
+						<img></img>
+						<img></img>
+						<img></img>
 					</div>
-					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
-						<FabricRender 
-							fabricCanvas={fabricCanvas}
-							currentFrame={currentFrame}
-							save_data={save_data}
-							scaling_factor_height={scaling_factor_height}
-							scaling_factor_width={scaling_factor_width}
-						/>
-					</div>
+
 					<div style={{gridColumn: 1, gridRow:2, position: "relative", width: scaling_factor_width, top: 0, left: 0}}>
-						<input
-							style={{width: scaling_factor_width}}
-							type='range' min={0} max={0.999999} step='any'
-							value={sliderPercent}
-							onChange={handleSeekChange}
-							onMouseDown={handleSeekMouseDown}
-							onMouseUp={handleSeekMouseUp}
-						/>
+
 					</div>
 					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
 						<AnnotationTable
