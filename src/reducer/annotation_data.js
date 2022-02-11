@@ -23,7 +23,9 @@ const annotationDataSlice = createSlice({
             temp[payload.payload.currentFrame] = payload.payload.data
             state.data = temp
         },
-
+        middleware: (getDefaultMiddleware) => getDefaultMiddleware({
+            serializableCheck: false
+        })
     }
 })
 

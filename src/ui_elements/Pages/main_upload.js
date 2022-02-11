@@ -492,13 +492,13 @@ export default function MainUpload() {
 		var frameVal = currentFrame - skip_value
 		if(frameVal < 0){
 			if(inputType === 1){
-				currentFrame =(0)
+				currentFrame = 0
 				setCurrFrameData(getFrameData(0))
 				setCurrAnnotationData(getAnnotationData(0))
 				return;
 			}
-			setCurrFrameData(getFrameData(frameVal))
-			setCurrAnnotationData(getAnnotationData(frameVal))
+			setCurrFrameData(getFrameData(0))
+			setCurrAnnotationData(getAnnotationData(0))
 			handleSetCurrentFrame(0)
 		}else{
 			if(inputType === 1){
