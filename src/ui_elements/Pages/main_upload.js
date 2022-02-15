@@ -178,6 +178,10 @@ export default function MainUpload() {
 		fabricCanvas.forEachObject(object => { object.selectable = true; object.evented = true;});
 	}
 
+	if(inputType == 1){
+		total_frames = image_frames.length
+	}
+
 	const save_data = (frame_num) => {
 		//return; //TODO Clear up
 		if(fabricCanvas.getObjects().length != 0){
@@ -198,6 +202,13 @@ export default function MainUpload() {
 	}
 
 	const handleSetCurrentFrame = (val) => {
+		if(inputType == 1){
+			currentFrame = val
+			canvasBackgroundUpdate()
+			total_frames = image_frames.length
+			return;
+		}
+
 		total_frames = duration * frame_rate
 		handle_visual_toggle()
 		if(typeof(val) === "number"){
@@ -290,7 +301,7 @@ export default function MainUpload() {
 		setPreviousFrameNumber(currentFrame)
 	}
 
-	const addToCanvas = () =>{
+	const addToCanvas = () => {
 		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
 		
 		if(currAnnotationData == null){
