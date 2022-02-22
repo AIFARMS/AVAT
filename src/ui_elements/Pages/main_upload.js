@@ -23,6 +23,7 @@ import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
+//
 import store from '../../store' 
 import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
 
@@ -178,6 +179,12 @@ export default function MainUpload() {
 		fabricCanvas.forEachObject(object => { object.selectable = true; object.evented = true;});
 	}
 
+	if(inputType == 1){
+		total_frames = image_frames.length
+	}
+
+	console.log(fabricCanvas.getObjects())
+
 	const save_data = (frame_num) => {
 		//return; //TODO Clear up
 		if(fabricCanvas.getObjects().length != 0){
@@ -198,6 +205,13 @@ export default function MainUpload() {
 	}
 
 	const handleSetCurrentFrame = (val) => {
+		if(inputType == 1){
+			currentFrame = val
+			canvasBackgroundUpdate()
+			total_frames = image_frames.length
+			return;
+		}
+
 		total_frames = duration * frame_rate
 		handle_visual_toggle()
 		if(typeof(val) === "number"){
@@ -230,8 +244,8 @@ export default function MainUpload() {
 		}
 	}
 
-	const removeRow = (index) => {	
-		console.log(index)	
+	const removeRow = (index) => {
+		console.log(index)
 		var index_num = 1;
 		for(var i = 0; i < currAnnotationData.length; i++){
 			if(currAnnotationData[i]['id'] == index){
@@ -242,9 +256,9 @@ export default function MainUpload() {
 		if (index_num === -1){
 			alert("bug: " + index)
 		}
-
 		if(index.substring(index.length-1, index.length) !== "f"){ //Disabled removal of key-point for now
 			var current_objects = fabricCanvas.getObjects()
+			console.log(current_objects)
 			for(var i = 0; i < current_objects.length; i++){
 				console.log(current_objects[i])
 				if(current_objects[i]['_objects'][1]['text'] === index){
@@ -257,12 +271,10 @@ export default function MainUpload() {
 			}
 		}
 		console.log("CURRENT FRAME: " + currentFrame)
-		var length_before = currAnnotationData.length;
 		var temp_array = [...currAnnotationData]; temp_array.splice(index_num, 1);
 		setCurrAnnotationData(temp_array);
-		if (currAnnotationData.length == length_before){
-			alert("Delete error, please note this error down in the bug tracker - Size of array: " + currAnnotationData.length )
-		}
+		//var temp_frame = [...currFrameData]; temp_frame.splice(index_num, 1);
+		setCurrFrameData(fabricCanvas.getObjects())
 		save_data(currentFrame)
 	}
 
@@ -277,7 +289,6 @@ export default function MainUpload() {
 			removeRow(index)
 		}
 		console.log(currAnnotationData)
-		canvasBackgroundUpdate()
 		setVisualToggle(Math.floor(Math.random() * 999999999999))
 	}
 	
@@ -290,7 +301,7 @@ export default function MainUpload() {
 		setPreviousFrameNumber(currentFrame)
 	}
 
-	const addToCanvas = () =>{
+	const addToCanvas = () => {
 		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
 		
 		if(currAnnotationData == null){
@@ -345,7 +356,6 @@ export default function MainUpload() {
 			image_frames = event.target.files
 			initAnnotationData(image_frames.length)
 			initFrameData(image_frames.length)
-			canvasBackgroundUpdate() //TODO might cause a breaking change since no return
 			disable_buttons = false;
 		}
 		
@@ -388,11 +398,19 @@ export default function MainUpload() {
 			type: "annotation_data/initOldAnnotation",
 			payload: oldAnnotation.get_annotation_data()
 		});
+
 		setCurrFrameData(oldAnnotation.get_frame_data()[0])
 		setCurrAnnotationData(oldAnnotation.get_annotation_data()[0])
-
-		canvasBackgroundUpdate()
+		setBoxCount(oldAnnotation.find_highest_localid())
 	}, [oldAnnotation]);
+		
+
+	useEffect(() =>{
+		if(currFrameData.length != 0){
+			canvasBackgroundUpdate()
+		}
+		
+	}, [currFrameData])
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {
@@ -679,12 +697,9 @@ export default function MainUpload() {
 			img.onload = function() {
 				fabricCanvas.clear()
 				if(currFrameData != undefined){
-					fabric.util.enlivenObjects(currFrameData, function(objects) {		
-						for(var i = 0; i < currFrameData.length; i++){
-							objects[i].local_id = currFrameData[i].local_id
-							fabricCanvas.add(objects[i])
-						}
-					}); 
+					for(var i = 0; i < currFrameData.length; i++){
+						fabricCanvas.add(currFrameData[i])
+					}
 				}
 				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
 				var f_img = new fabric.Image(img, {
