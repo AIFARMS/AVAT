@@ -11,30 +11,12 @@ export default class ExtractingAnnotation{
     }
 
     get_frame_data(){
-        if(this.check_legacy() == true){
-            alert("Legacy format detected - when exporting the format will be changed to the latest version automatically.")
-            return this.frame_data
-        }else{
-            return this.scale_annotations()
-        }
+        console.log(this.scale_annotations())
+        return this.scale_annotations()
     }
     
     get_annotation_data(){
         return this.annotation_data;
-    }
-
-    check_legacy(){
-        for(var i = 0; i < this.frame_data.length; i++){
-            var curr_frame = this.frame_data[i]
-            if(curr_frame == null){
-                continue;
-            }
-            //console.log(curr_frame)
-            if(curr_frame['objects'] !== undefined){
-                return true;
-            }
-        }
-        return false;
     }
 
     find_highest_localid(){
