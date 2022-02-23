@@ -1,3 +1,6 @@
+import store from '../store'
+import {getFrameData, getAnnotationData} from './actions'
+
 export async function downloadFileJSON (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, frame_data, annotation_data, VIDEO_METADATA) {
     var fileName = "generated_annotations";
     if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
@@ -5,7 +8,7 @@ export async function downloadFileJSON (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, f
     }
     console.log(annotation_data)
     //const json = JSON.stringify(fabricCanvas.getObjects());
-    const json = JSON.stringify({"vid_metadata": VIDEO_METADATA, "annotations": frame_data, "behavior_data": annotation_data})
+    const json = JSON.stringify({"vid_metadata": VIDEO_METADATA, "annotations": store.getState().frame_data.data, "behavior_data": store.getState().annotation_data.data})
     //var json = JSON.stringify(frame_data);
     var blob = new Blob([json],{type:'application/json'});
     var href = await URL.createObjectURL(blob);
@@ -17,6 +20,8 @@ export async function downloadFileJSON (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, f
     document.body.removeChild(link);
 }
 
+
+//Legacy code below - Can be refrenced later IF need for CSV is present. Currently broken.
 function convert_data_csv(data, columns){
     console.log(columns)
     var csv = new Array(data.length + 1)
