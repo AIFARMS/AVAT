@@ -336,7 +336,8 @@ export default function MainUpload() {
 		}
 
 		if(inputType === 1){
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "test",status: "test", current: "test", behavior: "test", posture: "test", notes: "test", confidence:"test", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
 			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
@@ -409,8 +410,10 @@ export default function MainUpload() {
 		if(currFrameData.length != 0){
 			canvasBackgroundUpdate()
 		}
+		updateFrameData(currentFrame, currFrameData)
+		updateAnnotationData(currentFrame, currAnnotationData)
 		
-	}, [currFrameData])
+	}, [currFrameData, currAnnotationData])
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {
@@ -738,7 +741,9 @@ export default function MainUpload() {
 					}
 				}
 				var f_img = new fabric.Image(img, {
-					objectCaching: false
+					objectCaching: false,
+					scaleX: scaling_factor_width / img.width,
+					scaleY: scaling_factor_height / img.height
 				});
 			
 				fabricCanvas.setBackgroundImage(f_img);

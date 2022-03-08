@@ -174,6 +174,9 @@ export default function CustomNavBar(props){
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
+					<Form style={{float: "left",gridColumn: 1, gridRow:6}}>
+						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file"/>
+					</Form>
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
