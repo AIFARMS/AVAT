@@ -409,8 +409,10 @@ export default function MainUpload() {
 		if(currFrameData.length != 0){
 			canvasBackgroundUpdate()
 		}
+		updateFrameData(currentFrame, currFrameData)
+		updateAnnotationData(currentFrame, currAnnotationData)
 		
-	}, [currFrameData])
+	}, [currFrameData, currAnnotationData])
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {
@@ -738,7 +740,9 @@ export default function MainUpload() {
 					}
 				}
 				var f_img = new fabric.Image(img, {
-					objectCaching: false
+					objectCaching: false,
+					scaleX: scaling_factor_width / img.width,
+					scaleY: scaling_factor_height / img.height
 				});
 			
 				fabricCanvas.setBackgroundImage(f_img);
