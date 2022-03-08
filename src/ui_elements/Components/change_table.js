@@ -11,6 +11,8 @@ import Tab from 'react-bootstrap/Tab'
 import Button from 'react-bootstrap/Button'
 import { FormControl } from "react-bootstrap";
 
+import AnnotTable from './annot_table'
+
 import store from '../../store'
 
 const anno_col = (handler) => [
@@ -48,6 +50,8 @@ const anno_col = (handler) => [
         },
       }
 ]
+
+
 
 function getAnnotationTableCount() {
     var annotation_data = store.getState().annotation_data.data
@@ -98,29 +102,41 @@ export default function AnnotationTable(props){
     console.log(props.annotation_data)
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
 
+    const columns = React.useMemo(
+        () => [
+          {
+            Header: 'Annotations',
+            columns: [
+              {
+                Header: 'id',
+                accessor: 'id',
+              },
+              {
+                Header: 'Glo',
+                accessor: 'global_id',
+              },
+              {
+                Header: 'Posture',
+                accessor: 'posture',
+              },
+              {
+                Header: 'Behavior',
+                accessor: 'behavior',
+              },
+              {
+                Header: 'Confidence',
+                accessor: 'confidence',
+              }
+            ],
+          },
+        ],
+        []
+    )
+    //TODO Add in force option for user to upload some sort of config file to continue along to next steps.
     return (
         <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
             <Tab eventKey="home" title="Current">
-                <BootstrapTable
-                    keyField='id'
-                    data={annotation_data} 
-                    columns={props.columns(props.remove_table_index)}
-                    table
-                    noDataIndication={ () => <div>No recorded annotations or behaviors for this frame<br/>Please add an annotation or behavior tag to start.</div> }
-                    cellEdit={
-                        cellEditFactory({ mode: 'click', blurToSave: true,
-                            afterSaveCell: (oldValue, newValue, row, column) => {
-                                props.change_annotation_data(annotation_data)
-                                props.toggleKeyCheck(true)
-                            },
-                            onStartEdit: (row, column, rowIndex, columnIndex) => {
-                                props.toggleKeyCheck(false)
-                            }
-                        }) 
-                    }
-                    pagination={ paginationFactory() }
-                    expandRow={ expandRow }
-                />
+                <AnnotTable columns={columns} data={annotation_data} />
             </Tab>
             <Tab eventKey="profile" title="Previous">
                 <BootstrapTable
