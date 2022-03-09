@@ -38,4 +38,18 @@ function getAnnotationData(frame_number){
     return store.getState().annotation_data.data[frame_number]
 }
 
-export {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData}
+/*
+Action functions for column uploading
+*/
+function initColumnData(column_dat){
+	store.dispatch({
+		type: "column_annot/init",
+		payload: {data: column_dat}
+	})
+}
+
+function getColumnData(){
+	return store.getState().column_annot
+}
+
+export {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData}

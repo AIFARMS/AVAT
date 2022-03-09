@@ -52,6 +52,14 @@ const anno_col = (handler) => [
 ]
 
 
+function hookBypass(col){
+  return React.useMemo(
+    () => [
+      col,
+    ],
+    []
+  )
+}
 
 function getAnnotationTableCount() {
     var annotation_data = store.getState().annotation_data.data
@@ -101,43 +109,28 @@ export default function AnnotationTable(props){
     var data = getAnnotationTableCount()
     console.log(props.annotation_data)
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
+    var columns = []
+    var col = []
+    if(store.getState().column_annot.data != undefined){
+      col = store.getState().column_annot.data['columns']
+      columns = hookBypass(col)
+    }
 
-    const columns = React.useMemo(
-        () => [
-          {
-            Header: 'Annotations',
-            columns: [
-              {
-                Header: 'id',
-                accessor: 'id',
-              },
-              {
-                Header: 'Glo',
-                accessor: 'global_id',
-              },
-              {
-                Header: 'Posture',
-                accessor: 'posture',
-              },
-              {
-                Header: 'Behavior',
-                accessor: 'behavior',
-              },
-              {
-                Header: 'Confidence',
-                accessor: 'confidence',
-              }
-            ],
-          },
-        ],
-        []
-    )
+    console.log(store.getState().column_annot)
+    console.log(col)
+    console.log(columns)
+    
+  console.log(columns)
+
     //TODO Add in force option for user to upload some sort of config file to continue along to next steps.
     return (
         <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
-            <Tab eventKey="home" title="Current">
-                <AnnotTable columns={columns} data={annotation_data} />
-            </Tab>
+            {
+              col.length != 0 &&
+              <Tab eventKey="home" title="Current">
+                <AnnotTable columns={col} data={annotation_data} />
+              </Tab>
+            }
             <Tab eventKey="profile" title="Previous">
                 <BootstrapTable
                     keyField='frame_num'

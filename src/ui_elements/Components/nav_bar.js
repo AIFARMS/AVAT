@@ -25,7 +25,7 @@ import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 import store from '../../store' 
 
-
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData} from '../../processing/actions'
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
@@ -37,6 +37,7 @@ export default function CustomNavBar(props){
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
 	const [editSeg, setEditSeg] = useState(false)
+	const [columnData, setColumnData] = useState({})
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -93,6 +94,30 @@ export default function CustomNavBar(props){
 		Edit(props.fabricCanvas, props.save_data);
 		props.toggle_segmentation();
 		props.save_data()
+	}
+
+	const handleColumnUpload = (event) => {
+		var promise = downloadColumn(event)
+		promise.then(function (result) {
+			if(result != null){
+				setColumnData(result);
+				console.log(result)
+				initColumnData(result)
+				alert("Column data upload successful.")
+			}else{
+				alert("Error in processing columns")
+			}
+		})
+	}
+
+	const downloadColumn = (file) => {
+		return new Promise((resolve, reject) => {
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			resolve((JSON.parse(e.target.result)));
+		}
+		reader.readAsText(file.target.files[0])
+		})
 	}
 
 
@@ -175,7 +200,7 @@ export default function CustomNavBar(props){
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<Form style={{float: "left",gridColumn: 1, gridRow:6}}>
-						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file"/>
+						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
 					</Form>
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
