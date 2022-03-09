@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { useTable, usePagination } from 'react-table'
+import {confidence, behaviors, posture} from '../../static_data/combined_dat'
 
 export default function AnnotTable({columns, data}){
     const {
@@ -15,12 +16,17 @@ export default function AnnotTable({columns, data}){
       })
 
     return(
-        <table {...getTableProps()}>
+        <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
             <thead>
                 {headerGroups.map(headerGroup => (
                 <tr {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map(column => (
-                    <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                    <th {...column.getHeaderProps()} 
+                    style={{
+                      background: '#657',
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}>{column.render('Header')}</th>
                     ))}
                 </tr>
                 ))}
@@ -28,19 +34,61 @@ export default function AnnotTable({columns, data}){
             <tbody {...getTableBodyProps()}>
                 {rows.map((row, i) => {
                     prepareRow(row)
-                    return (
-                        <tr {...row.getRowProps()}>
-                            {row.cells.map(cell => {
-                                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
-                            })}
-                        </tr>
-                    )
+                    const {id, global_id, posture, behavior, confidence} = row
+                    var selection = genSelection(row.original)
+                    console.log(selection)
+                    return(selection)
                 })}
             </tbody>
         </table>
     )
 }
 
-function genSelection(){
-    
+function genSelection(elem){
+    let behaviors_temp = (
+        <select>
+            {
+                behaviors.map((beh, i) => {
+                    return(
+                        <option value={beh.value}>{beh.value}</option>
+                    )
+                })
+            }
+        </select>
+    )
+
+    let confidence_temp = (
+        <select>
+            {
+                confidence.map((beh, i) => {
+                    return(
+                        <option value={beh.value}>{beh.value}</option>
+                    )
+                })
+            }
+        </select>
+    )
+
+    let posture_temp = (
+        <select>
+            {
+                posture.map((beh, i) => {
+                    return(
+                        <option value={beh.value}>{beh.value}</option>
+                    )
+                })
+            }
+        </select>
+    )
+
+    let coombined = (
+        <tr key={elem.id}>
+            <td>{elem.id}</td>
+            <td>{elem.global_id}</td>
+            <td>{posture_temp}</td>
+            <td>{behaviors_temp}</td>
+            <td>{confidence_temp}</td>
+        </tr>
+    )
+    return coombined
 }
