@@ -46,7 +46,8 @@ export default function AnnotTable({columns, data}){
 
 function genSelection(elem){
     let behaviors_temp = (
-        <select>
+        <select defaultValue={elem.behavior}>
+            <option value=""></option>
             {
                 behaviors.map((beh, i) => {
                     return(
@@ -58,7 +59,8 @@ function genSelection(elem){
     )
 
     let confidence_temp = (
-        <select>
+        <select defaultValue={elem.confidence}>
+            <option value=""></option>
             {
                 confidence.map((beh, i) => {
                     return(
@@ -70,7 +72,8 @@ function genSelection(elem){
     )
 
     let posture_temp = (
-        <select>
+        <select defaultValue={elem.posture}>
+            <option value=""></option>
             {
                 posture.map((beh, i) => {
                     return(
