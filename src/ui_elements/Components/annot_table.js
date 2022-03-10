@@ -4,6 +4,7 @@ import { useTable, usePagination } from 'react-table'
 import {confidence, behaviors, posture} from '../../static_data/combined_dat'
 
 export default function AnnotTable({columns, data}){
+    console.log(columns)
 
     const {
         getTableProps,
@@ -15,7 +16,6 @@ export default function AnnotTable({columns, data}){
         columns,
         data,
       })
-    
       if(!columns){
         return (
             <div>

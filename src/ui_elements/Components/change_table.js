@@ -52,15 +52,6 @@ const anno_col = (handler) => [
 ]
 
 
-function hookBypass(col){
-  return React.useMemo(
-    () => [
-      col,
-    ],
-    []
-  )
-}
-
 function getAnnotationTableCount() {
     var annotation_data = store.getState().annotation_data.data
     var data = []
@@ -113,7 +104,8 @@ export default function AnnotationTable(props){
     var col = []
     if(store.getState().column_annot.data != undefined){
       col = store.getState().column_annot.data['columns']
-      columns = hookBypass(col)
+      columns.push(col)//hookBypass(col)
+      console.log(columns)
     }
 
     console.log(store.getState().column_annot)
@@ -128,7 +120,7 @@ export default function AnnotationTable(props){
             {
               col.length != 0 &&
               <Tab eventKey="home" title="Current">
-                <AnnotTable columns={col} data={annotation_data} />
+                <AnnotTable columns={columns} data={annotation_data} />
               </Tab>
             }
             <Tab eventKey="profile" title="Previous">
