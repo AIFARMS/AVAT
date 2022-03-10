@@ -1,0 +1,11 @@
+      58 ./test/video_upload_test.py
+      61 ./test/run_tests.py
+       0 ./test/segmentation_test.py
+      99 ./test/navbar_test.py
+      41 ./test/selection_test.py
+      97 ./test/upload_dialog_test.py
+      45 ./test/boundingbox_test.py
+     244 ./avat2coco.py
+       9 ./backend/app.py
+     123 ./avat2voc.py
+     777 total

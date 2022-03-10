@@ -4,6 +4,8 @@ import { useTable, usePagination } from 'react-table'
 import {confidence, behaviors, posture} from '../../static_data/combined_dat'
 
 export default function AnnotTable({columns, data}){
+    console.log(columns)
+
     const {
         getTableProps,
         getTableBodyProps,
@@ -14,7 +16,13 @@ export default function AnnotTable({columns, data}){
         columns,
         data,
       })
-
+      if(!columns){
+        return (
+            <div>
+                {"No column upload detected."}
+            </div>
+        )
+    }
     return(
         <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
             <thead>
