@@ -102,10 +102,12 @@ export default function AnnotationTable(props){
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
     var columns = []
     var col = []
+    var select_data = undefined
     if(store.getState().column_annot.data != undefined){
       col = store.getState().column_annot.data['columns']
+      select_data = store.getState().column_annot.data['select_data']
       columns.push(col)//hookBypass(col)
-      console.log(columns)
+      console.log(select_data)
     }
 
     console.log(store.getState().column_annot)
@@ -120,7 +122,7 @@ export default function AnnotationTable(props){
             {
               col.length != 0 &&
               <Tab eventKey="home" title="Current">
-                <AnnotTable columns={columns} data={annotation_data} />
+                <AnnotTable columns={columns} data={annotation_data} select_data={select_data}/>
               </Tab>
             }
             <Tab eventKey="profile" title="Previous">

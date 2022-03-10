@@ -336,7 +336,7 @@ export default function MainUpload() {
 		}
 
 		if(inputType === 1){
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "test",status: "test", current: "test", behavior: "test", posture: "test", confidence:"test", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{

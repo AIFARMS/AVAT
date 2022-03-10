@@ -3,7 +3,7 @@ import React from 'react'
 import { useTable, usePagination } from 'react-table'
 import {confidence, behaviors, posture} from '../../static_data/combined_dat'
 
-export default function AnnotTable({columns, data}){
+export default function AnnotTable({columns, data, select_data}){
     console.log(columns)
 
     const {
@@ -23,6 +23,7 @@ export default function AnnotTable({columns, data}){
             </div>
         )
     }
+    console.log(data)
     return(
         <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
             <thead>
@@ -43,7 +44,7 @@ export default function AnnotTable({columns, data}){
                 {rows.map((row, i) => {
                     prepareRow(row)
                     const {id, global_id, posture, behavior, confidence} = row
-                    var selection = genSelection(row.original)
+                    var selection = genSelection(row.original, select_data, columns)
                     console.log(selection)
                     return(selection)
                 })}
@@ -52,54 +53,55 @@ export default function AnnotTable({columns, data}){
     )
 }
 
-function genSelection(elem){
-    let behaviors_temp = (
-        <select defaultValue={elem.behavior}>
-            <option value=""></option>
-            {
-                behaviors.map((beh, i) => {
-                    return(
-                        <option value={beh.value}>{beh.value}</option>
-                    )
-                })
-            }
-        </select>
-    )
-
-    let confidence_temp = (
-        <select defaultValue={elem.confidence}>
-            <option value=""></option>
-            {
-                confidence.map((beh, i) => {
-                    return(
-                        <option value={beh.value}>{beh.value}</option>
-                    )
-                })
-            }
-        </select>
-    )
-
-    let posture_temp = (
-        <select defaultValue={elem.posture}>
-            <option value=""></option>
-            {
-                posture.map((beh, i) => {
-                    return(
-                        <option value={beh.value}>{beh.value}</option>
-                    )
-                })
-            }
-        </select>
-    )
-
+function genSelection(elem, select_data, columns){
+    var row_vals = []
+    console.log(elem)
+    console.log(select_data)
+    console.log(columns)
+    
+    for(var i = 0; i < columns[0].columns.length; i++){
+        var curr_elem = columns[0].columns[i]['accessor']
+        if(!check_keys(select_data, curr_elem)){
+            continue
+        }
+        console.log(curr_elem)
+        console.log(elem[curr_elem])
+        console.log(select_data[curr_elem])
+        let temp = (
+            <select defaultValue={elem[curr_elem]}>
+                <option value=""></option>
+                {
+                    select_data[curr_elem].map((beh, _) => {
+                        return(
+                            <option value={beh.value}>{beh.value}</option>
+                        )
+                    })
+                }
+            </select>
+        )
+        row_vals.push(temp)
+    }
+    
     let coombined = (
         <tr key={elem.id}>
             <td>{elem.id}</td>
             <td>{elem.global_id}</td>
-            <td>{posture_temp}</td>
-            <td>{behaviors_temp}</td>
-            <td>{confidence_temp}</td>
+            {
+                row_vals.map((i, j) => {
+                    return(<td>{i}</td>)
+                })
+            }
         </tr>
     )
     return coombined
+}
+
+function check_keys(obj, key){
+    let obj_keys = Object.keys(obj)
+    for(var i = 0; i < obj_keys.length; i++){
+        if(obj_keys[i] === key){
+            return true
+        }
+    }
+    return false
 }
