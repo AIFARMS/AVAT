@@ -4,7 +4,6 @@ import { useTable, usePagination } from 'react-table'
 import {confidence, behaviors, posture} from '../../static_data/combined_dat'
 
 export default function AnnotTable({columns, data, select_data}){
-    console.log(columns)
 
     const {
         getTableProps,
@@ -23,6 +22,7 @@ export default function AnnotTable({columns, data, select_data}){
             </div>
         )
     }
+
     console.log(data)
     return(
         <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
@@ -45,7 +45,6 @@ export default function AnnotTable({columns, data, select_data}){
                     prepareRow(row)
                     const {id, global_id, posture, behavior, confidence} = row
                     var selection = genSelection(row.original, select_data, columns)
-                    console.log(selection)
                     return(selection)
                 })}
             </tbody>
@@ -55,18 +54,12 @@ export default function AnnotTable({columns, data, select_data}){
 
 function genSelection(elem, select_data, columns){
     var row_vals = []
-    console.log(elem)
-    console.log(select_data)
-    console.log(columns)
     
     for(var i = 0; i < columns[0].columns.length; i++){
         var curr_elem = columns[0].columns[i]['accessor']
         if(!check_keys(select_data, curr_elem)){
             continue
         }
-        console.log(curr_elem)
-        console.log(elem[curr_elem])
-        console.log(select_data[curr_elem])
         let temp = (
             <select defaultValue={elem[curr_elem]}>
                 <option value=""></option>
@@ -85,7 +78,9 @@ function genSelection(elem, select_data, columns){
     let coombined = (
         <tr key={elem.id}>
             <td>{elem.id}</td>
-            <td>{elem.global_id}</td>
+            <td>
+                <input type={"text"} style={{width: "50%"}}></input>
+            </td>
             {
                 row_vals.map((i, j) => {
                     return(<td>{i}</td>)

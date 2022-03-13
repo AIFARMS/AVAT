@@ -243,7 +243,7 @@ export default function CustomNavBar(props){
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					{
 						//props.fabricCanvas != undefined &&props.fabricCanvas.getActiveObject !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
-						<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+						//<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
 					}
 					{' '}
 					<Dropdown as={ButtonGroup}>
