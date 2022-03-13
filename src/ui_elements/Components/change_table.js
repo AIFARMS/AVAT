@@ -51,7 +51,6 @@ const anno_col = (handler) => [
       }
 ]
 
-
 function getAnnotationTableCount() {
     var annotation_data = store.getState().annotation_data.data
     var data = []
@@ -74,56 +73,33 @@ function getAnnotationTableCount() {
 
 
 export default function AnnotationTable(props){
-    const expandRow = {
-        onlyOneExpanding: true,
-        renderer: (row, rowIndex) => (
-          <div>
-            <FormControl 
-                as="textarea" aria-label="With textarea" 
-                defaultValue={props.annotation_data[rowIndex]['notes']} 
-                onChange={(event)=> {handleOnChange(event, rowIndex)}}
-                onClick={(event) => {props.toggleKeyCheck(false)}} 
-                onBlur={(event) => {props.toggleKeyCheck(true)}}
-            />
-          </div>
-        ),
-        showExpandColumn: true,
-        expandByColumnOnly: true
-    };
-
-    const handleOnChange = (event, rowIndex) => {
-        console.log(props.annotation_data);
-        props.annotation_data[rowIndex]['notes'] = (event.target.value);
-        console.log(props.annotation_data) 
-    }
-
     var data = getAnnotationTableCount()
-    console.log(props.annotation_data)
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
     var columns = []
     var col = []
+    var select_data = undefined
     if(store.getState().column_annot.data != undefined){
       col = store.getState().column_annot.data['columns']
+      select_data = store.getState().column_annot.data['select_data']
       columns.push(col)//hookBypass(col)
-      console.log(columns)
     }
-
-    console.log(store.getState().column_annot)
-    console.log(col)
-    console.log(columns)
-    
-  console.log(columns)
 
     //TODO Add in force option for user to upload some sort of config file to continue along to next steps.
     return (
-        <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
+        //<Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
+        <div>
             {
               col.length != 0 &&
-              <Tab eventKey="home" title="Current">
-                <AnnotTable columns={columns} data={annotation_data} />
-              </Tab>
+              //<Tab eventKey="home" title="Current">
+                <AnnotTable columns={columns} data={annotation_data} select_data={select_data}/>
+              //</Tab>
             }
-            <Tab eventKey="profile" title="Previous">
+        </div>
+        //</Tabs>
+    )
+}
+/*
+<Tab eventKey="profile" title="Previous">
                 <BootstrapTable
                     keyField='frame_num'
                     data={data} 
@@ -133,6 +109,4 @@ export default function AnnotationTable(props){
                     pagination={ paginationFactory() }
                 />
             </Tab>
-        </Tabs>
-    )
-}
+*/

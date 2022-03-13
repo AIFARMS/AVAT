@@ -187,6 +187,7 @@ export default function MainUpload() {
 
 	const save_data = (frame_num) => {
 		//return; //TODO Clear up
+		console.log("Saved data")
 		if(fabricCanvas.getObjects().length != 0){
 			updateFrameData(frame_num, fabricCanvas.getObjects())
 		}else{
@@ -325,8 +326,9 @@ export default function MainUpload() {
 			//var keyp = new KeyPoint().generate_stick(fabricCanvas)
 		}else if (annotationType === ANNOTATION_SEG){
 			//TODO Fix segmentation issues
-			annotation_type_txt = "s"	  
-
+			annotation_type_txt = "s";
+			alert("Segmentation has been disabled for this version. Please use an earlier version.");
+			return;
 			var segment = new Segmentation().generate_polygon(fabricCanvas, boxCount+'s', toggle_segmentation)
 			toggle_segmentation()
 
@@ -336,7 +338,7 @@ export default function MainUpload() {
 		}
 
 		if(inputType === 1){
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "test",status: "test", current: "test", behavior: "test", posture: "test", confidence:"test", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
