@@ -182,10 +182,11 @@ export default function MainUpload() {
 	if(inputType == 1){
 		total_frames = image_frames.length
 	}
-
+ 
 	console.log(fabricCanvas.getObjects())
 
 	const save_data = (frame_num) => {
+		console.log(frame_num)
 		//return; //TODO Clear up
 		console.log("Saved data")
 		if(fabricCanvas.getObjects().length != 0){
@@ -225,7 +226,7 @@ export default function MainUpload() {
 			}
 			player.seekTo(new_skip)
 		}else{
-			save_data(currentFrame)
+			//save_data(currentFrame)
 			var frame_calc = (val['played']/total_frames)
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
@@ -412,8 +413,8 @@ export default function MainUpload() {
 		if(currFrameData.length != 0){
 			canvasBackgroundUpdate()
 		}
-		updateFrameData(currentFrame, currFrameData)
-		updateAnnotationData(currentFrame, currAnnotationData)
+		//updateFrameData(currentFrame, currFrameData)
+		//updateAnnotationData(currentFrame, currAnnotationData)
 		
 	}, [currFrameData, currAnnotationData])
 
@@ -483,6 +484,7 @@ export default function MainUpload() {
 
 	const skip_frame_forward = e =>{
 		save_previous_data()
+		console.log(currentFrame)
 		save_data(currentFrame)
 		var frameVal = currentFrame + skip_value
 

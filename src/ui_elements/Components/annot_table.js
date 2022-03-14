@@ -23,7 +23,6 @@ export default function AnnotTable({columns, data, select_data}){
         )
     }
 
-    console.log(data)
     return(
         <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
             <thead>
@@ -75,7 +74,7 @@ function genSelection(elem, select_data, columns){
         row_vals.push(temp)
     }
     
-    let coombined = (
+    let combined_elems = (
         <tr key={elem.id}>
             <td>{elem.id}</td>
             <td>
@@ -88,7 +87,7 @@ function genSelection(elem, select_data, columns){
             }
         </tr>
     )
-    return coombined
+    return combined_elems
 }
 
 function check_keys(obj, key){

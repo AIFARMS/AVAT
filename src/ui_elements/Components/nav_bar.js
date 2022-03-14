@@ -91,9 +91,9 @@ export default function CustomNavBar(props){
 
 	const edit_click = (event) => {
 		setEditSeg(!editSeg);
-		Edit(props.fabricCanvas, props.save_data);
+		//Edit(props.fabricCanvas, props.save_data);
 		props.toggle_segmentation();
-		props.save_data()
+		//props.save_data()
 	}
 
 	const handleColumnUpload = (event) => {
@@ -237,8 +237,8 @@ export default function CustomNavBar(props){
 				</Nav>
 				<div>
 					{
-						model.length > 0 &&
-						<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
+						//model.length > 0 &&
+						//<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					{

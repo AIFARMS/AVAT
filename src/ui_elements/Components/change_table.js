@@ -75,6 +75,7 @@ function getAnnotationTableCount() {
 export default function AnnotationTable(props){
     var data = getAnnotationTableCount()
     var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
+    console.log(annotation_data)
     var columns = []
     var col = []
     var select_data = undefined
