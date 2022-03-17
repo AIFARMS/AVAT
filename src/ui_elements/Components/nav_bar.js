@@ -103,7 +103,6 @@ export default function CustomNavBar(props){
 				setColumnData(result);
 				console.log(result)
 				initColumnData(result)
-				alert("Column data upload successful.")
 			}else{
 				alert("Error in processing columns")
 			}
@@ -140,7 +139,7 @@ export default function CustomNavBar(props){
 			<Button variant="secondary" onClick={handleClose}>Close</Button>
 			</Modal.Footer>
 		</Modal>
-		<Modal show={uploadShow} onHide={handleUploadClose} size='lg'>
+		<Modal show={uploadShow}  size='lg'>
 			<Modal.Header closeButton>
 				<Modal.Title>Upload</Modal.Title>
 			</Modal.Header>
@@ -155,38 +154,23 @@ export default function CustomNavBar(props){
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="0">Upload</option>
+							<option value="0">Video</option>
 							<option value="1">Youtube</option>
 							<option value="2">Image</option>
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
-					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
-						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
-						<NavDropdown.Divider />
-					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-						{"Date and Time:"}
-						<DatePicker
-							selected={startDate}
-							onChange={(date) => {handleSetStartDate(date)}}
-							timeInputLabel="Time:"
-							dateFormat="yyyy/MM/dd hh:mm"
-							showTimeInput
-							onClick={(event) => {props.toggleKeyCheck(false)}}
-							onClickOutside={(event) => {props.toggleKeyCheck(true)}}
-							onCalendarOpen={(event) => {props.toggleKeyCheck(false)}}
-							onCalendarClose={(event) => {props.toggleKeyCheck(true)}}
-						/>
-						<NavDropdown.Divider />
+
 					</div>
+					<NavDropdown.Divider />
 					{videoFormat === 0 && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
 							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
 					}
 					{videoFormat === 1 &&
-						<div>
+						<div style={{float: "left",gridColumn: 1, gridRow:4}}>
 							{'Youtube URL:'}
 							<input onChange={handleVideoLink}></input>
 							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
