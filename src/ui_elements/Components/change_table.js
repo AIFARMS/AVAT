@@ -12,44 +12,9 @@ import Button from 'react-bootstrap/Button'
 import { FormControl } from "react-bootstrap";
 
 import AnnotTable from './annot_table'
+import SwapAnnotTable from "./cumulative_annot_table";
 
 import store from '../../store'
-
-const anno_col = (handler) => [
-    {
-        dataField: "frame_num",
-        text: "Frame",
-        headerStyle: () => { return { width: "40px", left: 0 }; }
-    },{
-        dataField: "anno_count",
-        text: "Count",
-        headerStyle: () => { return { width: "40px", left: 0 }; }
-    },{
-        dataField: "local_ids",
-        text: "Local ID",
-        headerStyle: () => { return { width: "40px", left: 0 }; }
-    },{
-        dataField: "global_ids",
-        text: "Global ID",
-        headerStyle: () => { return { width: "40px", left: 0 }; }
-    },{
-        dataField: "swap",
-        text: "Swap",
-        editable: false,
-        headerStyle: () => { return { width: "50px", left: 0}; },
-        formatter: (cellContent, row) => {
-          return (
-            <Button
-                className="btn btn-confirm btn-xs"
-                label="Del"
-                onClick={() => {handler(row.frame_num)}}
-            >
-                Skip
-            </Button>
-          );
-        },
-      }
-]
 
 function getAnnotationTableCount() {
     var annotation_data = store.getState().annotation_data.data
@@ -74,7 +39,8 @@ function getAnnotationTableCount() {
 
 export default function AnnotationTable(props){
     var data = getAnnotationTableCount()
-    var annotation_data = JSON.parse(JSON.stringify(props.annotation_data))
+    var annotation_data = (props.annotation_data)
+    console.log(annotation_data)
     var columns = []
     var col = []
     var select_data = undefined
@@ -83,19 +49,53 @@ export default function AnnotationTable(props){
       select_data = store.getState().column_annot.data['select_data']
       columns.push(col)//hookBypass(col)
     }
+    const anno_col = React.useMemo(
+        () => [
+          {
+            Header: 'Name',
+            columns: [
+              {
+                Header: 'Frame',
+                accessor: 'frame_num',
+              },
+              {
+                Header: 'Count',
+                accessor: 'anno_count',
+              },
+              {
+                Header: 'Local ID',
+                accessor: 'local_id',
+              },
+              {
+                Header: 'Global ID',
+                accessor: 'global_ids',
+              },
+              /*{
+                Header: 'Swap',
+                accessor: 'swap',
+              }*/
+            ],
+          }
+        ],
+        []
+      )
 
     //TODO Add in force option for user to upload some sort of config file to continue along to next steps.
     return (
-        //<Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
         <div>
-            {
-              col.length != 0 &&
-              //<Tab eventKey="home" title="Current">
-                <AnnotTable columns={columns} data={annotation_data} select_data={select_data}/>
-              //</Tab>
-            }
+        {
+            col.length != 0 &&
+            <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
+                <Tab eventKey="home" title="Current">
+                    <AnnotTable columns={columns} data={annotation_data} select_data={select_data}/>
+                </Tab>
+                <Tab eventKey="swap" title="Swap">
+                    <SwapAnnotTable columns={anno_col} data={getAnnotationTableCount()}></SwapAnnotTable>
+                </Tab>
+            </Tabs>
+        }   
         </div>
-        //</Tabs>
+           
     )
 }
 /*

@@ -23,6 +23,7 @@ import CustomNavBar from "../Components/nav_bar";
 import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
+
 //
 import store from '../../store' 
 import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
@@ -182,10 +183,11 @@ export default function MainUpload() {
 	if(inputType == 1){
 		total_frames = image_frames.length
 	}
-
+ 
 	console.log(fabricCanvas.getObjects())
 
 	const save_data = (frame_num) => {
+		console.log(frame_num)
 		//return; //TODO Clear up
 		console.log("Saved data")
 		if(fabricCanvas.getObjects().length != 0){
@@ -225,7 +227,7 @@ export default function MainUpload() {
 			}
 			player.seekTo(new_skip)
 		}else{
-			save_data(currentFrame)
+			//save_data(currentFrame)
 			var frame_calc = (val['played']/total_frames)
 			frame_calc = (Math.floor(val['played']*total_frames))
 			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
@@ -339,7 +341,6 @@ export default function MainUpload() {
 
 		if(inputType === 1){
 			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
-			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "test",status: "test", current: "test", behavior: "test", posture: "test", confidence:"test", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
 			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
@@ -412,8 +413,8 @@ export default function MainUpload() {
 		if(currFrameData.length != 0){
 			canvasBackgroundUpdate()
 		}
-		updateFrameData(currentFrame, currFrameData)
-		updateAnnotationData(currentFrame, currAnnotationData)
+		//updateFrameData(currentFrame, currFrameData)
+		//updateAnnotationData(currentFrame, currAnnotationData)
 		
 	}, [currFrameData, currAnnotationData])
 
@@ -478,11 +479,9 @@ export default function MainUpload() {
 		setDuration(parseInt(val))
 	}
 
-	const [scrubbing, setScrubbing] = useState(true);
-
-
 	const skip_frame_forward = e =>{
 		save_previous_data()
+		console.log(currentFrame)
 		save_data(currentFrame)
 		var frameVal = currentFrame + skip_value
 
@@ -601,16 +600,6 @@ export default function MainUpload() {
 			handlePlaying()
 		}else if (event.key === "e"){
 			skip_frame_forward()
-		}else if (event.key === "f"){
-			if(scrubbing === false){
-				toast_text = "Scrubbing Mode Activated"
-				setScrubbing(true)
-				changeSave(true)
-			}else{
-				toast_text = "Scrubbing Mode Deactivated"
-				setScrubbing(false)
-				changeSave(true)
-			}
 		}else if(event.key === "c"){
 			toast_text = "Copying previous frame annotation"
 			setCurrAnnotationData(JSON.parse(JSON.stringify(getAnnotationData(previousFrameNumber))))
@@ -635,11 +624,6 @@ export default function MainUpload() {
 		return () => document.removeEventListener("keydown", onKeyPress);
 	}, [onKeyPress]);
 	
-
-
-	const change_annotator_name = (event) => {
-		ANNOTATOR_NAME = event
-	}
 
 	const handle_visual_toggle = () => {
 		setVisualToggle(Math.floor(Math.random() * 999999999999))
@@ -690,11 +674,6 @@ export default function MainUpload() {
 		}
 	}
 
-	const setDateTime = (time) => {
-		time_unix = time;
-		VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
-	}
- 
 	const canvasBackgroundUpdate = () => {
 		console.log("updated canvas")
 		if(inputType == 1){ //This is for when images are uploaded
@@ -780,7 +759,6 @@ export default function MainUpload() {
 				video_width={video_width} 
 				video_height={video_height} 
 				skip_value={skip_value} 
-				ANNOTATOR_NAME={ANNOTATOR_NAME}
 				handleOldAnnotation={handleOldAnnotation}
 				handleVideoUpload={handleVideoUpload}
 				currentFrame={currentFrame}
@@ -792,14 +770,12 @@ export default function MainUpload() {
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
 				change_skip_value={change_skip_value}
-				change_annotator_name={change_annotator_name}
 				change_annotation_type={change_annotation_type}
 				VIDEO_METADATA={VIDEO_METADATA}
 				handleSetPlaybackRate={handleSetPlaybackRate}
 				toggleKeyCheck={toggleKeyCheck}
 				setFrameRate={setFrameRate}
 				frame_rate={frame_rate}
-				setDateTime={setDateTime}
 				fabricCanvas={fabricCanvas}
 				save_data={save_data}
 				handle_visual_toggle={handle_visual_toggle}

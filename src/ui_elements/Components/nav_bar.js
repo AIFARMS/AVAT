@@ -30,7 +30,6 @@ import {initFrameData, updateFrameData, getFrameData, initAnnotationData, update
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
-	const [startDate, setStartDate] = useState(0);
 	const [frameRate, setFrameRate] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
@@ -42,22 +41,14 @@ export default function CustomNavBar(props){
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 	const handleUploadClose = () => {setUploadShow(false); setProcess(true)}
-	const handleUploadShow = () => setUploadShow(true)
+	const handleUploadShow = () => {
+		setUploadShow(true)
+	}
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
-
-	const handleSetStartDate = (date) => {
-		setStartDate(date)
-		try { //Making sure that any garbage input taken care of
-			props.setDateTime(Math.floor((date.getTime() / 1000)))
-		} catch (error) {
-			alert("Invalid date input!")
-		}
-	}
-
 	const handleVideoFormat = (type) => {
 		console.log(type)
 		//TODO Make sure bug is resolved and simply have video format equal type
@@ -91,9 +82,9 @@ export default function CustomNavBar(props){
 
 	const edit_click = (event) => {
 		setEditSeg(!editSeg);
-		Edit(props.fabricCanvas, props.save_data);
+		//Edit(props.fabricCanvas, props.save_data);
 		props.toggle_segmentation();
-		props.save_data()
+		//props.save_data()
 	}
 
 	const handleColumnUpload = (event) => {
@@ -103,7 +94,6 @@ export default function CustomNavBar(props){
 				setColumnData(result);
 				console.log(result)
 				initColumnData(result)
-				alert("Column data upload successful.")
 			}else{
 				alert("Error in processing columns")
 			}
@@ -155,38 +145,23 @@ export default function CustomNavBar(props){
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="0">Upload</option>
+							<option value="0">Video</option>
 							<option value="1">Youtube</option>
 							<option value="2">Image</option>
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
-					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
-						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
-						<NavDropdown.Divider />
-					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-						{"Date and Time:"}
-						<DatePicker
-							selected={startDate}
-							onChange={(date) => {handleSetStartDate(date)}}
-							timeInputLabel="Time:"
-							dateFormat="yyyy/MM/dd hh:mm"
-							showTimeInput
-							onClick={(event) => {props.toggleKeyCheck(false)}}
-							onClickOutside={(event) => {props.toggleKeyCheck(true)}}
-							onCalendarOpen={(event) => {props.toggleKeyCheck(false)}}
-							onCalendarClose={(event) => {props.toggleKeyCheck(true)}}
-						/>
-						<NavDropdown.Divider />
+
 					</div>
+					<NavDropdown.Divider />
 					{videoFormat === 0 && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
 							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
 					}
 					{videoFormat === 1 &&
-						<div>
+						<div style={{float: "left",gridColumn: 1, gridRow:4}}>
 							{'Youtube URL:'}
 							<input onChange={handleVideoLink}></input>
 							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
@@ -237,8 +212,8 @@ export default function CustomNavBar(props){
 				</Nav>
 				<div>
 					{
-						model.length > 0 &&
-						<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
+						//model.length > 0 &&
+						//<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
 					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					{

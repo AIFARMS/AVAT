@@ -1,10 +1,8 @@
 import React from 'react'
 
 import { useTable, usePagination } from 'react-table'
-import {confidence, behaviors, posture} from '../../static_data/combined_dat'
 
 export default function AnnotTable({columns, data, select_data}){
-
     const {
         getTableProps,
         getTableBodyProps,
@@ -23,7 +21,6 @@ export default function AnnotTable({columns, data, select_data}){
         )
     }
 
-    console.log(data)
     return(
         <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
             <thead>
@@ -75,20 +72,20 @@ function genSelection(elem, select_data, columns){
         row_vals.push(temp)
     }
     
-    let coombined = (
+    let combined_elems = (
         <tr key={elem.id}>
             <td>{elem.id}</td>
             <td>
-                <input type={"text"} style={{width: "50%"}}></input>
+                <input type={"text"} style={{width: "50%"}} defaultValue={elem.global_id}></input>
             </td>
             {
                 row_vals.map((i, j) => {
-                    return(<td>{i}</td>)
+                    return(<td id={j}>{i}</td>)
                 })
             }
         </tr>
     )
-    return coombined
+    return combined_elems
 }
 
 function check_keys(obj, key){
@@ -99,4 +96,36 @@ function check_keys(obj, key){
         }
     }
     return false
+}
+
+function cell_edit(rowIndex, columnId, value){
+    console.log(rowIndex)
+    console.log(columnId)
+    console.log(value)
+}
+
+const EditableCell = ({
+    value: initialValue,
+    row: { index },
+    column: { id },
+    updateMyData,
+}) => {
+    const [value, setValue] = React.useState(initialValue)
+    const onChange = e => {
+        setValue(e.target.value)
+    }
+
+    const onBlur = () => {
+        updateMyData(index, id, value)
+    }
+
+    React.useEffect(() => {
+        setValue(initialValue)
+      }, [initialValue])
+    
+      return <input value={value} onChange={onChange} onBlur={onBlur} />
+}
+
+const defaultColumn = {
+    Cell: EditableCell,
 }
