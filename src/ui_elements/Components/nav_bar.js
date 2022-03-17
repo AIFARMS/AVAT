@@ -30,7 +30,6 @@ import {initFrameData, updateFrameData, getFrameData, initAnnotationData, update
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
-	const [startDate, setStartDate] = useState(0);
 	const [frameRate, setFrameRate] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(0)
 	const [videoLink, setVideoLink] = useState("")
@@ -42,22 +41,14 @@ export default function CustomNavBar(props){
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 	const handleUploadClose = () => {setUploadShow(false); setProcess(true)}
-	const handleUploadShow = () => setUploadShow(true)
+	const handleUploadShow = () => {
+		setUploadShow(true)
+	}
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
-
-	const handleSetStartDate = (date) => {
-		setStartDate(date)
-		try { //Making sure that any garbage input taken care of
-			props.setDateTime(Math.floor((date.getTime() / 1000)))
-		} catch (error) {
-			alert("Invalid date input!")
-		}
-	}
-
 	const handleVideoFormat = (type) => {
 		console.log(type)
 		//TODO Make sure bug is resolved and simply have video format equal type
@@ -139,7 +130,7 @@ export default function CustomNavBar(props){
 			<Button variant="secondary" onClick={handleClose}>Close</Button>
 			</Modal.Footer>
 		</Modal>
-		<Modal show={uploadShow}  size='lg'>
+		<Modal show={uploadShow} onHide={handleUploadClose} size='lg'>
 			<Modal.Header closeButton>
 				<Modal.Title>Upload</Modal.Title>
 			</Modal.Header>

@@ -770,7 +770,6 @@ export default function MainUpload() {
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
 				change_skip_value={change_skip_value}
-				change_annotator_name={change_annotator_name}
 				change_annotation_type={change_annotation_type}
 				VIDEO_METADATA={VIDEO_METADATA}
 				handleSetPlaybackRate={handleSetPlaybackRate}
