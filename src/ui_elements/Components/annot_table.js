@@ -1,8 +1,9 @@
 import React from 'react'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
 
 import { useTable, usePagination } from 'react-table'
 
-export default function AnnotTable({columns, data, select_data}){
+export default function AnnotTable({columns, data, select_data, current_frame, change_annot}){
     const {
         getTableProps,
         getTableBodyProps,
@@ -41,7 +42,7 @@ export default function AnnotTable({columns, data, select_data}){
                 {rows.map((row, i) => {
                     prepareRow(row)
                     const {id, global_id, posture, behavior, confidence} = row
-                    var selection = genSelection(row.original, select_data, columns)
+                    var selection = genSelection(row.original, select_data, columns, i, current_frame)
                     return(selection)
                 })}
             </tbody>
@@ -49,16 +50,32 @@ export default function AnnotTable({columns, data, select_data}){
     )
 }
 
-function genSelection(elem, select_data, columns){
+const change_row = (e) => {
+    //console.log(e.target)
+    //console.log(e.target.value)
+    //console.log(e.target.id)
+    console.log(e.target.dataset.type)
+    console.log(e.target.dataset.curr)
+    var curr_data = getAnnotationData(e.target.dataset.curr)
+    if (curr_data.length === 0){
+        alert("Row changing value failed - please report this bug.")
+        return;
+    }
+    console.log(curr_data)
+    curr_data[e.target.id][e.target.dataset.type] = e.target.value
+    updateAnnotationData(e.target.dataset.currFrame, curr_data)
+}
+
+function genSelection(elem, select_data, columns, curr_idx, current_frame){
     var row_vals = []
-    
+    console.log(current_frame)
     for(var i = 0; i < columns[0].columns.length; i++){
         var curr_elem = columns[0].columns[i]['accessor']
         if(!check_keys(select_data, curr_elem)){
             continue
         }
         let temp = (
-            <select defaultValue={elem[curr_elem]}>
+            <select id={curr_idx} data-type={i} data-curr={current_frame} defaultValue={elem[curr_elem]} onChange={change_row}>
                 <option value=""></option>
                 {
                     select_data[curr_elem].map((beh, _) => {

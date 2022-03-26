@@ -339,6 +339,7 @@ export default function MainUpload() {
 			annotation_type_txt = "f"
 		}
 
+		var new_array = {}
 		if(inputType === 1){
 			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
@@ -347,6 +348,7 @@ export default function MainUpload() {
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
 		}
 	    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
+		
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
 	}
@@ -487,9 +489,9 @@ export default function MainUpload() {
 
 		if(frameVal >= total_frames){
 			if(inputType === 1){
-				currentFrame = (total_frames-1)
 				setCurrFrameData(getFrameData(total_frames-1))
 				setCurrAnnotationData(getAnnotationData(total_frames-1))
+				currentFrame = (total_frames-1)
 				return;
 			}
 			setCurrFrameData(getFrameData(total_frames-1))
@@ -497,9 +499,9 @@ export default function MainUpload() {
 			handleSetCurrentFrame(total_frames-1)
 		}else{
 			if(inputType === 1){
-				currentFrame =(frameVal)
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
+				currentFrame =(frameVal)
 				return;
 			}
 			setCurrFrameData(getFrameData(frameVal))
@@ -514,9 +516,9 @@ export default function MainUpload() {
 		var frameVal = currentFrame - skip_value
 		if(frameVal < 0){
 			if(inputType === 1){
-				currentFrame = 0
 				setCurrFrameData(getFrameData(0))
 				setCurrAnnotationData(getAnnotationData(0))
+				currentFrame = 0
 				return;
 			}
 			setCurrFrameData(getFrameData(0))
@@ -524,9 +526,9 @@ export default function MainUpload() {
 			handleSetCurrentFrame(0)
 		}else{
 			if(inputType === 1){
-				currentFrame =(frameVal)
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
+				currentFrame =(frameVal)
 				return;
 			}
 			setCurrFrameData(getFrameData(frameVal))
@@ -829,7 +831,7 @@ export default function MainUpload() {
 						<AnnotationTable
 							annotation_data={currAnnotationData}
 							change_annotation_data={handleChangeAnnot}
-							currentFrame={tableFrameNum}
+							currentFrame={currentFrame}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
 							remove_table_index={remove_table_index}

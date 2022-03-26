@@ -38,7 +38,6 @@ function getAnnotationTableCount() {
 
 
 export default function AnnotationTable(props){
-    var data = getAnnotationTableCount()
     var annotation_data = (props.annotation_data)
     console.log(annotation_data)
     var columns = []
@@ -87,17 +86,20 @@ export default function AnnotationTable(props){
             col.length != 0 &&
             <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
                 <Tab eventKey="home" title="Current">
-                    <AnnotTable columns={columns} data={annotation_data} select_data={select_data}/>
+                    <AnnotTable columns={columns} data={annotation_data} select_data={select_data} current_frame={props.currentFrame} change_annot={props.handleChangeAnnot}/>
                 </Tab>
-                <Tab eventKey="swap" title="Swap">
-                    <SwapAnnotTable columns={anno_col} data={getAnnotationTableCount()}></SwapAnnotTable>
-                </Tab>
+
             </Tabs>
         }   
         </div>
            
     )
 }
+/*
+                <Tab eventKey="swap" title="Swap">
+                    <SwapAnnotTable columns={anno_col} data={getAnnotationTableCount()}></SwapAnnotTable>
+                </Tab>
+*/
 /*
 <Tab eventKey="profile" title="Previous">
                 <BootstrapTable
