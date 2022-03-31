@@ -1,4 +1,4 @@
-//const tf = require('@tensorflow-models/tfjs-node');
+/*//const tf = require('@tensorflow-models/tfjs-node');
 const deeplab = require('@tensorflow-models/deeplab');
 const tfconv = require('@tensorflow/tfjs-converter');
 
@@ -56,3 +56,4 @@ export async function run_model_segment(fabricCanvas, annotation_data, currentFr
 
         });
 }
+*/

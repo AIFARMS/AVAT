@@ -26,7 +26,8 @@ import AnnotationTable from "../Components/change_table";
 
 //
 import store from '../../store' 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData} from '../../processing/actions'
+import { image } from "@tensorflow/tfjs";
 
 const fabric = require("fabric").fabric;
 
@@ -338,19 +339,47 @@ export default function MainUpload() {
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
 		}
-
-		var new_array = {}
+		
 		if(inputType === 1){
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			create_annotation(boxCount+annotation_type_txt)
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
+			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
+			create_annotation(boxCount+annotation_type_txt)
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
 		}
 	    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
-		
+		 
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
+	}
+
+	useEffect(() =>{
+		save_data(currentFrame)
+	}, [currAnnotationData])
+
+	const create_annotation = (id) => {
+		var columns = getColumnData()
+		var new_data = {}
+		columns = columns['data']['columns']['columns']
+		console.log(columns)
+		console.log(columns)
+		for(var i = 0; i < columns.length; i++){
+			console.log(i)
+			var curr_val = columns[i]
+			new_data[curr_val.Header] = ""
+		}
+		if(inputType === 1){
+			new_data['dataType'] = "image"
+			new_data['fileName'] = image_frames[currentFrame]['name']
+		}else{
+			new_data['dataType'] = "video"
+			new_data['fileName'] = "frame_" + currentFrame
+		}
+		new_data['id'] = id
+		setCurrAnnotationData(oldArray => [...oldArray, new_data])
+		console.log(new_data) 
 	}
 
 	const toggle_segmentation = (event) => {
@@ -363,6 +392,7 @@ export default function MainUpload() {
 			initAnnotationData(image_frames.length)
 			initFrameData(image_frames.length)
 			disable_buttons = false;
+			canvasBackgroundUpdate()
 		}
 		
 		if(typeof(event) === "string"){//Youtube upload
@@ -412,13 +442,14 @@ export default function MainUpload() {
 		
 
 	useEffect(() =>{
-		if(currFrameData.length != 0){
+		if(image_frames.length != 0){
 			canvasBackgroundUpdate()
 		}
 		//updateFrameData(currentFrame, currFrameData)
 		//updateAnnotationData(currentFrame, currAnnotationData)
 		
 	}, [currFrameData, currAnnotationData])
+
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {

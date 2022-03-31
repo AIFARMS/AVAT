@@ -1,4 +1,4 @@
-import '@tensorflow/tfjs-backend-cpu';
+/** import '@tensorflow/tfjs-backend-cpu';
 import '@tensorflow/tfjs-backend-webgl';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 
@@ -52,5 +52,5 @@ export async function run_model(fabricCanvas, annotation_data, currentFrame, sav
             result[i].bbox[1] > 10 ? result[i].bbox[1] - 5 : 10);
     }
     console.log(result)
-    //alert(JSON.stringify(result))*/
-};
+    //alert(JSON.stringify(result))
+}; */
