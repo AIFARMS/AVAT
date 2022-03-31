@@ -27,7 +27,7 @@ import AnnotationTable from "../Components/change_table";
 //
 import store from '../../store' 
 import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData} from '../../processing/actions'
-import { image } from "@tensorflow/tfjs";
+import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
 
@@ -177,6 +177,8 @@ export default function MainUpload() {
 	const [currFrameData, setCurrFrameData] = useState([])
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
+	const annot_redux = useSelector(state => state.annotation_data.data)
+
 	if(!segmentation_flag){
 		fabricCanvas.forEachObject(object => { object.selectable = true; object.evented = true;});
 	}
@@ -191,6 +193,7 @@ export default function MainUpload() {
 		console.log(frame_num)
 		//return; //TODO Clear up
 		console.log("Saved data")
+		console.log(currAnnotationData)
 		if(fabricCanvas.getObjects().length != 0){
 			updateFrameData(frame_num, fabricCanvas.getObjects())
 		}else{
@@ -340,35 +343,44 @@ export default function MainUpload() {
 			annotation_type_txt = "f"
 		}
 		
+		var saved_annot = getAnnotationData(currentFrame)
+		var generated_annotation;
 		if(inputType === 1){
 			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
-			create_annotation(boxCount+annotation_type_txt)
+			generated_annotation = create_annotation(boxCount+annotation_type_txt)
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
 			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
-			create_annotation(boxCount+annotation_type_txt)
+			generated_annotation = create_annotation(boxCount+annotation_type_txt)
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
 		}
 	    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
-		 
+		saved_annot = Object.assign([], saved_annot)
+		console.log(saved_annot)
+		console.log(generated_annotation)
+		console.log(typeof(saved_annot))
+		saved_annot.push(generated_annotation)
+		updateAnnotationData(currentFrame, saved_annot)
+		//setCurrAnnotationData(oldArray => [...oldArray, generated_annotation])
+
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
 	}
 
 	useEffect(() =>{
-		save_data(currentFrame)
-	}, [currAnnotationData])
+		if(upload == true){
+			setCurrAnnotationData(getAnnotationData(currentFrame))
+			console.log("ANNOT REDUX CHANGE")
+		}
+	}, [annot_redux])
 
 	const create_annotation = (id) => {
 		var columns = getColumnData()
 		var new_data = {}
 		columns = columns['data']['columns']['columns']
-		console.log(columns)
-		console.log(columns)
 		for(var i = 0; i < columns.length; i++){
-			console.log(i)
 			var curr_val = columns[i]
-			new_data[curr_val.Header] = ""
+			new_data[curr_val.accessor] = ""
 		}
 		if(inputType === 1){
 			new_data['dataType'] = "image"
@@ -378,8 +390,7 @@ export default function MainUpload() {
 			new_data['fileName'] = "frame_" + currentFrame
 		}
 		new_data['id'] = id
-		setCurrAnnotationData(oldArray => [...oldArray, new_data])
-		console.log(new_data) 
+		return new_data
 	}
 
 	const toggle_segmentation = (event) => {

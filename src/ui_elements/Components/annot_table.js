@@ -51,9 +51,9 @@ export default function AnnotTable({columns, data, select_data, current_frame, c
 }
 
 const change_row = (e) => {
-    //console.log(e.target)
-    //console.log(e.target.value)
-    //console.log(e.target.id)
+    console.log(e.target)
+    console.log(e.target.value)
+    console.log(e.target.id)
     console.log(e.target.dataset.type)
     console.log(e.target.dataset.curr)
     var curr_data = getAnnotationData(e.target.dataset.curr)
@@ -62,8 +62,10 @@ const change_row = (e) => {
         return;
     }
     console.log(curr_data)
+    console.log(curr_data[e.target.id])
+    console.log(curr_data[e.target.id][e.target.dataset.type])
     curr_data[e.target.id][e.target.dataset.type] = e.target.value
-    updateAnnotationData(e.target.dataset.currFrame, curr_data)
+    updateAnnotationData(parseInt(e.target.dataset.curr), curr_data)
 }
 
 function genSelection(elem, select_data, columns, curr_idx, current_frame){
@@ -75,7 +77,7 @@ function genSelection(elem, select_data, columns, curr_idx, current_frame){
             continue
         }
         let temp = (
-            <select id={curr_idx} data-type={i} data-curr={current_frame} defaultValue={elem[curr_elem]} onChange={change_row}>
+            <select id={curr_idx} data-type={curr_elem} data-curr={current_frame} defaultValue={elem[curr_elem]} onChange={change_row}>
                 <option value=""></option>
                 {
                     select_data[curr_elem].map((beh, _) => {

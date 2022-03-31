@@ -16,7 +16,7 @@ function updateFrameData(frame_number, data){
 	})
 }
 function getFrameData(frame_number){
-	return store.getState().frame_data.data[frame_number]
+	return JSON.parse(JSON.stringify(store.getState().frame_data.data[frame_number]))
 } 
 
 /*
@@ -35,7 +35,7 @@ function updateAnnotationData(frame_number, data){
 	})
 }
 function getAnnotationData(frame_number){
-    return store.getState().annotation_data.data[frame_number]
+    return JSON.parse(JSON.stringify(store.getState().annotation_data.data[frame_number]))
 }
 
 /*
@@ -49,7 +49,7 @@ function initColumnData(column_dat){
 }
 
 function getColumnData(){
-	return store.getState().column_annot
+	return JSON.parse(JSON.stringify(store.getState().column_annot))
 }
 
 export {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData}
