@@ -178,11 +178,7 @@ export default function MainUpload() {
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
 	const annot_redux = useSelector(state => state.annotation_data.data)
-
-	if(!segmentation_flag){
-		fabricCanvas.forEachObject(object => { object.selectable = true; object.evented = true;});
-	}
-
+	
 	if(inputType == 1){
 		total_frames = image_frames.length
 	}
@@ -361,6 +357,7 @@ export default function MainUpload() {
 		console.log(typeof(saved_annot))
 		saved_annot.push(generated_annotation)
 		updateAnnotationData(currentFrame, saved_annot)
+		updateFrameData(currentFrame, fabricCanvas.getObjects())
 		//setCurrAnnotationData(oldArray => [...oldArray, generated_annotation])
 
 		setBoxCount(boxCount + 1);
@@ -459,7 +456,7 @@ export default function MainUpload() {
 		//updateFrameData(currentFrame, currFrameData)
 		//updateAnnotationData(currentFrame, currAnnotationData)
 		
-	}, [currFrameData, currAnnotationData])
+	}, [currFrameData])
 
 
 	const downloadOldAnnotation = (file) => {
@@ -721,13 +718,21 @@ export default function MainUpload() {
 	const canvasBackgroundUpdate = () => {
 		console.log("updated canvas")
 		if(inputType == 1){ //This is for when images are uploaded
+			console.log(currFrameData)
 			var img = new Image()
 			img.onload = function() {
 				fabricCanvas.clear()
 				if(currFrameData != undefined){
-					for(var i = 0; i < currFrameData.length; i++){
+					/*for(var i = 0; i < currFrameData.length; i++){
+						console.log(currFrameData[i])
 						fabricCanvas.add(currFrameData[i])
-					}
+					}*/
+					fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
+						enlivenedObjects.forEach(function (obj, index) {
+							fabricCanvas.add(obj);
+						});
+						fabricCanvas.renderAll();
+					})
 				}
 				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
 				var f_img = new fabric.Image(img, {
@@ -761,9 +766,12 @@ export default function MainUpload() {
 			img.onload = function() {
 				fabricCanvas.clear()
 				if(currFrameData != undefined){
-					for(var i = 0; i < currFrameData.length; i++){
-						fabricCanvas.add(currFrameData[i])
-					}
+					fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
+						enlivenedObjects.forEach(function (obj, index) {
+							fabricCanvas.add(obj);
+						});
+						fabricCanvas.renderAll();
+					})
 				}
 				var f_img = new fabric.Image(img, {
 					objectCaching: false,
