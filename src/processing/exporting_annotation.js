@@ -7,7 +7,6 @@ export default class ExportingAnnotation{
     }
 
     get_frame_json(){
-        console.log(this.frame_data[0][0].get('type'))
         var standard_annot = new Array(this.frame_data.length)
         console.log(this.metadata)
         for(var i = 0; i < this.frame_data.length; i++){
