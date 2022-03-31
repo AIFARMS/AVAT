@@ -7,7 +7,6 @@ import Modal from 'react-bootstrap/Modal'
 import Carousel from 'react-bootstrap/Carousel'
 
 import MainUpload from './main_upload'
-import MainMultiview from './main_muiltiview'
 import { Container, Jumbotron, Col, Row, Card} from "react-bootstrap";
 import Instructions from "../Components/instructions";
 
@@ -30,8 +29,6 @@ function SelectionScreen(){
 
     if(upload){
         return (<MainUpload/>)
-    }else if(multiview){
-        return (<MainMultiview/>)
     }else{
         return (
             <div>
@@ -51,7 +48,6 @@ function SelectionScreen(){
                             <p className="lead text-muted"> Analysis tool to record data for livestock behavior and computer vision applications. </p>
                             <p>
                                 <Button onClick={handleUpload} variant="success" className="mx-1 my-2">Video Upload</Button>
-                                <Button onClick={handleMultiview} variant="success">Multiview</Button>
                             </p>
                         </Container>
                     </Jumbotron>

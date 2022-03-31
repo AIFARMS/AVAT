@@ -26,7 +26,8 @@ import AnnotationTable from "../Components/change_table";
 
 //
 import store from '../../store' 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData} from '../../processing/actions'
+import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
 
@@ -176,6 +177,8 @@ export default function MainUpload() {
 	const [currFrameData, setCurrFrameData] = useState([])
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
+	const annot_redux = useSelector(state => state.annotation_data.data)
+
 	if(!segmentation_flag){
 		fabricCanvas.forEachObject(object => { object.selectable = true; object.evented = true;});
 	}
@@ -190,6 +193,7 @@ export default function MainUpload() {
 		console.log(frame_num)
 		//return; //TODO Clear up
 		console.log("Saved data")
+		console.log(currAnnotationData)
 		if(fabricCanvas.getObjects().length != 0){
 			updateFrameData(frame_num, fabricCanvas.getObjects())
 		}else{
@@ -338,17 +342,55 @@ export default function MainUpload() {
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
 		}
-
+		
+		var saved_annot = getAnnotationData(currentFrame)
+		var generated_annotation;
 		if(inputType === 1){
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
+			generated_annotation = create_annotation(boxCount+annotation_type_txt)
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
-			setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
+			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
+			generated_annotation = create_annotation(boxCount+annotation_type_txt)
 			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
 		}
 	    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
+		saved_annot = Object.assign([], saved_annot)
+		console.log(saved_annot)
+		console.log(generated_annotation)
+		console.log(typeof(saved_annot))
+		saved_annot.push(generated_annotation)
+		updateAnnotationData(currentFrame, saved_annot)
+		//setCurrAnnotationData(oldArray => [...oldArray, generated_annotation])
+
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
+	}
+
+	useEffect(() =>{
+		if(upload == true){
+			setCurrAnnotationData(getAnnotationData(currentFrame))
+			console.log("ANNOT REDUX CHANGE")
+		}
+	}, [annot_redux])
+
+	const create_annotation = (id) => {
+		var columns = getColumnData()
+		var new_data = {}
+		columns = columns['data']['columns']['columns']
+		for(var i = 0; i < columns.length; i++){
+			var curr_val = columns[i]
+			new_data[curr_val.accessor] = ""
+		}
+		if(inputType === 1){
+			new_data['dataType'] = "image"
+			new_data['fileName'] = image_frames[currentFrame]['name']
+		}else{
+			new_data['dataType'] = "video"
+			new_data['fileName'] = "frame_" + currentFrame
+		}
+		new_data['id'] = id
+		return new_data
 	}
 
 	const toggle_segmentation = (event) => {
@@ -361,6 +403,7 @@ export default function MainUpload() {
 			initAnnotationData(image_frames.length)
 			initFrameData(image_frames.length)
 			disable_buttons = false;
+			canvasBackgroundUpdate()
 		}
 		
 		if(typeof(event) === "string"){//Youtube upload
@@ -410,13 +453,14 @@ export default function MainUpload() {
 		
 
 	useEffect(() =>{
-		if(currFrameData.length != 0){
+		if(image_frames.length != 0){
 			canvasBackgroundUpdate()
 		}
 		//updateFrameData(currentFrame, currFrameData)
 		//updateAnnotationData(currentFrame, currAnnotationData)
 		
 	}, [currFrameData, currAnnotationData])
+
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {
@@ -487,9 +531,9 @@ export default function MainUpload() {
 
 		if(frameVal >= total_frames){
 			if(inputType === 1){
-				currentFrame = (total_frames-1)
 				setCurrFrameData(getFrameData(total_frames-1))
 				setCurrAnnotationData(getAnnotationData(total_frames-1))
+				currentFrame = (total_frames-1)
 				return;
 			}
 			setCurrFrameData(getFrameData(total_frames-1))
@@ -497,9 +541,9 @@ export default function MainUpload() {
 			handleSetCurrentFrame(total_frames-1)
 		}else{
 			if(inputType === 1){
-				currentFrame =(frameVal)
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
+				currentFrame =(frameVal)
 				return;
 			}
 			setCurrFrameData(getFrameData(frameVal))
@@ -514,9 +558,9 @@ export default function MainUpload() {
 		var frameVal = currentFrame - skip_value
 		if(frameVal < 0){
 			if(inputType === 1){
-				currentFrame = 0
 				setCurrFrameData(getFrameData(0))
 				setCurrAnnotationData(getAnnotationData(0))
+				currentFrame = 0
 				return;
 			}
 			setCurrFrameData(getFrameData(0))
@@ -524,9 +568,9 @@ export default function MainUpload() {
 			handleSetCurrentFrame(0)
 		}else{
 			if(inputType === 1){
-				currentFrame =(frameVal)
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
+				currentFrame =(frameVal)
 				return;
 			}
 			setCurrFrameData(getFrameData(frameVal))
@@ -829,7 +873,7 @@ export default function MainUpload() {
 						<AnnotationTable
 							annotation_data={currAnnotationData}
 							change_annotation_data={handleChangeAnnot}
-							currentFrame={tableFrameNum}
+							currentFrame={currentFrame}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
 							remove_table_index={remove_table_index}

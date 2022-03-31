@@ -5,7 +5,7 @@ The front-end dashboard that provides the ability to annotate videos of livestoc
 ## Goals
 The goal of this project is to create a tool that is easy to use, has a small learning curve and can scale easily to provide the ability to annotate videos efficiently and at scale. The intuition of this project is gained from analyzing similar projects and analyzing the weaknesses and points of frustration and improving them. Another goal is to have an annotation workflow that is extremely fast and efficient, as there are terabytes of video that needs to be processed at large. 
 
-## Feedback + Bug Report + Feature Suggestions
+## Feedback Form
 
 For any feedback, bug repots and feature suggestions please use this form: https://forms.gle/gEbAkvc39NC8p2Pt8
 
