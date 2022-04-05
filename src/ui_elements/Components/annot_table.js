@@ -95,7 +95,7 @@ function genSelection(elem, select_data, columns, curr_idx, current_frame){
         <tr key={elem.id}>
             <td>{elem.id}</td>
             <td>
-                <input type={"text"} style={{width: "50%"}} defaultValue={elem.global_id}></input>
+                <input type={"text"} style={{width: "50%"}} defaultValue={elem.global_id} id={curr_idx} data-type={"global_id"} data-curr={current_frame} onChange={change_row}></input>
             </td>
             {
                 row_vals.map((i, j) => {
