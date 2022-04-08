@@ -9,6 +9,7 @@ export default class ExportingAnnotation{
     get_frame_json(){
         var standard_annot = new Array(this.frame_data.length)
         console.log(this.metadata)
+        console.log(this.frame_data)
         for(var i = 0; i < this.frame_data.length; i++){
             var curr = []
 
