@@ -6,9 +6,8 @@ export async function downloadFileJSON (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, f
     if(ANNOTATION_VIDEO_NAME !== "" && ANNOTATOR_NAME !== ""){
         fileName = ANNOTATION_VIDEO_NAME.split('.').slice(0, -1).join('.') + "_" +  ANNOTATOR_NAME
     }
-    console.log(annotation_data)
     //const json = JSON.stringify(fabricCanvas.getObjects());
-    const json = JSON.stringify({"vid_metadata": VIDEO_METADATA, "annotations": store.getState().frame_data.data, "behavior_data": store.getState().annotation_data.data})
+    const json = JSON.stringify({"vid_metadata": VIDEO_METADATA, "annotations": frame_data, "behavior_data": store.getState().annotation_data.data})
     //var json = JSON.stringify(frame_data);
     var blob = new Blob([json],{type:'application/json'});
     var href = await URL.createObjectURL(blob);

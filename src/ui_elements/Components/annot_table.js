@@ -51,20 +51,22 @@ export default function AnnotTable({columns, data, select_data, current_frame, c
 }
 
 const change_row = (e) => {
-    console.log(e.target)
-    console.log(e.target.value)
-    console.log(e.target.id)
-    console.log(e.target.dataset.type)
-    console.log(e.target.dataset.curr)
     var curr_data = getAnnotationData(e.target.dataset.curr)
     if (curr_data.length === 0){
         alert("Row changing value failed - please report this bug.")
         return;
     }
-    console.log(curr_data)
-    console.log(curr_data[e.target.id])
-    console.log(curr_data[e.target.id][e.target.dataset.type])
     curr_data[e.target.id][e.target.dataset.type] = e.target.value
+    updateAnnotationData(parseInt(e.target.dataset.curr), curr_data)
+}
+
+const delete_row = (e) => {
+    var curr_data = getAnnotationData(e.target.dataset.curr)
+    if (curr_data.length === 0){
+        alert("Row deletion failed - please report this bug.")
+        return;
+    }
+    curr_data.splice(e.target.id, 1)
     updateAnnotationData(parseInt(e.target.dataset.curr), curr_data)
 }
 
@@ -102,6 +104,9 @@ function genSelection(elem, select_data, columns, curr_idx, current_frame){
                     return(<td id={j}>{i}</td>)
                 })
             }
+            <td>
+                <input type={"button"} style={{backgroundColor: "#f44336"}} defaultValue={elem.global_id} id={curr_idx} data-type={"global_id"} data-curr={current_frame} onClick={delete_row}></input>
+            </td>
         </tr>
     )
     return combined_elems
@@ -117,11 +122,6 @@ function check_keys(obj, key){
     return false
 }
 
-function cell_edit(rowIndex, columnId, value){
-    console.log(rowIndex)
-    console.log(columnId)
-    console.log(value)
-}
 
 const EditableCell = ({
     value: initialValue,
