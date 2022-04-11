@@ -172,12 +172,14 @@ export default function MainUpload() {
 	const [inputType, setInputType] = useState(0)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
+	const [isLoading, setIsLoading] = useState(true)
 
 	//New state vars
 	const [currFrameData, setCurrFrameData] = useState([])
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
 	const annot_redux = useSelector(state => state.annotation_data.data)
+	const column_redux = useSelector(state => state.column_annot.data)
 	
 	if(inputType == 1){
 		total_frames = image_frames.length
@@ -457,6 +459,10 @@ export default function MainUpload() {
 		//updateAnnotationData(currentFrame, currAnnotationData)
 		
 	}, [currFrameData])
+
+	useEffect(() => { //This shold update the view upon column loading
+		setIsLoading(false)
+	}, [column_redux])
 
 
 	const downloadOldAnnotation = (file) => {
