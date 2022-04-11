@@ -36,7 +36,7 @@ export default function CustomNavBar(props){
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
 	const [editSeg, setEditSeg] = useState(false)
-	const [columnData, setColumnData] = useState({})
+	const [columnLoad, setColumnLoad] = useState(false)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -80,18 +80,11 @@ export default function CustomNavBar(props){
 		}
 	}
 
-	const edit_click = (event) => {
-		setEditSeg(!editSeg);
-		//Edit(props.fabricCanvas, props.save_data);
-		props.toggle_segmentation();
-		//props.save_data()
-	}
-
 	const handleColumnUpload = (event) => {
 		var promise = downloadColumn(event)
 		promise.then(function (result) {
 			if(result != null){
-				setColumnData(result);
+				setColumnLoad(true);
 				console.log(result)
 				initColumnData(result)
 			}else{
@@ -172,10 +165,10 @@ export default function CustomNavBar(props){
 						</Form>
 					}
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
-						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
+						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
 					</Form>
 					<Form style={{float: "left",gridColumn: 1, gridRow:6}}>
-						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
+						<Form.File disabled={!columnLoad} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
