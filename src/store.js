@@ -3,12 +3,14 @@ import frameDataSlice from './reducer/frame_data'
 import annotationDataSlice from './reducer/annotation_data'
 import columnDataSlice from './reducer/column_annot'
 import currFrameDataSlice from './reducer/current_frame'
+import mediaDataSlice from './reducer/media_data'
 
 export default configureStore({
   reducer: {
     frame_data: frameDataSlice,
     annotation_data: annotationDataSlice,
     column_annot: columnDataSlice,
-    current_frame: currFrameDataSlice
+    current_frame: currFrameDataSlice,
+    media_data: mediaDataSlice
   },
 })

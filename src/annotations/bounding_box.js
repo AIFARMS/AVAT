@@ -34,7 +34,7 @@ class BoundingBox {
           });
     }
 
-    generate_no_behavior(canvas){
+    generate_no_behavior(){
         var group = new fabric.Group([this.rectangle(), this.id_text()],{
             borderColor: '#000000',
             hasBorders: true,
@@ -59,13 +59,13 @@ class BoundingBox {
             text_box.set('scaleX', scaleX);
             text_box.set('scaleY', scaleY);
         }
-        canvas.on({
+        /* canvas.on({
             'object:scaling': onChange
-        })
+        }) */
 
         var temp = this.id 
         group.local_id = temp
-        canvas.add(group)
+        //canvas.add(group)
         //console.log(group.toJSON())
         return group.toJSON()
     }

@@ -1,34 +1,142 @@
 import React from 'react';
 import ReactDOM from 'react-dom'
 
-export default class FabricRender extends React.Component{
-    componentDidMount() {
-        var el = ReactDOM.findDOMNode(this);
-  
-      //alert("Loaded player: \nHorizontal Resolution = " + scaling_factor_width + "\nVertical Resolution = " + scaling_factor_height)
-      // Here we have the canvas so we can initialize fabric
-      this.props.fabricCanvas.initialize(el, {
-          height: this.props.scaling_factor_height,
-        width: this.props.scaling_factor_width,
-        backgroundColor : null,
-      });
-      
-      // on mouse up lets save some state
-      /*this.props.fabricCanvas.on('mouse:up', () => {
-        this.props.save_data(this.props.currentFrame)
-      });
-  
-      this.props.fabricCanvas.on('object:added', this.props.save_data(this.props.currentFrame));
-      this.props.fabricCanvas.on('object:removed', this.props.save_data(this.props.currentFrame));
-      this.props.fabricCanvas.on('object:modified', this.props.save_data(this.props.currentFrame));*/
-      
-      // an event we will fire when we want to save state
-      this.props.fabricCanvas.on('saveData', () => {
-        this.props.fabricCanvas.renderAll(); // programatic changes we make will not trigger a render in fabric
-      });
-    }
+import store from '../../store' 
+import {initFrameData, updateFrameData, getFrameData, 
+		initAnnotationData, updateAnnotationData, getAnnotationData, 
+		initColumnData, getColumnData, 
+		initCurrentFrame, getCurrentFrame, setCurrentFrame,} from '../../processing/actions'
+import { useSelector } from "react-redux";
 
-    render() {
-      return <canvas id="canvas"></canvas>
-    }
+const fabric = require("fabric").fabric;
+
+var fabricCanvas = new fabric.Canvas('c', {
+	uniScaleTransform: true,
+	uniformScaling: false,
+	includeDefaultValues: false
+});
+
+const canvasBackgroundUpdate = (currFrameData, inputType, image_url) => {
+	console.log("updated canvas")
+	  if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
+		  console.log(currFrameData)
+		  var img = new Image()
+		  img.onload = function() {
+			  fabricCanvas.clear()
+			  if(currFrameData != undefined){
+				  console.log(currFrameData)
+				  fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
+					  enlivenedObjects.forEach(function (obj, index) {
+						  fabricCanvas.add(obj);
+					  });
+					  fabricCanvas.renderAll();
+					  console.log(fabricCanvas.getObjects())
+				  })
+			  }
+			  VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate}
+			  var f_img = new fabric.Image(img, {
+				  objectCaching: false,
+				  scaleX: scaling_factor_width / img.width,
+				  scaleY: scaling_factor_height / img.height
+			  });
+			  console.log("CURRFRAME: " + currframe_redux)
+			  fabricCanvas.setBackgroundImage(f_img);
+			
+			  fabricCanvas.renderAll();
+			  setTableFrameNum(currframe_redux)
+
+		  };
+		  img.src = URL.createObjectURL(image_url)
+		  return;
+	}
+}
+
+export default function FabricRender(props){
+	useEffect(() => {
+		var el = ReactDOM.findDOMNode(this);
+
+		fabricCanvas.initialize(el, {
+			height: this.props.scaling_factor_height,
+		  	width: this.props.scaling_factor_width,
+		  	backgroundColor : null,
+		});
+
+		fabricCanvas.on('mouse:over', function(e) {
+		  if(e.target == null | segmentation_flag == true){
+			return;
+		  }else if(e.target['_objects'] == undefined){
+			return;
+		  }	
+			temp_color = e.target['_objects'][0].get('fill')
+		  e.target['_objects'][0].set('fill', "#39FF14");
+			fabricCanvas.renderAll();
+		});
+		
+		fabricCanvas.on('mouse:out', function(e) {
+		  if(e.target == null | segmentation_flag == true){
+			return;
+		  }else if(e.target['_objects'] == undefined){
+			return;
+		  }
+		  e.target['_objects'][0].set('fill', temp_color);
+			fabricCanvas.renderAll();
+		});
+		
+		fabric.Image.prototype.toObject = (function(toObject) {
+		  return function() {
+			return fabric.util.object.extend(toObject.call(this), {
+			src: this.toDataURL()
+			});
+		  };
+		  })(fabric.Image.prototype.toObject);
+		
+		fabricCanvas.on('mouse:wheel', function(opt) {
+		  var delta = opt.e.deltaY;
+		  var zoom = fabricCanvas.getZoom();
+		  
+		  zoom *= 0.999 ** delta;
+		  if (zoom > 20) zoom = 20;
+		  if (zoom < 0.01) zoom = 0.01;
+		  fabricCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+		  opt.e.preventDefault();
+		  opt.e.stopPropagation();
+		  });
+		
+		fabricCanvas.on('mouse:down', function(opt) {
+		  var evt = opt.e;
+		  if (evt.altKey === true) {
+			this.isDragging = true;
+			this.selection = false;
+			this.lastPosX = evt.clientX;
+			this.lastPosY = evt.clientY;
+		  }
+		  });
+		fabricCanvas.on('mouse:move', function(opt) {
+		  if (this.isDragging) {
+			var e = opt.e;
+			var vpt = this.viewportTransform;
+			vpt[4] += e.clientX - this.lastPosX;
+			vpt[5] += e.clientY - this.lastPosY;
+			this.requestRenderAll();
+			this.lastPosX = e.clientX;
+			this.lastPosY = e.clientY;
+		  }
+		  });
+		fabricCanvas.on('mouse:up', function(opt) {
+		  // on mouse up we want to recalculate new interaction
+		  // for all objects, so we call setViewportTransform
+		  this.setViewportTransform(this.viewportTransform);
+		  this.isDragging = false;
+		  this.selection = true;
+		  });
+
+	}, []);
+
+	var image_data = store.getState.image_data
+
+	return(
+		<div>
+			<canvas id="canvas"></canvas>
+		</div>
+	)
 }
