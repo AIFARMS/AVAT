@@ -14,13 +14,13 @@ export default class FabricRender extends React.Component{
       });
       
       // on mouse up lets save some state
-      this.props.fabricCanvas.on('mouse:up', () => {
+      /*this.props.fabricCanvas.on('mouse:up', () => {
         this.props.save_data(this.props.currentFrame)
       });
   
       this.props.fabricCanvas.on('object:added', this.props.save_data(this.props.currentFrame));
       this.props.fabricCanvas.on('object:removed', this.props.save_data(this.props.currentFrame));
-      this.props.fabricCanvas.on('object:modified', this.props.save_data(this.props.currentFrame));
+      this.props.fabricCanvas.on('object:modified', this.props.save_data(this.props.currentFrame));*/
       
       // an event we will fire when we want to save state
       this.props.fabricCanvas.on('saveData', () => {

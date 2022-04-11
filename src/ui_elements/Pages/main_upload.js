@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from "react"; 
 import ReactPlayer from 'react-player'
 import 'bootstrap/dist/css/bootstrap.min.css';
-//import fileMetadata from '../../processing/extract_framerate'
+
+//Constants
+import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
 //UI Element imports
 import Toast from 'react-bootstrap/Toast'
@@ -24,9 +26,12 @@ import FabricRender from "../Components/fabric_canvas";
 import AnnotationTable from "../Components/change_table";
 
 
-//
+//Redux
 import store from '../../store' 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData, getCurrentFrame, setCurrentFrame} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, 
+		initAnnotationData, updateAnnotationData, getAnnotationData, 
+		initColumnData, getColumnData, 
+		initCurrentFrame, getCurrentFrame, setCurrentFrame,} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
@@ -147,6 +152,7 @@ var player_opacity = 0
 //TODO remove after fixing null exceptions
 initAnnotationData(1)
 initFrameData(1)
+initCurrentFrame(0)
 
 //Current frame counter
 export default function MainUpload() {
@@ -161,7 +167,7 @@ export default function MainUpload() {
 	const [playing, setPlaying] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [playbackRate, setPlaybackRate] = useState(1)
-	const [inputType, setInputType] = useState(0)
+	const [inputType, setInputType] = useState(INPUT_VIDEO)
 	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
 	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
 	const [isLoading, setIsLoading] = useState(true)
@@ -172,9 +178,11 @@ export default function MainUpload() {
 
 	const annot_redux = useSelector(state => state.annotation_data.data)
 	const column_redux = useSelector(state => state.column_annot.data)
-	const currframe_redux = useSelector(state => state.current_frame)
+	const currframe_redux = useSelector(state => state.current_frame)['data']
+	console.log(currframe_redux)
 	
-	if(inputType == 1){
+	console.log(inputType)
+	if(inputType == INPUT_IMAGE){
 		total_frames = image_frames.length
 	}
  
@@ -194,9 +202,8 @@ export default function MainUpload() {
 	}
 
 	const handleInputType = (val) => {
-		if(val == 0 | val ==1){
+		if(val == INPUT_VIDEO | val == INPUT_IMAGE){
 			setInputType(val)
-			//alert("Input set to " + val)
 		}else{
 			alert("ERROR VALUE SET - Please report this bug!\n")
 		}
@@ -232,7 +239,7 @@ export default function MainUpload() {
 		setCurrAnnotationData(temp_array);
 		//var temp_frame = [...currFrameData]; temp_frame.splice(index_num, 1);
 		setCurrFrameData(fabricCanvas.getObjects())
-		save_data(getCurrentFrame())
+		save_data(currframe_redux)
 	}
 
 	const remove_table_index = (index) => {
@@ -255,7 +262,7 @@ export default function MainUpload() {
 		if(currAnnotationData.length == 0){
 			return;
 		}
-		setPreviousFrameNumber(getCurrentFrame())
+		setPreviousFrameNumber(currframe_redux)
 	}
 
 	const addToCanvas = () => {
@@ -295,7 +302,7 @@ export default function MainUpload() {
 		
 		var saved_annot = getAnnotationData(getCurrentFrame())
 		var generated_annotation;
-		if(inputType === 1){
+		if(inputType === INPUT_IMAGE){
 			generated_annotation = create_annotation(boxCount+annotation_type_txt)
 		}else{
 			generated_annotation = create_annotation(boxCount+annotation_type_txt)
@@ -323,7 +330,7 @@ export default function MainUpload() {
 			var curr_val = columns[i]
 			new_data[curr_val.accessor] = ""
 		}
-		if(inputType === 1){
+		if(inputType === INPUT_IMAGE){
 			new_data['dataType'] = "image"
 			new_data['fileName'] = image_frames[currframe_redux]['name']
 		}else{
@@ -339,22 +346,14 @@ export default function MainUpload() {
 	}
 
 	const handleVideoUpload = (event) => {
-		if(inputType === 1){
+		console.log("UPLOADED " + inputType)
+		if(inputType === INPUT_IMAGE){
 			image_frames = event.target.files
+			total_frames = image_frames.length
 			initAnnotationData(image_frames.length)
 			initFrameData(image_frames.length)
 			disable_buttons = false;
 			canvasBackgroundUpdate()
-		}
-		
-		if(typeof(event) === "string"){//Youtube upload
-			setVideoFileURL(event)
-			ANNOTATION_VIDEO_NAME = event
-			upload = true;
-			return;
-		}
-		if(inputType !== 1){
-			//fileMetadata(event.target.files[0])
 		}
 		ANNOTATION_VIDEO_NAME = event.target.files[0]['name']
 		setVideoFileURL(URL.createObjectURL(event.target.files[0]));
@@ -460,11 +459,12 @@ export default function MainUpload() {
 
 	const skip_frame_forward = e =>{
 		save_previous_data()
-		save_data(getCurrentFrame())
-		var frameVal = getCurrentFrame() + skip_value
+		save_data(currframe_redux)
+		var frameVal = currframe_redux + skip_value
+		console.log(frameVal)
 
 		if(frameVal >= total_frames){
-			if(inputType === 1){
+			if(inputType === INPUT_IMAGE){
 				setCurrFrameData(getFrameData(total_frames-1))
 				setCurrAnnotationData(getAnnotationData(total_frames-1))
 				setCurrentFrame(total_frames-1)
@@ -474,7 +474,7 @@ export default function MainUpload() {
 			setCurrAnnotationData(getAnnotationData(total_frames-1))
 			setCurrentFrame(total_frames-1)
 		}else{
-			if(inputType === 1){
+			if(inputType === INPUT_IMAGE){
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
 				setCurrentFrame(frameVal)
@@ -488,10 +488,10 @@ export default function MainUpload() {
 
 	const skip_frame_backward = e => {
 		save_previous_data()
-		save_data(getCurrentFrame())
-		var frameVal = getCurrentFrame() - skip_value
+		save_data(currframe_redux)
+		var frameVal = currframe_redux - skip_value
 		if(frameVal < 0){
-			if(inputType === 1){
+			if(inputType === INPUT_IMAGE){
 				setCurrFrameData(getFrameData(0))
 				setCurrAnnotationData(getAnnotationData(0))
 				setCurrentFrame(0)
@@ -501,7 +501,7 @@ export default function MainUpload() {
 			setCurrAnnotationData(getAnnotationData(0))
 			setCurrentFrame(0)
 		}else{
-			if(inputType === 1){
+			if(inputType === INPUT_IMAGE){
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
 				setCurrentFrame(frameVal)
@@ -514,8 +514,9 @@ export default function MainUpload() {
 	}
 
 	useEffect(() => {
-		if(inputType === 1){
+		if(inputType === INPUT_IMAGE){
 			canvasBackgroundUpdate()
+			total_frames = image_frames.length
 		}else if(duration != 0){
 			canvasBackgroundUpdate()
 		}
@@ -654,7 +655,7 @@ export default function MainUpload() {
 
 	const canvasBackgroundUpdate = () => {
 		console.log("updated canvas")
-		if(inputType == 1){ //This is for when images are uploaded
+		if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
 			console.log(currFrameData)
 			var img = new Image()
 			img.onload = function() {
@@ -681,13 +682,12 @@ export default function MainUpload() {
 				fabricCanvas.setBackgroundImage(f_img);
 			
 				fabricCanvas.renderAll();
-				//save_data()
 				setTableFrameNum(currframe_redux)
 	
 			};
 			img.src = URL.createObjectURL(image_frames[currframe_redux])
 			return;
-		}else if(inputType == 0){ //This is for when videos are uploaded
+		}else if(inputType == INPUT_VIDEO){ //This is for when videos are uploaded
 			//TODO cleanup variabkle
 			var htmlvideo = document.getElementsByTagName('video')[0]
 			let canvas = document.createElement('canvas');
@@ -720,7 +720,6 @@ export default function MainUpload() {
 			
 				fabricCanvas.renderAll();
 				canvas.remove()
-				//save_data()
 				setTableFrameNum(currframe_redux)
 
 			};
@@ -781,7 +780,7 @@ export default function MainUpload() {
 			</Toast>
 			{
 				upload === true && 
-				<div style={{display: "grid"}} show={upload}>
+				<div style={{display: "grid"}}>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: player_opacity}}>
 
 					</div>
@@ -798,12 +797,18 @@ export default function MainUpload() {
 						<AnnotationTable
 							annotation_data={currAnnotationData}
 							change_annotation_data={handleChangeAnnot}
-							currframe_redux={currframe_redux}
+							currentFrame={currframe_redux}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
 							remove_table_index={remove_table_index}
 						/>
 					</div>
+				</div>
+			}
+			{
+				upload === false &&
+				<div>
+					"Video/Image upload not detected. Please upload."
 				</div>
 			}
 		</div>

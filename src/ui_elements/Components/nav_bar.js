@@ -11,7 +11,6 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import { ButtonGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
 
-import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 
 import Instructions from './instructions';
@@ -20,6 +19,7 @@ import { downloadFileJSON} from '../../processing/download';
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 import store from '../../store' 
+import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
 import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData} from '../../processing/actions'
 
@@ -27,7 +27,7 @@ export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
 	const [frameRate, setFrameRate] = useState(0)
-	const [videoFormat, setVideoFormat] = useState(2)
+	const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
@@ -48,19 +48,22 @@ export default function CustomNavBar(props){
 	const handleVideoFormat = (type) => {
 		console.log(type)
 		//TODO Make sure bug is resolved and simply have video format equal type
-		type = parseInt(type)
-		if(type === 0){
-			setVideoFormat(0)
+		//type = parseInt(type)
+		if(type === INPUT_VIDEO){
+			setVideoFormat(INPUT_VIDEO)
 			alert("Video is currently under development, some features might not work as expected.")
-		}else if (type === 1){
-			setVideoFormat(1)
-		}else if (type === 2){
-			setVideoFormat(2)
-			props.handleInputType(1)
+		}else if (type === INPUT_IMAGE){
+			setVideoFormat(INPUT_IMAGE)
+			props.handleInputType(INPUT_IMAGE)
+		}else {
+			alert("Wrong input detected - please report this bug.")
 		}
 	}
 
 	const handleVideoLink = (event) => {
+		if(videoFormat == INPUT_VIDEO){
+			alert("Video is currently being redone. Some features might not work as expected.")
+		}
 		if(typeof(event) === "string"){
 			setVideoLink(event.target.value)
 			console.log(event.target.value)
@@ -127,8 +130,8 @@ export default function CustomNavBar(props){
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="2">Image</option>
-							<option value="0">Video</option>
+							<option value={INPUT_VIDEO}>Video</option>
+							<option value={INPUT_IMAGE}>Image</option>
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
@@ -136,18 +139,11 @@ export default function CustomNavBar(props){
 
 					</div>
 					<NavDropdown.Divider />
-					{videoFormat === 0 && 
+					{videoFormat === INPUT_VIDEO && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
 							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
-					}
-					{videoFormat === 1 &&
-						<div style={{float: "left",gridColumn: 1, gridRow:4}}>
-							{'Youtube URL:'}
-							<input onChange={handleVideoLink}></input>
-							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
-						</div>
-					}{videoFormat === 2 &&
+					}{videoFormat === INPUT_IMAGE &&
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
 							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
@@ -202,7 +198,7 @@ export default function CustomNavBar(props){
 					
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
 					{
-						videoFormat === 1 && 
+						videoFormat === INPUT_VIDEO && 
 						<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>
 					}
 					{' '}

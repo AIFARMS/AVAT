@@ -52,8 +52,15 @@ function getColumnData(){
 	return JSON.parse(JSON.stringify(store.getState().column_annot))
 }
 
+function initCurrentFrame(frame_num){
+	store.dispatch({
+		type: "current_frame/init",
+		payload: {data: frame_num}
+	})
+}
+
 function getCurrentFrame(){
-	return JSON.parse(JSON.stringify(store.getState().current_frame))
+	return JSON.parse(JSON.stringify(store.getState().current_frame))['data']
 }
 
 function setCurrentFrame(frame_num){
@@ -71,5 +78,6 @@ export {initFrameData,
 		getAnnotationData, 
 		initColumnData, 
 		getColumnData,
+		initCurrentFrame,
 		getCurrentFrame,
 		setCurrentFrame}
