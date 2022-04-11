@@ -52,4 +52,24 @@ function getColumnData(){
 	return JSON.parse(JSON.stringify(store.getState().column_annot))
 }
 
-export {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData}
+function getCurrentFrame(){
+	return JSON.parse(JSON.stringify(store.getState().current_frame))
+}
+
+function setCurrentFrame(frame_num){
+	store.dispatch({
+		type: "current_frame/changeFrame",
+		payload: {data: frame_num}
+	})
+}
+
+export {initFrameData, 
+		updateFrameData, 
+		getFrameData, 
+		initAnnotationData, 
+		updateAnnotationData, 
+		getAnnotationData, 
+		initColumnData, 
+		getColumnData,
+		getCurrentFrame,
+		setCurrentFrame}

@@ -26,7 +26,7 @@ import AnnotationTable from "../Components/change_table";
 
 //
 import store from '../../store' 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData, getCurrentFrame, setCurrentFrame} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
@@ -41,11 +41,7 @@ var skip_value = 1;
 //var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
 
-//Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
-/*if (current_screen_height >= 1440){
-  scaling_factor_width = 1920;
-  scaling_factor_height = 1080;
-}else */if(current_screen_height >= 1080){
+if(current_screen_height >= 1080){////Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
   scaling_factor_width = 1280;
   scaling_factor_height = 720;
 }else if(current_screen_height >= 1024){
@@ -139,18 +135,14 @@ var video_height = 0;
 var upload = false;
 var disable_buttons = true;
 var toast_text = ""
-var ANNOTATOR_NAME = ""
 var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
 var play_button_text = "ERROR"
-var temp_flag = false
-var time_unix = 0;
 var segmentation_flag = false;
 var on_ready_flag = false;
 var image_frames = []
 var total_frames
 var player_opacity = 0
-var currentFrame = 0
 
 //TODO remove after fixing null exceptions
 initAnnotationData(1)
@@ -180,6 +172,7 @@ export default function MainUpload() {
 
 	const annot_redux = useSelector(state => state.annotation_data.data)
 	const column_redux = useSelector(state => state.column_annot.data)
+	const currframe_redux = useSelector(state => state.current_frame)
 	
 	if(inputType == 1){
 		total_frames = image_frames.length
@@ -209,46 +202,6 @@ export default function MainUpload() {
 		}
 	}
 
-	const handleSetCurrentFrame = (val) => {
-		if(inputType == 1){
-			currentFrame = val
-			canvasBackgroundUpdate()
-			total_frames = image_frames.length
-			return;
-		}
-
-		total_frames = duration * frame_rate
-		handle_visual_toggle()
-		if(typeof(val) === "number"){
-
-			currentFrame =(val)
-			setVisualToggle(Math.floor(Math.random() * 999999999999))
-			var new_skip = val/(total_frames)
-			if(new_skip > duration){
-				new_skip = duration
-			}
-			player.seekTo(new_skip)
-		}else{
-			//save_data(currentFrame)
-			var frame_calc = (val['played']/total_frames)
-			frame_calc = (Math.floor(val['played']*total_frames))
-			if((play_button_text === "Play" && temp_flag === true) | play_button_text === "Pause"){
-				if(frame_calc >= total_frames){
-					currentFrame =(total_frames-1)
-					setVisualToggle(Math.floor(Math.random() * 999999999999))
-					temp_flag = false;
-					return;
-				}
-				currentFrame =(frame_calc)
-				setVisualToggle(Math.floor(Math.random() * 999999999999))
-				temp_flag = false;
-			}
-			if(play_button_text === "Pause"){
-			}
-			setVisualToggle(Math.floor(Math.random() * 999999999999))
-		}
-	}
-
 	const removeRow = (index) => {
 		console.log(index)
 		var index_num = 1;
@@ -275,12 +228,11 @@ export default function MainUpload() {
 				}
 			}
 		}
-		console.log("CURRENT FRAME: " + currentFrame)
 		var temp_array = [...currAnnotationData]; temp_array.splice(index_num, 1);
 		setCurrAnnotationData(temp_array);
 		//var temp_frame = [...currFrameData]; temp_frame.splice(index_num, 1);
 		setCurrFrameData(fabricCanvas.getObjects())
-		save_data(currentFrame)
+		save_data(getCurrentFrame())
 	}
 
 	const remove_table_index = (index) => {
@@ -303,7 +255,7 @@ export default function MainUpload() {
 		if(currAnnotationData.length == 0){
 			return;
 		}
-		setPreviousFrameNumber(currentFrame)
+		setPreviousFrameNumber(getCurrentFrame())
 	}
 
 	const addToCanvas = () => {
@@ -341,26 +293,17 @@ export default function MainUpload() {
 			annotation_type_txt = "f"
 		}
 		
-		var saved_annot = getAnnotationData(currentFrame)
+		var saved_annot = getAnnotationData(getCurrentFrame())
 		var generated_annotation;
 		if(inputType === 1){
-			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "", behavior: "", posture: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']}])
 			generated_annotation = create_annotation(boxCount+annotation_type_txt)
-			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "", confidence:"", dataType: "image", fileName: image_frames[currentFrame]['name']})
 		}else{
-			//setCurrAnnotationData(oldArray => [...oldArray, {id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame}])
 			generated_annotation = create_annotation(boxCount+annotation_type_txt)
-			//annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: "",status: "", current: "", behavior: "", posture: "", notes: "",  confidence:"", dataType: "video", fileName: "frame_"+currentFrame})
 		}
-	    //annotation_data[currentFrame].push({id: boxCount+annotation_type_txt, global_id: -1,status: "", current: "", behavior: "", posture: "", notes: "", confidence: ""})
 		saved_annot = Object.assign([], saved_annot)
-		console.log(saved_annot)
-		console.log(generated_annotation)
-		console.log(typeof(saved_annot))
 		saved_annot.push(generated_annotation)
-		updateAnnotationData(currentFrame, saved_annot)
-		updateFrameData(currentFrame, fabricCanvas.getObjects())
-		//setCurrAnnotationData(oldArray => [...oldArray, generated_annotation])
+		updateAnnotationData(currframe_redux, saved_annot)
+		updateFrameData(currframe_redux, fabricCanvas.getObjects())
 
 		setBoxCount(boxCount + 1);
 		fabricCanvas.fire('saveData');
@@ -368,8 +311,7 @@ export default function MainUpload() {
 
 	useEffect(() =>{
 		if(upload == true){
-			setCurrAnnotationData(getAnnotationData(currentFrame))
-			console.log("ANNOT REDUX CHANGE")
+			setCurrAnnotationData(getAnnotationData(currframe_redux))
 		}
 	}, [annot_redux])
 
@@ -383,10 +325,10 @@ export default function MainUpload() {
 		}
 		if(inputType === 1){
 			new_data['dataType'] = "image"
-			new_data['fileName'] = image_frames[currentFrame]['name']
+			new_data['fileName'] = image_frames[currframe_redux]['name']
 		}else{
 			new_data['dataType'] = "video"
-			new_data['fileName'] = "frame_" + currentFrame
+			new_data['fileName'] = "frame_" + currframe_redux
 		}
 		new_data['id'] = id
 		return new_data
@@ -455,8 +397,8 @@ export default function MainUpload() {
 		if(image_frames.length != 0){
 			canvasBackgroundUpdate()
 		}
-		//updateFrameData(currentFrame, currFrameData)
-		//updateAnnotationData(currentFrame, currAnnotationData)
+		//updateFrameData(currframe_redux, currFrameData)
+		//updateAnnotationData(currframe_redux, currAnnotationData)
 		
 	}, [currFrameData])
 
@@ -475,16 +417,6 @@ export default function MainUpload() {
 		})
 	}
   
-
-	const handlePlaying = (event) => {
-		if(play_button_text === "Pause"){
-			temp_flag = true;
-		}
-		setPlaying(!playing)
-		save_previous_data()
-	}
-
-
 	if(playing === true){
 		play_button_text = "Pause"
 		player_opacity = 100
@@ -501,7 +433,7 @@ export default function MainUpload() {
 						video_width = val['player']['player']['player'].videoWidth
 						video_height = val['player']['player']['player'].videoHeight
 						var duration = val['player']['player']['player'].duration
-						VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate, time: time_unix}
+						VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: video_width, vertical_res: video_height, frame_rate: frame_rate}
 					}
 				}
 			}
@@ -528,57 +460,56 @@ export default function MainUpload() {
 
 	const skip_frame_forward = e =>{
 		save_previous_data()
-		console.log(currentFrame)
-		save_data(currentFrame)
-		var frameVal = currentFrame + skip_value
+		save_data(getCurrentFrame())
+		var frameVal = getCurrentFrame() + skip_value
 
 		if(frameVal >= total_frames){
 			if(inputType === 1){
 				setCurrFrameData(getFrameData(total_frames-1))
 				setCurrAnnotationData(getAnnotationData(total_frames-1))
-				currentFrame = (total_frames-1)
+				setCurrentFrame(total_frames-1)
 				return;
 			}
 			setCurrFrameData(getFrameData(total_frames-1))
 			setCurrAnnotationData(getAnnotationData(total_frames-1))
-			handleSetCurrentFrame(total_frames-1)
+			setCurrentFrame(total_frames-1)
 		}else{
 			if(inputType === 1){
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
-				currentFrame =(frameVal)
+				setCurrentFrame(frameVal)
 				return;
 			}
 			setCurrFrameData(getFrameData(frameVal))
 			setCurrAnnotationData(getAnnotationData(frameVal))
-			handleSetCurrentFrame(frameVal)
+			setCurrentFrame(frameVal)
 		}
 	}
 
 	const skip_frame_backward = e => {
 		save_previous_data()
-		save_data(currentFrame)
-		var frameVal = currentFrame - skip_value
+		save_data(getCurrentFrame())
+		var frameVal = getCurrentFrame() - skip_value
 		if(frameVal < 0){
 			if(inputType === 1){
 				setCurrFrameData(getFrameData(0))
 				setCurrAnnotationData(getAnnotationData(0))
-				currentFrame = 0
+				setCurrentFrame(0)
 				return;
 			}
 			setCurrFrameData(getFrameData(0))
 			setCurrAnnotationData(getAnnotationData(0))
-			handleSetCurrentFrame(0)
+			setCurrentFrame(0)
 		}else{
 			if(inputType === 1){
 				setCurrFrameData(getFrameData(frameVal))
 				setCurrAnnotationData(getAnnotationData(frameVal))
-				currentFrame =(frameVal)
+				setCurrentFrame(frameVal)
 				return;
 			}
 			setCurrFrameData(getFrameData(frameVal))
 			setCurrAnnotationData(getAnnotationData(frameVal))
-			handleSetCurrentFrame(frameVal)
+			setCurrentFrame(frameVal)
 		}
 	}
 
@@ -588,7 +519,7 @@ export default function MainUpload() {
 		}else if(duration != 0){
 			canvasBackgroundUpdate()
 		}
-	}, [currentFrame]);
+	}, [currframe_redux]);
 
 	const change_skip_value = (event) => {
 		skip_value = event
@@ -644,7 +575,7 @@ export default function MainUpload() {
 			skip_frame_backward()
 		}else if (event.key === "w"){
 			canvasBackgroundUpdate()
-			handlePlaying()
+			alert("Video is currently under development, please use images for now!")
 		}else if (event.key === "e"){
 			skip_frame_forward()
 		}else if(event.key === "c"){
@@ -740,21 +671,21 @@ export default function MainUpload() {
 						fabricCanvas.renderAll();
 					})
 				}
-				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate, time: time_unix}
+				VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate}
 				var f_img = new fabric.Image(img, {
 					objectCaching: false,
 					scaleX: scaling_factor_width / img.width,
 					scaleY: scaling_factor_height / img.height
 				});
-				console.log("CURRFRAME: " + currentFrame)
+				console.log("CURRFRAME: " + currframe_redux)
 				fabricCanvas.setBackgroundImage(f_img);
 			
 				fabricCanvas.renderAll();
 				//save_data()
-				setTableFrameNum(currentFrame)
+				setTableFrameNum(currframe_redux)
 	
 			};
-			img.src = URL.createObjectURL(image_frames[currentFrame])
+			img.src = URL.createObjectURL(image_frames[currframe_redux])
 			return;
 		}else if(inputType == 0){ //This is for when videos are uploaded
 			//TODO cleanup variabkle
@@ -790,7 +721,7 @@ export default function MainUpload() {
 				fabricCanvas.renderAll();
 				canvas.remove()
 				//save_data()
-				setTableFrameNum(currentFrame)
+				setTableFrameNum(currframe_redux)
 
 			};
 
@@ -819,11 +750,10 @@ export default function MainUpload() {
 				skip_value={skip_value} 
 				handleOldAnnotation={handleOldAnnotation}
 				handleVideoUpload={handleVideoUpload}
-				currentFrame={currentFrame}
-				display_frame_num={"Frame #" + parseInt(currentFrame+1)+' / '+parseInt(total_frames)}
+				currentFrame={currframe_redux}
+				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(total_frames)}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
-				handlePlaying={handlePlaying}
 				play_button_text={play_button_text}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
@@ -839,7 +769,6 @@ export default function MainUpload() {
 				handle_visual_toggle={handle_visual_toggle}
 				handleInputType={handleInputType}
 				image_frames={image_frames}
-				toggle_segmentation={toggle_segmentation}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 
@@ -854,30 +783,12 @@ export default function MainUpload() {
 				upload === true && 
 				<div style={{display: "grid"}} show={upload}>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: player_opacity}}>
-						{
-							inputType==0 && 
-							<ReactPlayer 
-								onReady={handleOnReady}
-								ref={handleSetPlayer} 
-								onDuration={handleSetDuration} 
-								url={videoFilePath} 
-								width='100%'
-								height='100%'
-								playing={playing} 
-								controls={false} 
-								style={{position:'absolute', float:'left', top:0, left:0}}
-								volume={0}
-								muted={true}
-								pip={false}
-								playbackRate={playbackRate}
-								id="myvideo"
-							/>
-						}
+
 					</div>
 					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
 						<FabricRender 
 							fabricCanvas={fabricCanvas}
-							currentFrame={currentFrame}
+							currframe_redux={currframe_redux}
 							save_data={save_data}
 							scaling_factor_height={scaling_factor_height}
 							scaling_factor_width={scaling_factor_width}
@@ -887,11 +798,10 @@ export default function MainUpload() {
 						<AnnotationTable
 							annotation_data={currAnnotationData}
 							change_annotation_data={handleChangeAnnot}
-							currentFrame={currentFrame}
+							currframe_redux={currframe_redux}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
 							remove_table_index={remove_table_index}
-							handleSetCurrentFrame={handleSetCurrentFrame}
 						/>
 					</div>
 				</div>

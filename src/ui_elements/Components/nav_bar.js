@@ -15,11 +15,7 @@ import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 
 import Instructions from './instructions';
-import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
-import { Edit } from '../../annotations/segmentation_edit';
-
-import {run_model, load} from '../../tensorflow/ObjectDetection';
-import { run_model_segment } from '../../tensorflow/SemanticSegmentation'; 
+import { downloadFileJSON} from '../../processing/download';
 
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
@@ -31,7 +27,7 @@ export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
 	const [frameRate, setFrameRate] = useState(0)
-	const [videoFormat, setVideoFormat] = useState(0)
+	const [videoFormat, setVideoFormat] = useState(2)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
@@ -55,20 +51,13 @@ export default function CustomNavBar(props){
 		type = parseInt(type)
 		if(type === 0){
 			setVideoFormat(0)
+			alert("Video is currently under development, some features might not work as expected.")
 		}else if (type === 1){
 			setVideoFormat(1)
 		}else if (type === 2){
 			setVideoFormat(2)
 			props.handleInputType(1)
 		}
-	}
-
-	const handleEnableModel = (event) => {
-		//Defualt value is true which is disbaled. False turns it on!
-		if(model === ""){
-			alert("Please select a model")
-		}
-		load(model)
 	}
 
 	const handleVideoLink = (event) => {
@@ -138,9 +127,8 @@ export default function CustomNavBar(props){
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="0">Video</option>
-							<option value="1">Youtube</option>
 							<option value="2">Image</option>
+							<option value="0">Video</option>
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
@@ -175,17 +163,6 @@ export default function CustomNavBar(props){
 					<NavDropdown.Divider />
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
-					<NavDropdown.Divider />
-					<div>
-						Enable Object Detection Model:{' '}
-						<select defaultValue={model} onChange={(event) => {setModel(event.target.value)}} id='base_model'>
-							<option value="">Select</option>
-							<option value="lite_mobilenet_v2">SSD Lite Mobilenet V2</option>
-							<option value="mobilenet_v1">SSD Mobilenet v1</option>
-							<option value="mobilenet_v2">SSD Mobilenet v2</option>
-						</select>{' '}
-						<Button size='sm' variant='outline-success' onClick={handleEnableModel}>Enable</Button>
-					</div>
 					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
@@ -224,7 +201,11 @@ export default function CustomNavBar(props){
 					</Dropdown>{' '}
 					
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
+					{
+						videoFormat === 1 && 
+						<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>
+					}
+					{' '}
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
 					<Dropdown as={ButtonGroup} drop='left'>
 						<Button variant="success" onClick={props.addToCanvas}>Add</Button>
