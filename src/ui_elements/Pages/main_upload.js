@@ -100,6 +100,7 @@ export default function MainUpload() {
 		if(imagedata_redux[0].length != 0){
 			console.log(imagedata_redux)
 			upload = true
+			disable_buttons = false
 			setVisualToggle(10)
 		}
 	}, [imagedata_redux])
@@ -380,7 +381,7 @@ export default function MainUpload() {
 							currentFrame={currframe_redux}
 							scaling_factor_height={scaling_factor_height}
 							scaling_factor_width={scaling_factor_width}
-							stream_num={1}
+							stream_num={0}
 						/>
 					</div>
 					<div style={{gridColumn: 1, gridRow:2, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
@@ -388,7 +389,7 @@ export default function MainUpload() {
 							currentFrame={currframe_redux}
 							scaling_factor_height={scaling_factor_height}
 							scaling_factor_width={scaling_factor_width}
-							stream_num={2}
+							stream_num={1}
 						/>
 					</div>
 					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>

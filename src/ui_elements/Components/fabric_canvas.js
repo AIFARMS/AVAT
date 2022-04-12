@@ -134,7 +134,7 @@ export default function FabricRender(props){
 	
 	var image_data = useSelector(state => state.media_data)
 	console.log(image_data)
-	image_data = image_data['data'][0]
+	image_data = image_data['data'][props.stream_num]
 
 	var currframe_redux = useSelector(state => state.current_frame)['data']
 
