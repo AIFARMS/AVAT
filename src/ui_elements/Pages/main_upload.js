@@ -60,7 +60,7 @@ if(current_screen_height >= 1080){////Mappings are based off of https://en.wikip
 
 	  
 
-var temp_color;
+
 var video_width = 0;
 var video_height = 0;
 var upload = false;
@@ -226,7 +226,6 @@ export default function MainUpload() {
 	}
   
 	const skip_frame_forward = e =>{
-		save_data(currframe_redux)
 		var frameVal = currframe_redux + skip_value
 
 		if(frameVal >= total_frames){
@@ -245,7 +244,6 @@ export default function MainUpload() {
 	}
 
 	const skip_frame_backward = e => {
-		save_data(currframe_redux)
 		var frameVal = currframe_redux - skip_value
 		if(frameVal < 0){
 			if(inputType === INPUT_IMAGE){
@@ -311,7 +309,6 @@ export default function MainUpload() {
 		}else if (event.key === "q"){
 			skip_frame_backward()
 		}else if (event.key === "w"){
-			canvasBackgroundUpdate()
 			alert("Video is currently under development, please use images for now!")
 		}else if (event.key === "e"){
 			skip_frame_forward()
@@ -336,16 +333,6 @@ export default function MainUpload() {
 			changeKeyCheck(!keyCheck)
 		}else{
 			changeKeyCheck(toggle_val)
-		}
-	}
-
-
-
-	const handleOnReady = val => {
-		//canvasBackgroundUpdate()
-		if(on_ready_flag == false){
-			canvasBackgroundUpdate()
-			on_ready_flag = true
 		}
 	}
 
@@ -376,7 +363,6 @@ export default function MainUpload() {
 				toggleKeyCheck={toggleKeyCheck}
 				setFrameRate={setFrameRate}
 				frame_rate={frame_rate}
-				save_data={save_data}
 				handle_visual_toggle={handle_visual_toggle}
 				handleInputType={handleInputType}
 			/>
@@ -398,9 +384,17 @@ export default function MainUpload() {
 					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
 						<FabricRender 
 							currentFrame={currframe_redux}
-							save_data={save_data}
 							scaling_factor_height={scaling_factor_height}
 							scaling_factor_width={scaling_factor_width}
+							stream_num={1}
+						/>
+					</div>
+					<div style={{gridColumn: 1, gridRow:2, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
+						<FabricRender 
+							currentFrame={currframe_redux}
+							scaling_factor_height={scaling_factor_height}
+							scaling_factor_width={scaling_factor_width}
+							stream_num={2}
 						/>
 					</div>
 					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>

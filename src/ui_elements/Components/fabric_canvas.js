@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from "react"; 
 import ReactDOM from 'react-dom'
 
 import store from '../../store' 
@@ -8,6 +8,8 @@ import {initFrameData, updateFrameData, getFrameData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
+import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
+
 const fabric = require("fabric").fabric;
 
 var fabricCanvas = new fabric.Canvas('c', {
@@ -16,7 +18,9 @@ var fabricCanvas = new fabric.Canvas('c', {
 	includeDefaultValues: false
 });
 
-const canvasBackgroundUpdate = (currFrameData, inputType, image_url) => {
+var temp_color;
+
+const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height) => {
 	console.log("updated canvas")
 	  if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
 		  console.log(currFrameData)
@@ -33,17 +37,14 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url) => {
 					  console.log(fabricCanvas.getObjects())
 				  })
 			  }
-			  VIDEO_METADATA = {name: ANNOTATION_VIDEO_NAME, duration: duration, horizontal_res: img.width, vertical_res: img.height, frame_rate: frame_rate}
 			  var f_img = new fabric.Image(img, {
 				  objectCaching: false,
 				  scaleX: scaling_factor_width / img.width,
 				  scaleY: scaling_factor_height / img.height
 			  });
-			  console.log("CURRFRAME: " + currframe_redux)
 			  fabricCanvas.setBackgroundImage(f_img);
 			
 			  fabricCanvas.renderAll();
-			  setTableFrameNum(currframe_redux)
 
 		  };
 		  img.src = URL.createObjectURL(image_url)
@@ -62,18 +63,18 @@ export default function FabricRender(props){
 		});
 
 		fabricCanvas.on('mouse:over', function(e) {
-		  if(e.target == null | segmentation_flag == true){
-			return;
-		  }else if(e.target['_objects'] == undefined){
-			return;
-		  }	
-			temp_color = e.target['_objects'][0].get('fill')
-		  e.target['_objects'][0].set('fill', "#39FF14");
-			fabricCanvas.renderAll();
+			if(e.target == null){
+				return;
+			}else if(e.target['_objects'] == undefined){
+				return;
+			}	
+				temp_color = e.target['_objects'][0].get('fill')
+			e.target['_objects'][0].set('fill', "#39FF14");
+				fabricCanvas.renderAll();
 		});
 		
 		fabricCanvas.on('mouse:out', function(e) {
-		  if(e.target == null | segmentation_flag == true){
+		  if(e.target == null){
 			return;
 		  }else if(e.target['_objects'] == undefined){
 			return;
@@ -132,7 +133,7 @@ export default function FabricRender(props){
 
 	}, []);
 
-	var image_data = store.getState.image_data
+	var image_data = store.getState.image_data[props.stream_num]
 
 	return(
 		<div>
