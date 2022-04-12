@@ -21,7 +21,7 @@ import ProcessVideo from './process_video';
 import store from '../../store' 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia} from '../../processing/actions'
 
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
@@ -60,15 +60,13 @@ export default function CustomNavBar(props){
 		}
 	}
 
-	const handleVideoLink = (event) => {
+	const handleMediaUpload = (event) => {
 		if(videoFormat == INPUT_VIDEO){
 			alert("Video is currently being redone. Some features might not work as expected.")
-		}
-		if(typeof(event) === "string"){
-			setVideoLink(event.target.value)
-			console.log(event.target.value)
 		}else{
-			setVideoLink(URL.createObjectURL(event.target.files[0]))
+			console.log(event.target.files)
+			setMedia(0, event.target.files)
+			setMedia(1, event.target.files)
 		}
 	}
 
@@ -99,7 +97,7 @@ export default function CustomNavBar(props){
 	return (
 		<div>
 		{
-			//TODO Re-enable this for video processing. 
+										//TODO Re-enable this for video processing. 
 			process == 2 && 
 			<ProcessVideo
 				frame_rate={frameRate}
@@ -141,11 +139,11 @@ export default function CustomNavBar(props){
 					<NavDropdown.Divider />
 					{videoFormat === INPUT_VIDEO && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 						</Form>
 					}{videoFormat === INPUT_IMAGE &&
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 						</Form>
 					}
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
@@ -177,15 +175,7 @@ export default function CustomNavBar(props){
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
-					{
-						//model.length > 0 &&
-						//<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
-					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
-					{
-						//props.fabricCanvas != undefined &&props.fabricCanvas.getActiveObject !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
-						//<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
-					}
 					{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}

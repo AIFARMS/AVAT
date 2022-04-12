@@ -7,7 +7,6 @@ const mediaDataSlice = createSlice({
     initialState,
     reducers:{
         init(state, payload){
-            console.log(payload.payload)
             var data = [];
             for(var i = 0; i < payload.payload; i++){
                 data.push([]);
@@ -15,7 +14,10 @@ const mediaDataSlice = createSlice({
             state.data = data;
         },
         addMedia(state, payload){
-            state.data = payload.payload
+            var temp = state.data
+            var media = payload.payload.media
+            temp[payload.payload.stream_num] = media
+            state.data = temp
         },
         middleware: (getDefaultMiddleware) => getDefaultMiddleware({
             serializableCheck: false

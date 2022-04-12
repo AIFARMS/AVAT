@@ -70,6 +70,20 @@ function setCurrentFrame(frame_num){
 	})
 }
 
+function initMedia(num_streams){
+	store.dispatch({
+		type: "media_data/init",
+		payload: num_streams
+	})
+}
+
+function setMedia(stream_num, media){
+	store.dispatch({
+		type: "media_data/addMedia",
+		payload: {stream_num: stream_num, media: media}
+	})
+}
+
 export {initFrameData, 
 		updateFrameData, 
 		getFrameData, 
@@ -80,4 +94,6 @@ export {initFrameData,
 		getColumnData,
 		initCurrentFrame,
 		getCurrentFrame,
-		setCurrentFrame}
+		setCurrentFrame,
+		initMedia,
+		setMedia}

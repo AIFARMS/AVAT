@@ -14,7 +14,6 @@ import ExtractingAnnotation from '../../processing/annotation-processing'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
-import { Segmentation } from '../../annotations/segmentation'
 
 //Column information + data structure
 import {columns} from '../../static_data/columns'
@@ -31,7 +30,8 @@ import store from '../../store'
 import {initFrameData, updateFrameData, getFrameData, 
 		initAnnotationData, updateAnnotationData, getAnnotationData, 
 		initColumnData, getColumnData, 
-		initCurrentFrame, getCurrentFrame, setCurrentFrame,} from '../../processing/actions'
+		initCurrentFrame, getCurrentFrame, setCurrentFrame,
+		initMedia, setMedia} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
@@ -57,10 +57,6 @@ if(current_screen_height >= 1080){////Mappings are based off of https://en.wikip
   scaling_factor_height = 576;
 }
 
-
-	  
-
-
 var video_width = 0;
 var video_height = 0;
 var upload = false;
@@ -70,7 +66,6 @@ var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
 var play_button_text = "ERROR"
 var segmentation_flag = false;
-var on_ready_flag = false;
 var total_frames
 var player_opacity = 0
 
@@ -78,6 +73,7 @@ var player_opacity = 0
 initAnnotationData(1)
 initFrameData(1)
 initCurrentFrame(0)
+initMedia(2)
 
 //Current frame counter
 export default function MainUpload() {
@@ -86,15 +82,9 @@ export default function MainUpload() {
 	const [boxCount, setBoxCount] = useState(0)
 	const [videoFilePath, setVideoFileURL] = useState(null);
 	const [oldAnnotation, setOldAnnotation] = useState(null)
-	const [player, setPlayer] = useState(null)
-	const [duration, setDuration] = useState(0);
 	const [save, changeSave] = useState(false);
-	const [playing, setPlaying] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
-	const [playbackRate, setPlaybackRate] = useState(1)
 	const [inputType, setInputType] = useState(INPUT_VIDEO)
-	const [tableFrameNum, setTableFrameNum] = useState(0) //This var is to cause a slight delay to keep the table refresh happen at the same time of the frame change to not disrubt user **
-	const [previousFrameNumber, setPreviousFrameNumber] = useState(0) 
 	const [isLoading, setIsLoading] = useState(true)
 
 	//New state vars
@@ -104,6 +94,15 @@ export default function MainUpload() {
 	const annot_redux = useSelector(state => state.annotation_data.data)
 	const column_redux = useSelector(state => state.column_annot.data)
 	const currframe_redux = useSelector(state => state.current_frame)['data']
+	const imagedata_redux = useSelector(state => state.media_data.data)
+
+	useEffect(() => {
+		if(imagedata_redux[0].length != 0){
+			console.log(imagedata_redux)
+			upload = true
+			setVisualToggle(10)
+		}
+	}, [imagedata_redux])
 
 	const handleInputType = (val) => {
 		if(val == INPUT_VIDEO | val == INPUT_IMAGE){
@@ -348,7 +347,6 @@ export default function MainUpload() {
 				video_height={video_height} 
 				skip_value={skip_value} 
 				handleOldAnnotation={handleOldAnnotation}
-				handleVideoUpload={handleVideoUpload}
 				currentFrame={currframe_redux}
 				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(total_frames)}
 				skip_frame_forward={skip_frame_forward}
@@ -356,13 +354,9 @@ export default function MainUpload() {
 				play_button_text={play_button_text}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
-				change_skip_value={change_skip_value}
 				change_annotation_type={change_annotation_type}
 				VIDEO_METADATA={VIDEO_METADATA}
-				handleSetPlaybackRate={handleSetPlaybackRate}
 				toggleKeyCheck={toggleKeyCheck}
-				setFrameRate={setFrameRate}
-				frame_rate={frame_rate}
 				handle_visual_toggle={handle_visual_toggle}
 				handleInputType={handleInputType}
 			/>
@@ -404,7 +398,6 @@ export default function MainUpload() {
 							currentFrame={currframe_redux}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
-							remove_table_index={remove_table_index}
 						/>
 					</div>
 				</div>
