@@ -99,6 +99,7 @@ export default function MainUpload() {
 	useEffect(() => {
 		if(imagedata_redux[0].length != 0){
 			console.log(imagedata_redux)
+			total_frames = imagedata_redux[0].length
 			upload = true
 			disable_buttons = false
 			setVisualToggle(10)
@@ -373,10 +374,7 @@ export default function MainUpload() {
 			{
 				upload === true && 
 				<div style={{display: "grid"}}>
-					<div style={{gridColumn: 1, gridRow:1, position: "relative", width: scaling_factor_width, height: scaling_factor_height, top: 0, left: 0, opacity: player_opacity}}>
-
-					</div>
-					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
+					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
 						<FabricRender 
 							currentFrame={currframe_redux}
 							scaling_factor_height={scaling_factor_height}
@@ -384,7 +382,7 @@ export default function MainUpload() {
 							stream_num={0}
 						/>
 					</div>
-					<div style={{gridColumn: 1, gridRow:2, position: "relative",  top: 0, left: 0, opacity: 100-player_opacity}}>
+					<div style={{gridColumn: 1, gridRow:2, position: "relative",  top: 0, left: 0}}>
 						<FabricRender 
 							currentFrame={currframe_redux}
 							scaling_factor_height={scaling_factor_height}
