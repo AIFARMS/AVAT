@@ -11,32 +11,30 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import { ButtonGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
 
-import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css";
 
 import Instructions from './instructions';
-import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
-import { Edit } from '../../annotations/segmentation_edit';
-
-import {run_model, load} from '../../tensorflow/ObjectDetection';
-import { run_model_segment } from '../../tensorflow/SemanticSegmentation'; 
+import { downloadFileJSON} from '../../processing/download';
 
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 import store from '../../store' 
+import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia} from '../../processing/actions'
 
+initMedia(1)
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
 	const [frameRate, setFrameRate] = useState(0)
-	const [videoFormat, setVideoFormat] = useState(0)
+	const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
 	const [videoLink, setVideoLink] = useState("")
 	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
 	const [editSeg, setEditSeg] = useState(false)
-	const [columnData, setColumnData] = useState({})
+	const [columnLoad, setColumnLoad] = useState(false)
+	const [numStrems, setNumStreams] = useState(1)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -52,46 +50,33 @@ export default function CustomNavBar(props){
 	const handleVideoFormat = (type) => {
 		console.log(type)
 		//TODO Make sure bug is resolved and simply have video format equal type
-		type = parseInt(type)
-		if(type === 0){
-			setVideoFormat(0)
-		}else if (type === 1){
-			setVideoFormat(1)
-		}else if (type === 2){
-			setVideoFormat(2)
-			props.handleInputType(1)
+		//type = parseInt(type)
+		if(type === INPUT_VIDEO){
+			setVideoFormat(INPUT_VIDEO)
+			alert("Video is currently under development, some features might not work as expected.")
+		}else if (type === INPUT_IMAGE){
+			setVideoFormat(INPUT_IMAGE)
+			props.handleInputType(INPUT_IMAGE)
+		}else {
+			alert("Wrong input detected - please report this bug.")
 		}
 	}
 
-	const handleEnableModel = (event) => {
-		//Defualt value is true which is disbaled. False turns it on!
-		if(model === ""){
-			alert("Please select a model")
-		}
-		load(model)
-	}
-
-	const handleVideoLink = (event) => {
-		if(typeof(event) === "string"){
-			setVideoLink(event.target.value)
-			console.log(event.target.value)
+	const handleMediaUpload = (event) => {
+		if(videoFormat == INPUT_VIDEO){
+			alert("Video is currently being redone. Some features might not work as expected.")
 		}else{
-			setVideoLink(URL.createObjectURL(event.target.files[0]))
+			//console.log(event.target.id)
+			setMedia(parseInt(event.target.id), event.target.files)
+			//setMedia(1, event.target.files)
 		}
-	}
-
-	const edit_click = (event) => {
-		setEditSeg(!editSeg);
-		//Edit(props.fabricCanvas, props.save_data);
-		props.toggle_segmentation();
-		//props.save_data()
 	}
 
 	const handleColumnUpload = (event) => {
 		var promise = downloadColumn(event)
 		promise.then(function (result) {
 			if(result != null){
-				setColumnData(result);
+				setColumnLoad(true);
 				console.log(result)
 				initColumnData(result)
 			}else{
@@ -102,12 +87,50 @@ export default function CustomNavBar(props){
 
 	const downloadColumn = (file) => {
 		return new Promise((resolve, reject) => {
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			resolve((JSON.parse(e.target.result)));
-		}
-		reader.readAsText(file.target.files[0])
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				resolve((JSON.parse(e.target.result)));
+			}
+			reader.readAsText(file.target.files[0])
 		})
+	}
+
+	const handleStreamNumChange = (event) => {
+		setNumStreams(event.target.value)
+		initMedia(event.target.value)
+	}
+
+	const generateUploadButtons = () => {
+		var uploadButtons = []
+		for(var i = 0; i < numStrems; i++){
+			let button_image = (
+				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+					<Form.File multiple id={i+""} key={i} label={"Image Upload " + i} accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+				</Form>
+			)
+			let button_video = (
+				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+					<Form.File multiple id="file" label={"Video Upload " + i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+				</Form>
+			)
+			if (videoFormat === INPUT_IMAGE){
+				uploadButtons.push(button_image)
+			}else if (videoFormat === INPUT_VIDEO){
+				uploadButtons.push(button_video)
+			}
+		}
+		return (
+			<div>
+			{
+				uploadButtons.map((but, _) => {
+					return (
+						but
+					)
+				})
+			}
+			</div>
+		)
+		
 	}
 
 
@@ -137,62 +160,47 @@ export default function CustomNavBar(props){
 			<Modal.Body>
 				<div style={{display: "grid"}}>
 					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-					<Form style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
-						Video Format: 
+					<Form >
+						Media Format: 
 						<Form.Control
 							as="select"
 							id="inlineFormCustomSelect"
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="0">Video</option>
-							<option value="1">Youtube</option>
-							<option value="2">Image</option>
+							<option value={INPUT_VIDEO}>Video</option>
+							<option value={INPUT_IMAGE}>Image</option>
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
-					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-
+					<div>
+						Stream Num: <input type="number" defaultValue={1} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={handleStreamNumChange}></input>
 					</div>
 					<NavDropdown.Divider />
-					{videoFormat === 0 && 
-						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+					{videoFormat === INPUT_VIDEO && 
+						<Form >
+							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+						</Form>
+					}{videoFormat === INPUT_IMAGE &&
+						<Form >
+							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 						</Form>
 					}
-					{videoFormat === 1 &&
-						<div style={{float: "left",gridColumn: 1, gridRow:4}}>
-							{'Youtube URL:'}
-							<input onChange={handleVideoLink}></input>
-							<Button onClick={(event) => {props.handleVideoUpload(videoLink)}}>Upload</Button>
-						</div>
-					}{videoFormat === 2 &&
-						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
-						</Form>
+					{
+						generateUploadButtons()
 					}
-					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
-						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
-					</Form>
-					<Form style={{float: "left",gridColumn: 1, gridRow:6}}>
+					<NavDropdown.Divider />
+					<Form >
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
+					</Form>
+					<Form >
+						<Form.File disabled={!columnLoad} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
-					<NavDropdown.Divider />
-					<div>
-						Enable Object Detection Model:{' '}
-						<select defaultValue={model} onChange={(event) => {setModel(event.target.value)}} id='base_model'>
-							<option value="">Select</option>
-							<option value="lite_mobilenet_v2">SSD Lite Mobilenet V2</option>
-							<option value="mobilenet_v1">SSD Mobilenet v1</option>
-							<option value="mobilenet_v2">SSD Mobilenet v2</option>
-						</select>{' '}
-						<Button size='sm' variant='outline-success' onClick={handleEnableModel}>Enable</Button>
-					</div>
 					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
@@ -211,15 +219,7 @@ export default function CustomNavBar(props){
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
-					{
-						//model.length > 0 &&
-						//<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
-					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
-					{
-						//props.fabricCanvas != undefined &&props.fabricCanvas.getActiveObject !== undefined && props.fabricCanvas.getActiveObject()._objects[0].type == "polygon" && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
-						//<Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
-					}
 					{' '}
 					<Dropdown as={ButtonGroup}>
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
@@ -231,7 +231,11 @@ export default function CustomNavBar(props){
 					</Dropdown>{' '}
 					
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
+					{
+						videoFormat === INPUT_VIDEO && 
+						<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>
+					}
+					{' '}
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
 					<Dropdown as={ButtonGroup} drop='left'>
 						<Button variant="success" onClick={props.addToCanvas}>Add</Button>

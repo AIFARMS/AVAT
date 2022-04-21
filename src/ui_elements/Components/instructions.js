@@ -9,13 +9,11 @@ export default function Instructions(){
         <br></br><br></br>
         * <kbd>1</kbd> : Mode Switch: Behavior<br></br>
         * <kbd>2</kbd> : Mode Switch: Bounding Box<br></br>
-        * <kbd>3</kbd> : Mode Switch: Segmentation<br></br>
+        * <kbd>3</kbd> : Mode Switch: Segmentation (Currently Disabled)<br></br>
         * <kbd>a</kbd> : Add annotation<br></br>
         * <kbd>e</kbd> : Skip forward frame(s)<br></br>
         * <kbd>q</kbd> : Skip backward frame(s)<br></br>
         * <kbd>w</kbd> : Pause/Play<br></br>
-        * <kbd>c</kbd> : Copy previous annotation<br></br>
-        * <kbd>f</kbd> : Activate/Deactivate scrub mode (Activated by default)<br></br>
 
         <br></br><br></br>
         <h3>Uploading Video:</h3>
@@ -23,10 +21,18 @@ export default function Instructions(){
         Ensure that you know the framerate of the video chosen to be annotated. These values should be entered into the settings tab into their "frame rate" fields. 
         <br></br><br></br>
         Click on the right side browse button. All other buttons on the screen shuold be disabled until the video has been uploaded. Currenntly ```.mp4``` format is the best choice and tested for. Other file types such as .avi are supported but might have unintended bugs.
+        <br></br>
+        Please note that videos SHOULD be in 16:9 aspect ratio for best results. Extraneous behavior may occur if resolution is different.
+        <br></br><br></br>
+
+        <h3>Uploading Image:</h3>
+        Select all of the image files needed for the various inputs. To select a group of images, they should be in the same folder.
+        <br></br>
+        Please note that images SHOULD be in 16:9 aspect ratio for best results. Extraneous behavior may occur if resolution is different.
         <br></br><br></br>
         <h3>Annotations</h3>
         <br></br>
-        There are currently three kinds of annotations. 
+        There are currently two kinds of annotations. 
         <br></br><br></br>
         <h4>Behavior Annotation:</h4>
 
@@ -37,11 +43,6 @@ export default function Instructions(){
 
         This forms a square around the desired object. There should be small squares at the edges of the bounding box which can be used to resize the box. The number on the top left of the box is used to identify the placement of the box in the table to the right.
         <br></br><br></br>
-        <h4>Segmentation:</h4>
-
-        Upon generating this each click on the video generates a point which eventually will transform to a set of interconnected points. To complete the polygon click on the original point generated (which is the red colored point)
-        If there is a need to edit, then click on the "Edit Seg" button to start the editing process.
-
         </div>
     )
 }

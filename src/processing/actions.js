@@ -52,4 +52,48 @@ function getColumnData(){
 	return JSON.parse(JSON.stringify(store.getState().column_annot))
 }
 
-export {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, getColumnData}
+function initCurrentFrame(frame_num){
+	store.dispatch({
+		type: "current_frame/init",
+		payload: {data: frame_num}
+	})
+}
+
+function getCurrentFrame(){
+	return JSON.parse(JSON.stringify(store.getState().current_frame))['data']
+}
+
+function setCurrentFrame(frame_num){
+	store.dispatch({
+		type: "current_frame/changeFrame",
+		payload: {data: frame_num}
+	})
+}
+
+function initMedia(num_streams){
+	store.dispatch({
+		type: "media_data/init",
+		payload: num_streams
+	})
+}
+
+function setMedia(stream_num, media){
+	store.dispatch({
+		type: "media_data/addMedia",
+		payload: {stream_num: stream_num, media: media}
+	})
+}
+
+export {initFrameData, 
+		updateFrameData, 
+		getFrameData, 
+		initAnnotationData, 
+		updateAnnotationData, 
+		getAnnotationData, 
+		initColumnData, 
+		getColumnData,
+		initCurrentFrame,
+		getCurrentFrame,
+		setCurrentFrame,
+		initMedia,
+		setMedia}
