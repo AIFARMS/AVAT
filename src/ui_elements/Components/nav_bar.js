@@ -33,6 +33,7 @@ export default function CustomNavBar(props){
 	const [process, setProcess] = useState(false)
 	const [editSeg, setEditSeg] = useState(false)
 	const [columnLoad, setColumnLoad] = useState(false)
+	const [numStrems, setNumStreams] = useState(1)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -85,19 +86,52 @@ export default function CustomNavBar(props){
 
 	const downloadColumn = (file) => {
 		return new Promise((resolve, reject) => {
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			resolve((JSON.parse(e.target.result)));
-		}
-		reader.readAsText(file.target.files[0])
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				resolve((JSON.parse(e.target.result)));
+			}
+			reader.readAsText(file.target.files[0])
 		})
+	}
+
+	const generateUploadButtons = () => {
+		var uploadButtons = []
+		for(var i = 0; i < numStrems; i++){
+			let button_image = (
+				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+					<Form.File multiple id="file" label={i} accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+				</Form>
+			)
+			let button_video = (
+				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+					<Form.File multiple id="file" label={i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+				</Form>
+			)
+			if (videoFormat === INPUT_IMAGE){
+				uploadButtons.push(button_image)
+			}else if (videoFormat === INPUT_VIDEO){
+				uploadButtons.push(button_video)
+			}
+		}
+		return (
+			<div>
+			{
+				uploadButtons.map((but, _) => {
+					return (
+						but
+					)
+				})
+			}
+			</div>
+		)
+		
 	}
 
 
 	return (
 		<div>
 		{
-										//TODO Re-enable this for video processing. 
+			//TODO Re-enable this for video processing. 
 			process == 2 && 
 			<ProcessVideo
 				frame_rate={frameRate}
@@ -120,8 +154,8 @@ export default function CustomNavBar(props){
 			<Modal.Body>
 				<div style={{display: "grid"}}>
 					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-					<Form style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
-						Video Format: 
+					<Form >
+						Media Format: 
 						<Form.Control
 							as="select"
 							id="inlineFormCustomSelect"
@@ -133,23 +167,24 @@ export default function CustomNavBar(props){
 						</Form.Control>
 						<NavDropdown.Divider />
 					</Form>
-					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
-
+					<div>
+						Stream Num: <input type="number" defaultValue={1} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={1}></input>
 					</div>
 					<NavDropdown.Divider />
 					{videoFormat === INPUT_VIDEO && 
-						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+						<Form >
 							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 						</Form>
 					}{videoFormat === INPUT_IMAGE &&
-						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+						<Form >
 							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 						</Form>
 					}
-					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
+					<NavDropdown.Divider />
+					<Form >
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
 					</Form>
-					<Form style={{float: "left",gridColumn: 1, gridRow:6}}>
+					<Form >
 						<Form.File disabled={!columnLoad} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
