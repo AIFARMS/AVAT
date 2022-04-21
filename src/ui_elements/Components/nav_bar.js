@@ -21,8 +21,9 @@ import ProcessVideo from './process_video';
 import store from '../../store' 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia} from '../../processing/actions'
 
+initMedia(1)
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
@@ -65,9 +66,9 @@ export default function CustomNavBar(props){
 		if(videoFormat == INPUT_VIDEO){
 			alert("Video is currently being redone. Some features might not work as expected.")
 		}else{
-			console.log(event.target.files)
-			setMedia(0, event.target.files)
-			setMedia(1, event.target.files)
+			//console.log(event.target.id)
+			setMedia(parseInt(event.target.id), event.target.files)
+			//setMedia(1, event.target.files)
 		}
 	}
 
@@ -94,17 +95,22 @@ export default function CustomNavBar(props){
 		})
 	}
 
+	const handleStreamNumChange = (event) => {
+		setNumStreams(event.target.value)
+		initMedia(event.target.value)
+	}
+
 	const generateUploadButtons = () => {
 		var uploadButtons = []
 		for(var i = 0; i < numStrems; i++){
 			let button_image = (
 				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-					<Form.File multiple id="file" label={i} accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+					<Form.File multiple id={i+""} key={i} label={"Image Upload " + i} accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 				</Form>
 			)
 			let button_video = (
 				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-					<Form.File multiple id="file" label={i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+					<Form.File multiple id="file" label={"Video Upload " + i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 				</Form>
 			)
 			if (videoFormat === INPUT_IMAGE){
@@ -168,7 +174,7 @@ export default function CustomNavBar(props){
 						<NavDropdown.Divider />
 					</Form>
 					<div>
-						Stream Num: <input type="number" defaultValue={1} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={1}></input>
+						Stream Num: <input type="number" defaultValue={1} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={handleStreamNumChange}></input>
 					</div>
 					<NavDropdown.Divider />
 					{videoFormat === INPUT_VIDEO && 
@@ -179,6 +185,9 @@ export default function CustomNavBar(props){
 						<Form >
 							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 						</Form>
+					}
+					{
+						generateUploadButtons()
 					}
 					<NavDropdown.Divider />
 					<Form >

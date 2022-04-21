@@ -115,12 +115,14 @@ export default function FabricRender(props){
 	
 	var image_data = useSelector(state => state.media_data)
 	console.log(image_data)
-	image_data = image_data['data'][0]//[props.stream_num]
+	image_data = image_data['data'][props.stream_num]
 
 	var currframe_redux = useSelector(state => state.current_frame)['data']
-	if(fabricCanvas != null){
-		console.log(fabricCanvas)
-		canvasBackgroundUpdate([], INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+	if(fabricCanvas != null && image_data != undefined){
+		console.log(image_data)
+		if(image_data.length !== 0){
+			canvasBackgroundUpdate([], INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+		}
 	}
 
 	return(

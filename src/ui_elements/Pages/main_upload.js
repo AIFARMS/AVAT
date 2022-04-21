@@ -73,7 +73,7 @@ var player_opacity = 0
 initAnnotationData(1)
 initFrameData(1)
 initCurrentFrame(0)
-initMedia(2)
+
 
 //Current frame counter
 export default function MainUpload() {
@@ -97,13 +97,36 @@ export default function MainUpload() {
 	const imagedata_redux = useSelector(state => state.media_data.data)
 
 	useEffect(() => {
+		if(upload == true){
+			var annot = getAnnotationData(currframe_redux)
+			setCurrAnnotationData(annot)
+		}
+	}, [currframe_redux])
+
+	useEffect(() => {
 		if(imagedata_redux[0].length != 0){
 			console.log(imagedata_redux)
 			total_frames = imagedata_redux[0].length
 			upload = true
 			disable_buttons = false
+			initAnnotationData(total_frames)
+			initFrameData(total_frames)
 			setVisualToggle(10)
 		}
+		scaling_factor_width = 1920;
+		scaling_factor_height = 1080;
+		if(current_screen_height >= 1080){////Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
+			scaling_factor_width = 1280;
+			scaling_factor_height = 720;
+		  }else if(current_screen_height >= 1024){
+			scaling_factor_width = 1152;
+			scaling_factor_height = 648;
+		  }else if(current_screen_height >= 768){
+			scaling_factor_width = 1024;
+			scaling_factor_height = 576;
+		}
+		scaling_factor_height = scaling_factor_height * (1/imagedata_redux.length)
+		scaling_factor_width = scaling_factor_width * (1/imagedata_redux.length)
 	}, [imagedata_redux])
 
 	const handleInputType = (val) => {
@@ -183,7 +206,7 @@ export default function MainUpload() {
 		var promise = downloadOldAnnotation(event)
 		promise.then(function (result) {
 			if(result != null){
-				alert("WIP on oldUpload- please report this bug")
+				//alert("WIP on oldUpload- please report this bug")
 				//setOldAnnotation(new ExtractingAnnotation(result, fabricCanvas));
 			}else{
 				alert("Error in processing Annotation")
@@ -341,6 +364,35 @@ export default function MainUpload() {
 		setCurrAnnotationData(val)
 	}
 
+	const genFabricCanvas = () => {
+		var fcanvas = []
+		for(var i = 0; i < imagedata_redux.length; i++){
+			let canv = (
+				<div style={{gridColumn: 1, gridRow:i+1, position: "relative",  top: 0, left: 0}}>
+					<FabricRender 
+						currentFrame={currframe_redux}
+						scaling_factor_height={scaling_factor_height}
+						scaling_factor_width={scaling_factor_width}
+						stream_num={i}
+					/>
+				</div>
+			)
+			fcanvas.push(canv)
+		}
+		console.log(fcanvas)
+		return(
+			<div>
+			{
+				fcanvas.map((can, _) => {
+					return (
+						can
+					)
+				})
+			}
+			</div>
+		)
+	}
+
 	return (
 		<div>
 			<CustomNavBar 
@@ -374,31 +426,8 @@ export default function MainUpload() {
 			{
 				upload === true && 
 				<div style={{display: "grid"}}>
-					<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
-						<FabricRender 
-							currentFrame={currframe_redux}
-							scaling_factor_height={scaling_factor_height}
-							scaling_factor_width={scaling_factor_width}
-							stream_num={0}
-						/>
-					</div>
-					<div style={{gridColumn: 1, gridRow:2, position: "relative",  top: 0, left: 0}}>
-						<FabricRender 
-							currentFrame={currframe_redux}
-							scaling_factor_height={scaling_factor_height}
-							scaling_factor_width={scaling_factor_width}
-							stream_num={1}
-						/>
-					</div>
-					<div style={{gridColumn: 1, gridRow:3, position: "relative",  top: 0, left: 0}}>
-						<FabricRender 
-							currentFrame={currframe_redux}
-							scaling_factor_height={scaling_factor_height}
-							scaling_factor_width={scaling_factor_width}
-							stream_num={2}
-						/>
-					</div>
-					<div style={{gridColumn: 2, gridRow:1, position: "relative",width: scaling_factor_width*.4, height: scaling_factor_height, top: 0, left: 0}}>
+					{genFabricCanvas()}
+					<div style={{gridColumn: 2, gridRow:1, position: "relative", top: 0, left: 0}}>
 						<AnnotationTable
 							annotation_data={currAnnotationData}
 							change_annotation_data={handleChangeAnnot}
