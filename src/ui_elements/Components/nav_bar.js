@@ -177,15 +177,6 @@ export default function CustomNavBar(props){
 						Stream Num: <input type="number" defaultValue={1} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={handleStreamNumChange}></input>
 					</div>
 					<NavDropdown.Divider />
-					{videoFormat === INPUT_VIDEO && 
-						<Form >
-							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
-						</Form>
-					}{videoFormat === INPUT_IMAGE &&
-						<Form >
-							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
-						</Form>
-					}
 					{
 						generateUploadButtons()
 					}

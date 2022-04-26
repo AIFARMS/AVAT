@@ -153,6 +153,8 @@ export default function MainUpload() {
 		if (annotationType === ANNOTATION_BBOX){
 			annotation_type_txt = "b"
 			var new_bbox = new BoundingBox(50, 50, 50, 50, color, boxCount+'b', "None").generate_no_behavior()
+			setCurrFrameData([new_bbox])
+			updateFrameData(currframe_redux, [new_bbox])
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
