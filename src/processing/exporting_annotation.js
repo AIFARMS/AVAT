@@ -1,7 +1,8 @@
 export default class ExportingAnnotation{
-    constructor(annotation_data, canvas, VIDEO_METADATA, image_data){
+    constructor(annotation_data, width, height, VIDEO_METADATA, image_data){
         this.frame_data = annotation_data
-        this.canvas = canvas
+        this.width = width
+        this.height = height
         this.metadata = VIDEO_METADATA
         this.image_data = image_data
     }
@@ -28,10 +29,10 @@ export default class ExportingAnnotation{
                 }
                 if(frame_objects[j]._objects[0]['type'] === "rect"){
                     console.log(frame_objects[j])
-                    var x = (frame_objects[j]['left'] / this.canvas.width) * this.metadata['horizontal_res']
-                    var y = (frame_objects[j]['top'] / this.canvas.height) * this.metadata['vertical_res']
-                    var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.canvas.width) * this.metadata['horizontal_res']
-                    var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.canvas.height )* this.metadata['vertical_res']
+                    var x = (frame_objects[j]['left'] / this.width) * this.metadata['horizontal_res']
+                    var y = (frame_objects[j]['top'] / this.height) * this.metadata['vertical_res']
+                    var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.width) * this.metadata['horizontal_res']
+                    var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.height )* this.metadata['vertical_res']
                     var local_id = frame_objects[j]._objects[1]['text']
                     if(this.image_data.length != 0){
                         curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id,"fileName:": this.image_data[i]['name'], "dataType": "image"})
@@ -43,8 +44,8 @@ export default class ExportingAnnotation{
                     var raw_points = frame_objects[j]._objects[0]['points']
                     var points = []
                     for(var k = 0; k < raw_points.length; k++){
-                        var x = (raw_points[k]['x'] / this.canvas.width) * this.metadata['horizontal_res']
-                        var y = (raw_points[k]['y'] / this.canvas.height) * this.metadata['vertical_res']
+                        var x = (raw_points[k]['x'] / this.width) * this.metadata['horizontal_res']
+                        var y = (raw_points[k]['y'] / this.height) * this.metadata['vertical_res']
                         points.push({"x": x, "y": y})
                     }
                     var local_id = frame_objects[j]._objects[1]['text']
@@ -85,10 +86,10 @@ export default class ExportingAnnotation{
                 }
                 if(frame_objects[j]['objects'][0]['type'] === "rect"){
                     console.log(frame_objects[j])
-                    var x = (frame_objects[j]['left'] / this.canvas.width) * this.metadata['horizontal_res']
-                    var y = (frame_objects[j]['top'] / this.canvas.height) * this.metadata['vertical_res']
-                    var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.canvas.width) * this.metadata['horizontal_res']
-                    var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.canvas.height )* this.metadata['vertical_res']
+                    var x = (frame_objects[j]['left'] / this.width) * this.metadata['horizontal_res']
+                    var y = (frame_objects[j]['top'] / this.height) * this.metadata['vertical_res']
+                    var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.width) * this.metadata['horizontal_res']
+                    var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.height )* this.metadata['vertical_res']
                     var local_id = frame_objects[j]['objects'][1]['text']
                     if(this.image_data.length != 0){
                         curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id,"fileName:": this.image_data[i]['name'], "dataType": "image"})
@@ -100,8 +101,8 @@ export default class ExportingAnnotation{
                     var raw_points = frame_objects[j]['objects'][0]['points']
                     var points = []
                     for(var k = 0; k < raw_points.length; k++){
-                        var x = (raw_points[k]['x'] / this.canvas.width) * this.metadata['horizontal_res']
-                        var y = (raw_points[k]['y'] / this.canvas.height) * this.metadata['vertical_res']
+                        var x = (raw_points[k]['x'] / this.width) * this.metadata['horizontal_res']
+                        var y = (raw_points[k]['y'] / this.height) * this.metadata['vertical_res']
                         points.push({"x": x, "y": y})
                     }
                     var local_id = frame_objects[j]['objects'][1]['text']

@@ -33,6 +33,7 @@ import {initFrameData, updateFrameData, getFrameData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
 		initMedia, setMedia} from '../../processing/actions'
 import { useSelector } from "react-redux";
+import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from "react-dom";
 
 const fabric = require("fabric").fabric;
 
@@ -209,7 +210,7 @@ export default function MainUpload() {
 		promise.then(function (result) {
 			if(result != null){
 				//alert("WIP on oldUpload- please report this bug")
-				//setOldAnnotation(new ExtractingAnnotation(result, fabricCanvas));
+				setOldAnnotation(new ExtractingAnnotation(result, scaling_factor_width, scaling_factor_height));
 			}else{
 				alert("Error in processing Annotation")
 			}
@@ -399,8 +400,8 @@ export default function MainUpload() {
 		<div>
 			<CustomNavBar 
 				disable_buttons={disable_buttons} 
-				video_width={video_width} 
-				video_height={video_height} 
+				video_width={scaling_factor_width} 
+				video_height={scaling_factor_height} 
 				skip_value={skip_value} 
 				handleOldAnnotation={handleOldAnnotation}
 				currentFrame={currframe_redux}
