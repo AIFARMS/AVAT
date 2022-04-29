@@ -16,35 +16,38 @@ var temp_color;
 
 const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas) => {
 	
-	  if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
-		  var img = new Image()
-		  img.onload = function() {
-			  fabricCanvas.clear()
-			  if(currFrameData != undefined){
-				  fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
-					  enlivenedObjects.forEach(function (obj, index) {
-						  fabricCanvas.add(obj);
-					  });
-					  fabricCanvas.renderAll();
-				  })
-			  }
-			  var f_img = new fabric.Image(img, {
-				  objectCaching: false,
-				  scaleX: scaling_factor_width / img.width,
-				  scaleY: scaling_factor_height / img.height
-			  });
-			  fabricCanvas.setBackgroundImage(f_img);
-			
-			  fabricCanvas.renderAll();
-			  console.log("updated canvas")
-		  };
-		  img.src = URL.createObjectURL(image_url)
-		  return;
+	if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
+		var img = new Image()
+		img.onload = function() {
+			fabricCanvas.clear()
+			console.log(currFrameData)
+			if(currFrameData != undefined){
+				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
+					enlivenedObjects.forEach(function (obj, index) {
+						fabricCanvas.add(obj);
+					});
+					fabricCanvas.renderAll();
+				})
+			}
+			console.log(fabricCanvas.getObjects())
+			var f_img = new fabric.Image(img, {
+				objectCaching: false,
+				scaleX: scaling_factor_width / img.width,
+				scaleY: scaling_factor_height / img.height
+			});
+			fabricCanvas.setBackgroundImage(f_img);
+		
+			fabricCanvas.renderAll();
+			console.log("updated canvas")
+		};
+		img.src = URL.createObjectURL(image_url)
+		return;
 	}
 }
 
 export default function FabricRender(props){
 	const [fabricCanvas, setFabricCanvas] = useState(null)
+	const [currindex, setCurrindex] = useState(0)
 
 	useEffect(() => {
 
@@ -118,10 +121,18 @@ export default function FabricRender(props){
 	image_data = image_data['data'][props.stream_num]
 
 	var currframe_redux = useSelector(state => state.current_frame)['data']
+
+	useEffect(() => {
+		if(fabricCanvas != null){
+			updateFrameData(currindex, fabricCanvas.getObjects())
+		}
+		setCurrindex(currframe_redux)
+	}, [currframe_redux])
+
 	if(fabricCanvas != null && image_data != undefined){
 		console.log(image_data)
 		if(image_data.length !== 0){
-			canvasBackgroundUpdate([], INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 		}
 	}
 

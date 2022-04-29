@@ -44,7 +44,7 @@ export default function CustomNavBar(props){
 	}
 
 	const handleDownloadJSON = () => {
-		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.fabricCanvas, props.VIDEO_METADATA, props.image_frames).get_frame_json()
+		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, props.VIDEO_METADATA, store.getState().media_data.data[0]).get_frame_json()
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
 	const handleVideoFormat = (type) => {
@@ -177,15 +177,6 @@ export default function CustomNavBar(props){
 						Stream Num: <input type="number" defaultValue={1} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={handleStreamNumChange}></input>
 					</div>
 					<NavDropdown.Divider />
-					{videoFormat === INPUT_VIDEO && 
-						<Form >
-							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
-						</Form>
-					}{videoFormat === INPUT_IMAGE &&
-						<Form >
-							<Form.File multiple id="file" label="Image-set Upload" accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
-						</Form>
-					}
 					{
 						generateUploadButtons()
 					}

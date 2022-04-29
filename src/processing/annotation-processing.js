@@ -3,10 +3,11 @@ const fabric = require("fabric").fabric;
 const $ = require("jquery")
 
 export default class ExtractingAnnotation{
-    constructor(annotation_json, canvas, image_data){
+    constructor(annotation_json, width, height){
         this.frame_data = annotation_json['annotations']
         this.annotation_data = annotation_json['behavior_data']
-        this.canvas = canvas
+        this.width = width
+        this.height = height
         this.metadata = annotation_json['vid_metadata']
     }
 
@@ -43,22 +44,22 @@ export default class ExtractingAnnotation{
             }
             for(var j = 0; j < curr_frame.length; j++){
                 if(curr_frame[j]['type'] === "bounding_box"){
-                    var x = (parseInt(curr_frame[j]['x']) / parseInt(this.metadata['horizontal_res']) * this.canvas.width) 
-                    var y = (curr_frame[j]['y'] / this.metadata['vertical_res'] * this.canvas.height)
-                    var width = ((curr_frame[j]['width']) / this.metadata['horizontal_res'] * this.canvas.width)
-                    var height = ((curr_frame[j]['height']) / this.metadata['vertical_res'] * this.canvas.height)
+                    var x = (parseInt(curr_frame[j]['x']) / parseInt(this.metadata['horizontal_res']) * this.width) 
+                    var y = (curr_frame[j]['y'] / this.metadata['vertical_res'] * this.height)
+                    var width = ((curr_frame[j]['width']) / this.metadata['horizontal_res'] * this.width)
+                    var height = ((curr_frame[j]['height']) / this.metadata['vertical_res'] * this.height)
 
                     var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-                    var new_bbox = new BoundingBox(y, x, width, height, color, curr_frame[j]['local_id'], "None").generate_no_behavior(this.canvas)
-                    //this.canvas.add(new_bbox)
+                    var new_bbox = new BoundingBox(y, x, width, height, color, curr_frame[j]['local_id'], "None").generate_no_behavior(this)
+                    //this.add(new_bbox)
                     new_bbox.local_id = curr_frame[j]['local_id']
                     temp_data.push(new_bbox)
                 }else if(curr_frame[j]['type'] === "segmentation"){
                     var points = []
                     var curr_points = curr_frame[j]['points']
                     for(var k = 0; k < curr_points.length; k++){
-                        var x_scaled = (parseInt(curr_points[k]['x']) / parseInt(this.metadata['horizontal_res']) * this.canvas.width)
-                        var y_scaled = (curr_points[k]['y'] / this.metadata['vertical_res'] * this.canvas.height)
+                        var x_scaled = (parseInt(curr_points[k]['x']) / parseInt(this.metadata['horizontal_res']) * this.width)
+                        var y_scaled = (curr_points[k]['y'] / this.metadata['vertical_res'] * this.height)
                         points.push({x: x_scaled, y: y_scaled})
                     }
                     var po = new fabric.Polygon(points, {
@@ -86,7 +87,7 @@ export default class ExtractingAnnotation{
                     grouppo.lockMovementX = true;
                     grouppo.selectable = false;
                     grouppo.local_id = curr_frame[j]['local_id']
-                    //this.canvas.add(grouppo)
+                    //this.add(grouppo)
                     temp_data.push(grouppo)
                 }
             }
