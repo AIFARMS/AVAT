@@ -29,6 +29,7 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 					fabricCanvas.renderAll();
 				})
 			}
+			console.log(fabricCanvas.getObjects())
 			var f_img = new fabric.Image(img, {
 				objectCaching: false,
 				scaleX: scaling_factor_width / img.width,
