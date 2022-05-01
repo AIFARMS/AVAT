@@ -14,7 +14,7 @@ const fabric = require("fabric").fabric;
 
 var temp_color;
 
-const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, curr_frame) => {
+const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, curr_frame, video) => {
 	
 	if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
 		console.log("Redraw of canvas -- image")
@@ -45,54 +45,23 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		return;
 	}else{ //This is for videos
 		console.log("Redraw of canvas -- video")
-		var video = document.createElement('video');
-		video.width = scaling_factor_width
-		video.height = scaling_factor_height
-		video.style.objectFit = "contain"
-		video.controls = true
+		var video = document.getElementsByTagName('video')[0];
+		video.oncanplay = function(){
+			var video_canvas = new fabric.Image(video, {
+				scaleX: scaling_factor_width / video.width,
+				scaleY: scaling_factor_height / video.height,
+				objectCaching: false
+			})
+			fabricCanvas.setBackgroundImage(video_canvas)
+			fabricCanvas.renderAll();
+		}
 
-		var source = document.createElement('source');
-		source.src = URL.createObjectURL(image_url)
-		source.type = "video/mp4"
-
-		video.appendChild(source)
+		
 
 		console.log(video)
 		console.log(parseInt(90 * (curr_frame/3)))
-		video.currentTime = parseInt(90 * (curr_frame/3))
-		video.play()
-		video.pause()
-		//img.src = URL.createObjectURL(image_url)
-		var video = new fabric.Image(video, {
-			objectCaching: false
-		})
-		console.log(video)
-		fabricCanvas.setBackgroundImage(video)
-		fabricCanvas.renderAll();
-		/*img.onload = function() {
-			fabricCanvas.clear()
-			console.log(currFrameData)
-			if(currFrameData != undefined){
-				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
-					enlivenedObjects.forEach(function (obj, index) {
-						fabricCanvas.add(obj);
-					});
-					fabricCanvas.renderAll();
-				})
-			}
-			console.log(fabricCanvas.getObjects())
-			var f_img = new fabric.Image(img, {
-				objectCaching: false,
-				scaleX: scaling_factor_width / img.width,
-				scaleY: scaling_factor_height / img.height
-			});
-			fabricCanvas.add(f_img);
-			console.log(fabricCanvas.getObjects())
-		
-			fabricCanvas.renderAll();
-			console.log("updated canvas")
-		};
-		img.src = URL.createObjectURL(image_url)*/
+		video.currentTime = parseInt(90 * ((curr_frame+1)/3))
+
 		return;
 	}
 }
@@ -100,6 +69,7 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 export default function FabricRender(props){
 	const [fabricCanvas, setFabricCanvas] = useState(null)
 	const [currindex, setCurrindex] = useState(0)
+	const [upload, setUpload] = useState(false)
 
 	useEffect(() => {
 
@@ -184,6 +154,14 @@ export default function FabricRender(props){
 	if(fabricCanvas != null && image_data != undefined){
 		console.log(image_data)
 		if(image_data.length > 0){
+			if(upload === false){
+				var video = document.getElementsByTagName('video')[0];
+				var source = document.createElement('source');
+				source.src = URL.createObjectURL(image_data[0])
+				source.type = "video/mp4"
+				video.appendChild(source)
+				setUpload(true)
+			}
 			console.log("canvas update")
 			canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux)
 			//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
@@ -191,8 +169,9 @@ export default function FabricRender(props){
 	}
 
 	return(
-		<div>
+		<div width={props.scaling_factor_width} height={props.scaling_factor_height} objectFit={"cover"}>
 			<canvas id={props.stream_num}></canvas>
+			<video width={props.scaling_factor_width} height={props.scaling_factor_height}></video>
 		</div>
 	)
 }
