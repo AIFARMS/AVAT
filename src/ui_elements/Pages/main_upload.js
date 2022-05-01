@@ -107,7 +107,7 @@ export default function MainUpload() {
 	useEffect(() => {
 		if(imagedata_redux[0].length != 0){
 			console.log(imagedata_redux)
-			total_frames = imagedata_redux[0].length
+			total_frames = 3//imagedata_redux[0].length
 			upload = true
 			disable_buttons = false
 			initAnnotationData(total_frames)

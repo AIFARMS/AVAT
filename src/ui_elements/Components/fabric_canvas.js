@@ -14,9 +14,10 @@ const fabric = require("fabric").fabric;
 
 var temp_color;
 
-const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas) => {
+const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, curr_frame) => {
 	
 	if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
+		console.log("Redraw of canvas -- image")
 		var img = new Image()
 		img.onload = function() {
 			fabricCanvas.clear()
@@ -41,6 +42,57 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 			console.log("updated canvas")
 		};
 		img.src = URL.createObjectURL(image_url)
+		return;
+	}else{ //This is for videos
+		console.log("Redraw of canvas -- video")
+		var video = document.createElement('video');
+		video.width = scaling_factor_width
+		video.height = scaling_factor_height
+		video.style.objectFit = "contain"
+		video.controls = true
+
+		var source = document.createElement('source');
+		source.src = URL.createObjectURL(image_url)
+		source.type = "video/mp4"
+
+		video.appendChild(source)
+
+		console.log(video)
+		console.log(parseInt(90 * (curr_frame/3)))
+		video.currentTime = parseInt(90 * (curr_frame/3))
+		video.play()
+		video.pause()
+		//img.src = URL.createObjectURL(image_url)
+		var video = new fabric.Image(video, {
+			objectCaching: false
+		})
+		console.log(video)
+		fabricCanvas.setBackgroundImage(video)
+		fabricCanvas.renderAll();
+		/*img.onload = function() {
+			fabricCanvas.clear()
+			console.log(currFrameData)
+			if(currFrameData != undefined){
+				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
+					enlivenedObjects.forEach(function (obj, index) {
+						fabricCanvas.add(obj);
+					});
+					fabricCanvas.renderAll();
+				})
+			}
+			console.log(fabricCanvas.getObjects())
+			var f_img = new fabric.Image(img, {
+				objectCaching: false,
+				scaleX: scaling_factor_width / img.width,
+				scaleY: scaling_factor_height / img.height
+			});
+			fabricCanvas.add(f_img);
+			console.log(fabricCanvas.getObjects())
+		
+			fabricCanvas.renderAll();
+			console.log("updated canvas")
+		};
+		img.src = URL.createObjectURL(image_url)*/
 		return;
 	}
 }
@@ -131,8 +183,10 @@ export default function FabricRender(props){
 
 	if(fabricCanvas != null && image_data != undefined){
 		console.log(image_data)
-		if(image_data.length !== 0){
-			canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+		if(image_data.length > 0){
+			console.log("canvas update")
+			canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux)
+			//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 		}
 	}
 

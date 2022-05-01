@@ -63,8 +63,9 @@ export default function CustomNavBar(props){
 	}
 
 	const handleMediaUpload = (event) => {
+		console.log(event.target.files)
 		if(videoFormat == INPUT_VIDEO){
-			alert("Video is currently being redone. Some features might not work as expected.")
+			setMedia(parseInt(event.target.id), event.target.files)
 		}else{
 			//console.log(event.target.id)
 			setMedia(parseInt(event.target.id), event.target.files)
@@ -110,7 +111,7 @@ export default function CustomNavBar(props){
 			)
 			let button_video = (
 				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-					<Form.File multiple id="file" label={"Video Upload " + i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
+					<Form.File id={i+""} key={i} label={"Video Upload " + i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 				</Form>
 			)
 			if (videoFormat === INPUT_IMAGE){
