@@ -112,6 +112,13 @@ export default function MainUpload() {
 			disable_buttons = false
 			initAnnotationData(total_frames)
 			initFrameData(total_frames)
+			var url = URL.createObjectURL(imagedata_redux[0][0])
+			var img = new Image;
+			img.onload = function() {
+				VIDEO_METADATA = {"horizontal_res": img.width, "vertical_res": img.height}
+				URL.revokeObjectURL(img.src)
+			}
+			img.src = url
 			setVisualToggle(10)
 		}
 		scaling_factor_width = 1920;
@@ -128,6 +135,8 @@ export default function MainUpload() {
 		}
 		scaling_factor_height = scaling_factor_height * (1/imagedata_redux.length)
 		scaling_factor_width = scaling_factor_width * (1/imagedata_redux.length)
+
+
 	}, [imagedata_redux])
 
 	const handleInputType = (val) => {
