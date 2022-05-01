@@ -1,5 +1,7 @@
 export default class ExportingAnnotation{
     constructor(annotation_data, width, height, VIDEO_METADATA, image_data){
+        console.log(width)
+        console.log(height)
         this.frame_data = annotation_data
         this.width = width
         this.height = height
