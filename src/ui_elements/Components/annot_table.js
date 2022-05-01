@@ -66,8 +66,17 @@ const delete_row = (e) => {
         alert("Row deletion failed - please report this bug.")
         return;
     }
+    var annot_delte = curr_data[e.target.id]['id']
+    console.log(annot_delte)
     curr_data.splice(e.target.id, 1)
     updateAnnotationData(parseInt(e.target.dataset.curr), curr_data)
+    var curr_img_data = getFrameData(e.target.dataset.curr)
+    for(var i = 0; i < curr_img_data.length; i++){
+        if(curr_img_data[i].objects[1].text == annot_delte){
+            curr_img_data.splice(i, 1)
+        }
+    }
+    updateFrameData(parseInt(e.target.dataset.curr), curr_img_data)
 }
 
 function genSelection(elem, select_data, columns, curr_idx, current_frame){
@@ -120,31 +129,4 @@ function check_keys(obj, key){
         }
     }
     return false
-}
-
-
-const EditableCell = ({
-    value: initialValue,
-    row: { index },
-    column: { id },
-    updateMyData,
-}) => {
-    const [value, setValue] = React.useState(initialValue)
-    const onChange = e => {
-        setValue(e.target.value)
-    }
-
-    const onBlur = () => {
-        updateMyData(index, id, value)
-    }
-
-    React.useEffect(() => {
-        setValue(initialValue)
-      }, [initialValue])
-    
-      return <input value={value} onChange={onChange} onBlur={onBlur} />
-}
-
-const defaultColumn = {
-    Cell: EditableCell,
 }
