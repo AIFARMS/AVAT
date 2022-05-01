@@ -45,23 +45,42 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		return;
 	}else{ //This is for videos
 		console.log("Redraw of canvas -- video")
-		var video = document.getElementsByTagName('video')[0];
-		video.oncanplay = function(){
-			var video_canvas = new fabric.Image(video, {
-				scaleX: scaling_factor_width / video.width,
-				scaleY: scaling_factor_height / video.height,
-				objectCaching: false
-			})
-			fabricCanvas.setBackgroundImage(video_canvas)
-			fabricCanvas.renderAll();
-		}
-
 		
+		let canvas = document.createElement('canvas');
+		let context = canvas.getContext('2d');
+		let [w, h] = [scaling_factor_width, scaling_factor_height]
+		canvas.width =  scaling_factor_width;
+		canvas.height = scaling_factor_height;
+	
+		context.drawImage(video, 0, 0, w, h);
+		let base64ImageData = canvas.toDataURL();
 
-		console.log(video)
-		console.log(parseInt(90 * (curr_frame/3)))
-		video.currentTime = parseInt(90 * ((curr_frame+1)/3))
+		var img = new Image()
+		img.onload = function() {
+			fabricCanvas.clear()
+			console.log(currFrameData)
+			if(currFrameData != undefined){
+				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
+					enlivenedObjects.forEach(function (obj, index) {
+						fabricCanvas.add(obj);
+					});
+					fabricCanvas.renderAll();
+				})
+			}
+			console.log(fabricCanvas.getObjects())
+			var f_img = new fabric.Image(img, {
+				objectCaching: false,
+				scaleX: scaling_factor_width / img.width,
+				scaleY: scaling_factor_height / img.height
+			});
+			fabricCanvas.setBackgroundImage(f_img);
+		
+			fabricCanvas.renderAll();
+			canvas.remove()
+			console.log("updated canvas")
+		};
 
+		img.src = base64ImageData
 		return;
 	}
 }
@@ -154,24 +173,33 @@ export default function FabricRender(props){
 	if(fabricCanvas != null && image_data != undefined){
 		console.log(image_data)
 		if(image_data.length > 0){
+			var video = document.getElementsByTagName('video')[props.stream_num]
+			video.currentTime = parseInt(90 * ((currframe_redux+1)/3))
 			if(upload === false){
-				var video = document.getElementsByTagName('video')[0];
 				var source = document.createElement('source');
 				source.src = URL.createObjectURL(image_data[0])
 				source.type = "video/mp4"
 				video.appendChild(source)
+				video.oncanplay = function(){
+					canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
+				}
 				setUpload(true)
 			}
 			console.log("canvas update")
-			canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux)
+			
+			//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux)
 			//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 		}
 	}
 
 	return(
-		<div width={props.scaling_factor_width} height={props.scaling_factor_height} objectFit={"cover"}>
-			<canvas id={props.stream_num}></canvas>
-			<video width={props.scaling_factor_width} height={props.scaling_factor_height}></video>
+		<div style={{display: "grid"}}>		
+			<div style={{gridColumn: 1, gridRow:1, position: "relative", width: props.scaling_factor_width, height: props.scaling_factor_height, top: 0, left: 0, opacity: 0}}>
+				<video></video>
+			</div>
+			<div style={{gridColumn: 1, gridRow:1, position: "relative",  top: 0, left: 0}}>
+				<canvas id={props.stream_num}></canvas>
+			</div>
 		</div>
 	)
 }
