@@ -12,12 +12,6 @@
         "slide_time": 8000
     },
     {
-        "src": "/assets/segmentation.png",
-        "altText": "Segmentation",
-        "description": "Multiple dots across an object to help train AI models to identify objects in frame. This annotation can be coupled with behavior data.",
-        "slide_time": 4000
-    },
-    {
         "src": "/assets/bounding_box.png",
         "altText": "Bounding Box",
         "description": "Rectangle that serves as a point of refrence for training object detection AI models. This annotation can be coupled with behavior data.",

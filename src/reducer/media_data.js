@@ -16,6 +16,8 @@ const mediaDataSlice = createSlice({
         addMedia(state, payload){
             var temp = state.data
             var media = payload.payload.media
+            console.log(payload)
+            console.log(temp)
             temp[payload.payload.stream_num] = media
             state.data = temp
         },
