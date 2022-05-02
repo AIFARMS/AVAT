@@ -21,18 +21,14 @@ import ProcessVideo from './process_video';
 import store from '../../store' 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue} from '../../processing/actions'
 
 initMedia(1)
 export default function CustomNavBar(props){
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
-	const [frameRate, setFrameRate] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
-	const [videoLink, setVideoLink] = useState("")
-	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
-	const [editSeg, setEditSeg] = useState(false)
 	const [columnLoad, setColumnLoad] = useState(false)
 	const [numStrems, setNumStreams] = useState(1)
 
@@ -53,10 +49,10 @@ export default function CustomNavBar(props){
 		//type = parseInt(type)
 		if(type === INPUT_VIDEO){
 			setVideoFormat(INPUT_VIDEO)
-			alert("Video is currently under development, some features might not work as expected.")
+			setMediaType(INPUT_VIDEO)
 		}else if (type === INPUT_IMAGE){
 			setVideoFormat(INPUT_IMAGE)
-			props.handleInputType(INPUT_IMAGE)
+			setMediaType(INPUT_IMAGE)
 		}else {
 			alert("Wrong input detected - please report this bug.")
 		}
@@ -137,14 +133,6 @@ export default function CustomNavBar(props){
 
 	return (
 		<div>
-		{
-			//TODO Re-enable this for video processing. 
-			process == 2 && 
-			<ProcessVideo
-				frame_rate={frameRate}
-				video_link={videoLink}
-			/>
-		}
 		<Modal show={show} onHide={handleClose} size='lg'>
 			<Modal.Header closeButton>
 			<Modal.Title>Instructions</Modal.Title>
@@ -189,10 +177,9 @@ export default function CustomNavBar(props){
 						<Form.File disabled={!columnLoad} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
-					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
+					Frame Rate: <input type="number" onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {setFrameRate(event.target.value);}}></input>
 					<NavDropdown.Divider />
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
-					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
@@ -217,8 +204,7 @@ export default function CustomNavBar(props){
 						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
 						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
 						<Dropdown.Menu>
-							Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
-							Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
+							Skip Value: <input type='number' defaultValue="1" onChange={(event) => {setSkipValue(event.target.value)}}></input>
 						</Dropdown.Menu>
 					</Dropdown>{' '}
 					

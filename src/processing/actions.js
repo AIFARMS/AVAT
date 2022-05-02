@@ -84,6 +84,48 @@ function setMedia(stream_num, media){
 	})
 }
 
+function initMetadata(horizontal_res, vertical_res, frame_rate, media_type, total_frames){
+	store.dispatch({
+		type: "metadata/init",
+		payload: {horizontal_res: horizontal_res, vertical_res: vertical_res, frame_rate: frame_rate, media_type: media_type, total_frames: total_frames}
+	})
+}
+
+function setRes(horizontal_res, vertical_res){
+	store.dispatch({
+		type: "metadata/setRes",
+		payload: {horizontal_res: horizontal_res, vertical_res: vertical_res}
+	})
+}
+
+function setFrameRate(frame_rate){
+	store.dispatch({
+		type: "metadata/setFrameRate",
+		payload: {frame_rate: frame_rate}
+	})
+}
+
+function setMediaType(media_type){
+	store.dispatch({
+		type: "metadata/setMediaType",
+		payload: {media_type: media_type}
+	})
+}
+
+function setTotalFrames(total_frames){
+	store.dispatch({
+		type: "metadata/setTotalFrames",
+		payload: {total_frames: total_frames}
+	})
+}
+
+function setSkipValue(skip_val){
+	store.dispatch({
+		type: "metadata/setSkipValue",
+		payload: {skip_value: skip_val}
+	})
+}
+
 export {initFrameData, 
 		updateFrameData, 
 		getFrameData, 
@@ -96,4 +138,10 @@ export {initFrameData,
 		getCurrentFrame,
 		setCurrentFrame,
 		initMedia,
-		setMedia}
+		setMedia, 
+		initMetadata,
+		setRes, 
+		setFrameRate,
+		setMediaType,
+		setTotalFrames,
+		setSkipValue}

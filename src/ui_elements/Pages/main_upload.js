@@ -31,9 +31,9 @@ import {initFrameData, updateFrameData, getFrameData,
 		initAnnotationData, updateAnnotationData, getAnnotationData, 
 		initColumnData, getColumnData, 
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
-		initMedia, setMedia} from '../../processing/actions'
+		initMedia, setMedia,
+		initMetadata, setRes, setFrameRate, setMediaType, setTotalFrames} from '../../processing/actions'
 import { useSelector } from "react-redux";
-import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } from "react-dom";
 
 const fabric = require("fabric").fabric;
 
@@ -42,7 +42,6 @@ var frame_rate = 15;
 var num_frames = -1;
 var scaling_factor_width = 1920;
 var scaling_factor_height = 1080;
-var skip_value = 1;
 
 //var current_screen_width = window.screen.width;
 var current_screen_height = window.screen.height;
@@ -58,8 +57,6 @@ if(current_screen_height >= 1080){////Mappings are based off of https://en.wikip
   scaling_factor_height = 576;
 }
 
-var video_width = 0;
-var video_height = 0;
 var upload = false;
 var disable_buttons = true;
 var toast_text = ""
@@ -67,13 +64,12 @@ var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
 var play_button_text = "ERROR"
 var segmentation_flag = false;
-var total_frames
-var player_opacity = 0
 
 //TODO remove after fixing null exceptions
 initAnnotationData(1)
 initFrameData(1)
 initCurrentFrame(0)
+initMetadata(scaling_factor_width, scaling_factor_height, 1, INPUT_VIDEO, 1)
 
 
 //Current frame counter
@@ -85,7 +81,6 @@ export default function MainUpload() {
 	const [oldAnnotation, setOldAnnotation] = useState(null)
 	const [save, changeSave] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
-	const [inputType, setInputType] = useState(INPUT_VIDEO)
 	const [isLoading, setIsLoading] = useState(true)
 
 	//New state vars
@@ -96,6 +91,10 @@ export default function MainUpload() {
 	const column_redux = useSelector(state => state.column_annot.data)
 	const currframe_redux = useSelector(state => state.current_frame)['data']
 	const imagedata_redux = useSelector(state => state.media_data.data)
+	const metadata_redux = useSelector(state => state.metadata)
+	console.log(metadata_redux['media_type'] == INPUT_VIDEO)
+	var inputType = metadata_redux['media_type']
+	var skip_value = parseInt(metadata_redux['skip_value'])
 
 	useEffect(() => {
 		if(upload == true){
@@ -104,22 +103,34 @@ export default function MainUpload() {
 		}
 	}, [currframe_redux])
 
+	useEffect(()=>{
+		initAnnotationData(metadata_redux.total_frames)
+        initFrameData(metadata_redux.total_frames)
+	}, [metadata_redux])
+
 	useEffect(() => {
 		if(imagedata_redux[0].length != 0){
-			console.log(imagedata_redux)
-			total_frames = 3//imagedata_redux[0].length
-			upload = true
-			disable_buttons = false
-			initAnnotationData(total_frames)
-			initFrameData(total_frames)
-			var url = URL.createObjectURL(imagedata_redux[0][0])
-			var img = new Image;
-			img.onload = function() {
-				VIDEO_METADATA = {"horizontal_res": img.width, "vertical_res": img.height}
-				URL.revokeObjectURL(img.src)
+			if(metadata_redux['media_type'] == INPUT_IMAGE){
+				setTotalFrames(imagedata_redux[0].length)
+				upload = true
+				disable_buttons = false
+				initAnnotationData(imagedata_redux[0].length)
+				initFrameData(imagedata_redux[0].length)
+				var url = URL.createObjectURL(imagedata_redux[0][0])
+				var img = new Image;
+				img.onload = function() {
+					VIDEO_METADATA = {"horizontal_res": img.width, "vertical_res": img.height}
+					URL.revokeObjectURL(img.src)
+				}
+				img.src = url
+				setVisualToggle(10)
+			}else if(metadata_redux['media_type'] == INPUT_VIDEO){
+				upload = true
+				disable_buttons = false
+				initAnnotationData(imagedata_redux[0].length)
+				initFrameData(imagedata_redux[0].length)
+				setVisualToggle(10)
 			}
-			img.src = url
-			setVisualToggle(10)
 		}
 		scaling_factor_width = 1920;
 		scaling_factor_height = 1080;
@@ -139,25 +150,13 @@ export default function MainUpload() {
 
 	}, [imagedata_redux])
 
-	const handleInputType = (val) => {
-		if(val == INPUT_VIDEO | val == INPUT_IMAGE){
-			setInputType(val)
-		}else{
-			alert("ERROR VALUE SET - Please report this bug!\n")
-		}
-	}
-
 	const addToCanvas = () => {
 		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
 		
 		if(currAnnotationData == null){
 			setCurrAnnotationData([])
 		}
-		if (segmentation_flag == true){
-			alert("Please finish your current segmentation!")
-			return
-		}
-		
+
 		var annotation_type_txt = "error"
 
 		if (annotationType === ANNOTATION_BBOX){
@@ -264,12 +263,12 @@ export default function MainUpload() {
 	const skip_frame_forward = e =>{
 		var frameVal = currframe_redux + skip_value
 
-		if(frameVal >= total_frames){
+		if(frameVal >= metadata_redux['total_frames']){
 			if(inputType === INPUT_IMAGE){
-				setCurrentFrame(total_frames-1)
+				setCurrentFrame(metadata_redux['total_frames']-1)
 				return;
 			}
-			setCurrentFrame(total_frames-1)
+			setCurrentFrame(metadata_redux['total_frames']-1)
 		}else{
 			if(inputType === INPUT_IMAGE){
 				setCurrentFrame(frameVal)
@@ -414,7 +413,7 @@ export default function MainUpload() {
 				skip_value={skip_value} 
 				handleOldAnnotation={handleOldAnnotation}
 				currentFrame={currframe_redux}
-				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(total_frames)}
+				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(metadata_redux['total_frames'])}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
 				play_button_text={play_button_text}
@@ -424,7 +423,6 @@ export default function MainUpload() {
 				VIDEO_METADATA={VIDEO_METADATA}
 				toggleKeyCheck={toggleKeyCheck}
 				handle_visual_toggle={handle_visual_toggle}
-				handleInputType={handleInputType}
 			/>
 			<Toast 
 				onClose={() => changeSave(false)} 

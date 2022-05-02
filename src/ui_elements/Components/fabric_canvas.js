@@ -5,7 +5,7 @@ import store from '../../store'
 import {initFrameData, updateFrameData, getFrameData, 
 		initAnnotationData, updateAnnotationData, getAnnotationData, 
 		initColumnData, getColumnData, 
-		initCurrentFrame, getCurrentFrame, setCurrentFrame,} from '../../processing/actions'
+		initCurrentFrame, getCurrentFrame, setCurrentFrame, setTotalFrames,} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
@@ -89,6 +89,7 @@ export default function FabricRender(props){
 	const [fabricCanvas, setFabricCanvas] = useState(null)
 	const [currindex, setCurrindex] = useState(0)
 	const [upload, setUpload] = useState(false)
+	const metadata_redux = useSelector(state => state.metadata)
 
 	useEffect(() => {
 
@@ -168,27 +169,37 @@ export default function FabricRender(props){
 			updateFrameData(currindex, fabricCanvas.getObjects())
 		}
 		setCurrindex(currframe_redux)
+		var video = document.getElementsByTagName('video')[props.stream_num]
+		if(upload == true){
+			video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))
+		}
 	}, [currframe_redux])
 
 	if(fabricCanvas != null && image_data != undefined){
 		console.log(image_data)
 		if(image_data.length > 0){
-			var video = document.getElementsByTagName('video')[props.stream_num]
-			video.currentTime = parseInt(90 * ((currframe_redux+1)/3))
-			if(upload === false){
-				var source = document.createElement('source');
-				source.src = URL.createObjectURL(image_data[0])
-				source.type = "video/mp4"
-				video.appendChild(source)
-				video.oncanplay = function(){
-					canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
+			if(metadata_redux['media_type'] == INPUT_VIDEO){
+				var video = document.getElementsByTagName('video')[props.stream_num]
+				if(upload === false){
+					var source = document.createElement('source');
+					source.src = URL.createObjectURL(image_data[0])
+					source.type = "video/mp4"
+					video.appendChild(source)
+					video.onloadedmetadata = function(){
+						initAnnotationData(parseInt(video.duration))
+						initFrameData(parseInt(video.duration))
+						setTotalFrames(parseInt(video.duration))
+						video.currentTime=0
+					}
+					video.oncanplay = function(){
+						canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
+					}
+					setUpload(true)
 				}
-				setUpload(true)
+			}else if(metadata_redux['media_type'] == INPUT_IMAGE){
+				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
-			console.log("canvas update")
-			
 			//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux)
-			//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 		}
 	}
 
