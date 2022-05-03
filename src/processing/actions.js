@@ -126,6 +126,10 @@ function setSkipValue(skip_val){
 	})
 }
 
+function getMetaData(){
+	return JSON.parse(JSON.stringify(store.getState().metadata))
+}
+
 export {initFrameData, 
 		updateFrameData, 
 		getFrameData, 
@@ -144,4 +148,5 @@ export {initFrameData,
 		setFrameRate,
 		setMediaType,
 		setTotalFrames,
-		setSkipValue}
+		setSkipValue,
+		getMetaData}
