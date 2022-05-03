@@ -190,11 +190,12 @@ export default function FabricRender(props){
 						initFrameData(parseInt(video.duration))
 						setTotalFrames(parseInt(video.duration))
 						video.currentTime=0
+						setUpload(true)
 					}
 					video.oncanplay = function(){
 						canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
 					}
-					setUpload(true)
+					
 				}else if(upload === true){
 					video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))
 					//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
