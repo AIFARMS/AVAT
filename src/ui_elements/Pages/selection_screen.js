@@ -7,7 +7,7 @@ import Modal from 'react-bootstrap/Modal'
 import Carousel from 'react-bootstrap/Carousel'
 
 import MainUpload from './main_upload'
-import { Container, Jumbotron, Col, Row, Card} from "react-bootstrap";
+import { Container, Jumbotron, Card} from "react-bootstrap";
 import Instructions from "../Components/instructions";
 
 import selection_items from '../../static_data/selectionscreen_info.json'
@@ -16,16 +16,12 @@ import selection_items from '../../static_data/selectionscreen_info.json'
 function SelectionScreen(){
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
-	const handleShow = () => setShow(true);
     const [upload, setUpload] = useState(false)
     const handleUpload = (event) => {
         setUpload(!upload)
     }
 
     const [multiview, setMultiview] = useState(false)
-    const handleMultiview = (event) => {
-        setMultiview(!multiview)
-    }
 
     if(upload){
         return (<MainUpload/>)
@@ -51,18 +47,18 @@ function SelectionScreen(){
                             </p>
                         </Container>
                     </Jumbotron>
-                        <Carousel controls={false} fade style={{"width": "70%", "margin-left": "auto", "margin-right": "auto"}}>
+                        <Carousel controls={false} fade style={{"width": "70%", "marginLeft": "auto", "marginRight": "auto"}}>
                             {
                                 selection_items.map((item, key) => {
                                     return(
-                                        <Carousel.Item interval={item.slide_time}>
+                                        <Carousel.Item key={key} interval={item.slide_time}>
                                             <Card 
                                                 className="mb-5 box-shadow" 
-                                                top
+                                                top="true"
                                                 width='100%'
                                             >
                                                 <Card.Img width="60%" variant="top" src={process.env.PUBLIC_URL + item.src} />
-                                                <Card.Body style={{"text-align": "center"}}>
+                                                <Card.Body style={{"textAlign": "center"}}>
                                                     <Card.Title>{item.altText}</Card.Title>
                                                     <Card.Text>{item.description}</Card.Text>
                                                 </Card.Body>

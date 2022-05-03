@@ -44,7 +44,6 @@ export default function CustomNavBar(props){
 		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
 	}
 	const handleVideoFormat = (type) => {
-		console.log(type)
 		//TODO Make sure bug is resolved and simply have video format equal type
 		//type = parseInt(type)
 		if(type === INPUT_VIDEO){
@@ -59,13 +58,10 @@ export default function CustomNavBar(props){
 	}
 
 	const handleMediaUpload = (event) => {
-		console.log(event.target.files)
 		if(videoFormat == INPUT_VIDEO){
 			setMedia(parseInt(event.target.id), event.target.files)
 		}else{
-			//console.log(event.target.id)
 			setMedia(parseInt(event.target.id), event.target.files)
-			//setMedia(1, event.target.files)
 		}
 	}
 
@@ -74,7 +70,6 @@ export default function CustomNavBar(props){
 		promise.then(function (result) {
 			if(result != null){
 				setColumnLoad(true);
-				console.log(result)
 				initColumnData(result)
 			}else{
 				alert("Error in processing columns")
@@ -101,12 +96,12 @@ export default function CustomNavBar(props){
 		var uploadButtons = []
 		for(var i = 0; i < numStrems; i++){
 			let button_image = (
-				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+				<Form key={i} style={{float: "left",gridColumn: 1, gridRow:4}}>
 					<Form.File multiple id={i+""} key={i} label={"Image Upload " + i} accept="image/*" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 				</Form>
 			)
 			let button_video = (
-				<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+				<Form key={i} style={{float: "left",gridColumn: 1, gridRow:4}}>
 					<Form.File id={i+""} key={i} label={"Video Upload " + i} accept=".mp4" custom type="file" onChange={(event) => {handleMediaUpload(event)}} />
 				</Form>
 			)

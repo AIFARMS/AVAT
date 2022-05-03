@@ -12,8 +12,15 @@ export default class ExtractingAnnotation{
     }
 
     get_frame_data(){
-        console.log(this.scale_annotations())
         return this.scale_annotations()
+    }
+
+    get_frame_rate(){
+        try{
+            return this.metadata['frame_rate']
+        }catch (error){
+            return 1
+        }
     }
     
     get_annotation_data(){
@@ -24,17 +31,14 @@ export default class ExtractingAnnotation{
         var localid = []
         for(var i = 0; i < this.annotation_data.length; i++){
             for(var j = 0; j < this.annotation_data[i].length; j++){
-                console.log(this.annotation_data[i][j])
                 localid.push(parseInt(this.annotation_data[i][j]['id'].replace(/\D/g, "")))
             }
         }
-        console.log(Math.max(...localid))
         return Math.max(...localid)+1
     }
 
     scale_annotations(){
         var new_annotations = []
-        console.log(this.frame_data)
         for(var i = 0; i < this.frame_data.length; i++){
             var temp_data = []
             var curr_frame = this.frame_data[i]
@@ -93,7 +97,6 @@ export default class ExtractingAnnotation{
             }
             new_annotations.push(temp_data)
         }
-        console.log(new_annotations)
         return new_annotations
     }
 }
@@ -103,7 +106,6 @@ export default class ExtractingAnnotation{
 class MCPT_Processing {
     constructor(annotation_json){
         this.objects = annotation_json['objects']
-        console.log(this.objects)
     }
 
     getObjects_MCPT() {
@@ -134,7 +136,6 @@ class MCPT_Processing {
                 }
             }
         }
-        console.log(objects_frame)
         return objects_frame;
     }
 }*/

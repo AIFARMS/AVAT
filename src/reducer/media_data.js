@@ -5,7 +5,7 @@ const initialState = {data: []}
 const mediaDataSlice = createSlice({
     name: 'media_data',
     initialState,
-    reducers:{
+reducers:{
         init(state, payload){
             var data = [];
             for(var i = 0; i < payload.payload; i++){
@@ -16,8 +16,6 @@ const mediaDataSlice = createSlice({
         addMedia(state, payload){
             var temp = state.data
             var media = payload.payload.media
-            console.log(payload)
-            console.log(temp)
             temp[payload.payload.stream_num] = media
             state.data = temp
         },
