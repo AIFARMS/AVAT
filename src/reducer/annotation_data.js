@@ -18,7 +18,6 @@ const annotationDataSlice = createSlice({
             state.data = payload.payload
         },
         modifyFrame(state, payload){
-            console.log(payload.payload)
             var temp = state.data
             temp[payload.payload.currentFrame] = payload.payload.data
             state.data = temp

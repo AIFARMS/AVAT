@@ -92,7 +92,6 @@ export default function MainUpload() {
 	const currframe_redux = useSelector(state => state.current_frame)['data']
 	const imagedata_redux = useSelector(state => state.media_data.data)
 	const metadata_redux = useSelector(state => state.metadata)
-	console.log(metadata_redux['media_type'] == INPUT_VIDEO)
 	var inputType = metadata_redux['media_type']
 	var skip_value = parseInt(metadata_redux['skip_value'])
 
@@ -104,9 +103,11 @@ export default function MainUpload() {
 	}, [currframe_redux])
 
 	useEffect(()=>{
-		initAnnotationData(metadata_redux.total_frames)
-        initFrameData(metadata_redux.total_frames)
-	}, [metadata_redux])
+		if(annot_redux.length === 1){
+			initAnnotationData(metadata_redux.total_frames)
+			initFrameData(metadata_redux.total_frames)
+		}
+	}, [metadata_redux]);
 
 	useEffect(() => {
 		if(imagedata_redux[0].length != 0){
@@ -238,7 +239,7 @@ export default function MainUpload() {
 			type: "annotation_data/initOldAnnotation",
 			payload: oldAnnotation.get_annotation_data()
 		});
-
+		setFrameRate(oldAnnotation.get_frame_rate())
 		setCurrFrameData(oldAnnotation.get_frame_data()[0])
 		setCurrAnnotationData(oldAnnotation.get_annotation_data()[0])
 		setBoxCount(oldAnnotation.find_highest_localid())
@@ -252,11 +253,11 @@ export default function MainUpload() {
 
 	const downloadOldAnnotation = (file) => {
 		return new Promise((resolve, reject) => {
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			resolve((JSON.parse(e.target.result)));
-		}
-		reader.readAsText(file.target.files[0])
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				resolve((JSON.parse(e.target.result)));
+			}
+			reader.readAsText(file.target.files[0])
 		})
 	}
   
@@ -390,7 +391,6 @@ export default function MainUpload() {
 			)
 			fcanvas.push(canv)
 		}
-		console.log(fcanvas)
 		return(
 			<div>
 			{

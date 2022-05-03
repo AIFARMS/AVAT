@@ -14,14 +14,12 @@ const fabric = require("fabric").fabric;
 
 var temp_color;
 
-const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, curr_frame, video) => {
+const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, video) => {
 	
 	if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
-		console.log("Redraw of canvas -- image")
 		var img = new Image()
 		img.onload = function() {
 			fabricCanvas.clear()
-			console.log(currFrameData)
 			if(currFrameData != undefined){
 				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
 					enlivenedObjects.forEach(function (obj, index) {
@@ -30,7 +28,6 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 					fabricCanvas.renderAll();
 				})
 			}
-			console.log(fabricCanvas.getObjects())
 			var f_img = new fabric.Image(img, {
 				objectCaching: false,
 				scaleX: scaling_factor_width / img.width,
@@ -39,12 +36,10 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 			fabricCanvas.setBackgroundImage(f_img);
 		
 			fabricCanvas.renderAll();
-			console.log("updated canvas")
 		};
 		img.src = URL.createObjectURL(image_url)
 		return;
 	}else{ //This is for videos
-		console.log("Redraw of canvas -- video")
 		
 		let canvas = document.createElement('canvas');
 		let context = canvas.getContext('2d');
@@ -58,7 +53,6 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		var img = new Image()
 		img.onload = function() {
 			fabricCanvas.clear()
-			console.log(currFrameData)
 			if(currFrameData != undefined){
 				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
 					enlivenedObjects.forEach(function (obj, index) {
@@ -67,7 +61,6 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 					fabricCanvas.renderAll();
 				})
 			}
-			console.log(fabricCanvas.getObjects())
 			var f_img = new fabric.Image(img, {
 				objectCaching: false,
 				scaleX: scaling_factor_width / img.width,
@@ -77,7 +70,6 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		
 			fabricCanvas.renderAll();
 			canvas.remove()
-			console.log("updated canvas")
 		};
 
 		img.src = base64ImageData
@@ -91,6 +83,8 @@ export default function FabricRender(props){
 	const [upload, setUpload] = useState(false)
 	const metadata_redux = useSelector(state => state.metadata)
 	const frame_redux = useSelector(state => state.frame_data)
+	var image_data = useSelector(state => state.media_data)
+	var currframe_redux = useSelector(state => state.current_frame)['data']
 
 	useEffect(() => {
 
@@ -146,9 +140,7 @@ export default function FabricRender(props){
 		});
 
 		var el = ReactDOM.findDOMNode(this);
-		console.log(el)
 		var canvas_elem = document.getElementsByTagName('canvas')[props.stream_num*2]
-		console.log(canvas_elem)
 		temp_fabricCanvas.initialize(canvas_elem, {
 			height: props.scaling_factor_height,
 		  	width: props.scaling_factor_width,
@@ -158,25 +150,33 @@ export default function FabricRender(props){
 		setFabricCanvas(temp_fabricCanvas)
 	}, []);
 
-	var image_data = useSelector(state => state.media_data)
-	console.log(image_data)
 	image_data = image_data['data'][props.stream_num]
 
-	var currframe_redux = useSelector(state => state.current_frame)['data']
+	console.log(currframe_redux)
+	useEffect(() => {
+		if(fabricCanvas){
+			if(metadata_redux['media_type'] == INPUT_VIDEO){
+				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas,video)
+			}else if (metadata_redux['media_type'] == INPUT_IMAGE){
+				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			}
+		}
+	}, [frame_redux])
 
 	useEffect(() => {
-		if(fabricCanvas != null){
-			updateFrameData(currindex, fabricCanvas.getObjects())
-		}
-		setCurrindex(currframe_redux)
-		var video = document.getElementsByTagName('video')[props.stream_num]
-		if(upload == true){
-			video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))
+		if(fabricCanvas){
+			if(fabricCanvas.getObjects().length != 0){
+				//updateFrameData(currindex, fabricCanvas.getObjects())
+			}
+			setCurrindex(currframe_redux)
+			var video = document.getElementsByTagName('video')[props.stream_num]
+			if(upload == true){
+				video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))			
+			}
 		}
 	}, [currframe_redux])
 
 	if(fabricCanvas != null && image_data != undefined){
-		console.log(image_data)
 		if(image_data.length > 0){
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
 				var video = document.getElementsByTagName('video')[props.stream_num]
@@ -190,15 +190,18 @@ export default function FabricRender(props){
 						initFrameData(parseInt(video.duration))
 						setTotalFrames(parseInt(video.duration))
 						video.currentTime=0
-						setUpload(true)
+						
 					}
-					video.oncanplay = function(){
-						canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
+					video.oncanplaythrough = function(){
+						if(upload === false){
+							canvasBackgroundUpdate(getFrameData(currindex), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas,video)
+						}
+						setUpload(true)
 					}
 					
 				}else if(upload === true){
-					video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))
-					//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
+					//video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))
+					canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, video)
 				}
 			}else if(metadata_redux['media_type'] == INPUT_IMAGE){
 				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
