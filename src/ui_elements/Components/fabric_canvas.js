@@ -90,6 +90,7 @@ export default function FabricRender(props){
 	const [currindex, setCurrindex] = useState(0)
 	const [upload, setUpload] = useState(false)
 	const metadata_redux = useSelector(state => state.metadata)
+	const frame_redux = useSelector(state => state.frame_data)
 
 	useEffect(() => {
 
@@ -157,7 +158,6 @@ export default function FabricRender(props){
 		setFabricCanvas(temp_fabricCanvas)
 	}, []);
 
-	
 	var image_data = useSelector(state => state.media_data)
 	console.log(image_data)
 	image_data = image_data['data'][props.stream_num]
@@ -195,6 +195,9 @@ export default function FabricRender(props){
 						canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
 					}
 					setUpload(true)
+				}else if(upload === true){
+					video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))
+					//canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, currframe_redux, video)
 				}
 			}else if(metadata_redux['media_type'] == INPUT_IMAGE){
 				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)

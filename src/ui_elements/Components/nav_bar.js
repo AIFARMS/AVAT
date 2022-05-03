@@ -179,7 +179,7 @@ export default function CustomNavBar(props){
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {setFrameRate(event.target.value);}}></input>
 					<NavDropdown.Divider />
-					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
+					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {setSkipValue(event.target.value)}}></input>
 					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
