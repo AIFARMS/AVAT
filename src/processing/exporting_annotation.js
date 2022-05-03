@@ -15,7 +15,6 @@ export default class ExportingAnnotation{
         console.log(this.frame_data)
         for(var i = 0; i < this.frame_data.length; i++){
             var curr = []
-
             if(this.frame_data[i] == []){
                 continue;
             }
@@ -25,39 +24,46 @@ export default class ExportingAnnotation{
             }
             
             for(var j = 0; j < frame_objects.length; j++){
-                console.log(frame_objects[j]._objects)
-                if(frame_objects[j].get('type') !== "group"){
-                    continue;
-                }
-                if(frame_objects[j]._objects[0]['type'] === "rect"){
+                try {
                     console.log(frame_objects[j])
-                    var x = (frame_objects[j]['left'] / this.width) * this.metadata['horizontal_res']
-                    var y = (frame_objects[j]['top'] / this.height) * this.metadata['vertical_res']
-                    var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.width) * this.metadata['horizontal_res']
-                    var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.height )* this.metadata['vertical_res']
-                    var local_id = frame_objects[j]._objects[1]['text']
-                    if(this.image_data.length != 0){
-                        curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id,"fileName:": this.image_data[i]['name'], "dataType": "image"})
-                    }else{
-                        curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
+                    if(frame_objects[j] == undefined){
+                        continue;
                     }
-                    //curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id})
-                }else if (frame_objects[j]._objects[0]['type'] === "polygon"){
-                    var raw_points = frame_objects[j]._objects[0]['points']
-                    var points = []
-                    for(var k = 0; k < raw_points.length; k++){
-                        var x = (raw_points[k]['x'] / this.width) * this.metadata['horizontal_res']
-                        var y = (raw_points[k]['y'] / this.height) * this.metadata['vertical_res']
-                        points.push({"x": x, "y": y})
+                    if(frame_objects[j]['type'] !== "group"){
+                        continue;
                     }
-                    var local_id = frame_objects[j]._objects[1]['text']
+                    if(frame_objects[j]._objects[0] === "rect"){
+                        console.log(frame_objects[j])
+                        var x = (frame_objects[j]['left'] / this.width) * this.metadata['horizontal_res']
+                        var y = (frame_objects[j]['top'] / this.height) * this.metadata['vertical_res']
+                        var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.width) * this.metadata['horizontal_res']
+                        var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.height )* this.metadata['vertical_res']
+                        var local_id = frame_objects[j]._objects[1]['text']
+                        if(this.image_data.length != 0){
+                            curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id,"fileName:": this.image_data[i]['name'], "dataType": "image"})
+                        }else{
+                            curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
+                        }
+                        //curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id})
+                    }else if (frame_objects[j]._objects[0]['type'] === "polygon"){
+                        var raw_points = frame_objects[j]._objects[0]['points']
+                        var points = []
+                        for(var k = 0; k < raw_points.length; k++){
+                            var x = (raw_points[k]['x'] / this.width) * this.metadata['horizontal_res']
+                            var y = (raw_points[k]['y'] / this.height) * this.metadata['vertical_res']
+                            points.push({"x": x, "y": y})
+                        }
+                        var local_id = frame_objects[j]._objects[1]['text']
 
-                    if(this.image_data.length != 0){
-                        curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.image_data[i]['name'], "dataType": "image"})
-                    }else{
-                        curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
+                        if(this.image_data.length != 0){
+                            curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.image_data[i]['name'], "dataType": "image"})
+                        }else{
+                            curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
+                        }
+                        //curr.push({"type": "segmentation", "points": points, "local_id": local_id})
                     }
-                    //curr.push({"type": "segmentation", "points": points, "local_id": local_id})
+                } catch (error) {
+                    console.log(error)
                 }
 
             }
