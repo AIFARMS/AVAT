@@ -152,7 +152,6 @@ export default function FabricRender(props){
 
 	image_data = image_data['data'][props.stream_num]
 
-	console.log(currframe_redux)
 	useEffect(() => {
 		if(fabricCanvas){
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
@@ -166,7 +165,7 @@ export default function FabricRender(props){
 	useEffect(() => {
 		if(fabricCanvas){
 			if(fabricCanvas.getObjects().length != 0){
-				//updateFrameData(currindex, fabricCanvas.getObjects())
+				updateFrameData(currindex, fabricCanvas.getObjects())
 			}
 			setCurrindex(currframe_redux)
 			var video = document.getElementsByTagName('video')[props.stream_num]

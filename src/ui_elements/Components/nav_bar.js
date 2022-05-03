@@ -21,7 +21,7 @@ import ProcessVideo from './process_video';
 import store from '../../store' 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData} from '../../processing/actions'
 
 initMedia(1)
 export default function CustomNavBar(props){
@@ -41,7 +41,7 @@ export default function CustomNavBar(props){
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, props.VIDEO_METADATA, store.getState().media_data.data[0]).get_frame_json()
-		downloadFileJSON(props.ANNOTATION_VIDEO_NAME, props.ANNOTATOR_NAME, converted_annot, props.annotation_data, props.VIDEO_METADATA)
+		downloadFileJSON(converted_annot, props.annotation_data, getMetaData())
 	}
 	const handleVideoFormat = (type) => {
 		//TODO Make sure bug is resolved and simply have video format equal type
