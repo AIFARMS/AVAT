@@ -41,7 +41,8 @@ export default function CustomNavBar(props){
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, props.VIDEO_METADATA, store.getState().media_data.data[0]).get_frame_json()
-		downloadFileJSON(converted_annot, props.annotation_data, getMetaData())
+		console.log(converted_annot)
+		downloadFileJSON(converted_annot, getMetaData())
 	}
 	const handleVideoFormat = (type) => {
 		//TODO Make sure bug is resolved and simply have video format equal type

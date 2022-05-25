@@ -16,10 +16,12 @@ export default class ExportingAnnotation{
         for(var i = 0; i < this.frame_data.length; i++){
             var curr = []
             if(this.frame_data[i] == []){
+                console.log("Exporting error")
                 continue;
             }
             var frame_objects = this.frame_data[i]
             if(frame_objects == undefined){
+                console.log("Exporting error")
                 continue;
             }
             

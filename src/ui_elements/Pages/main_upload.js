@@ -84,7 +84,6 @@ export default function MainUpload() {
 	const [isLoading, setIsLoading] = useState(true)
 
 	//New state vars
-	const [currFrameData, setCurrFrameData] = useState([])
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
 	const annot_redux = useSelector(state => state.annotation_data.data)
@@ -163,8 +162,11 @@ export default function MainUpload() {
 		if (annotationType === ANNOTATION_BBOX){
 			annotation_type_txt = "b"
 			var new_bbox = new BoundingBox(50, 50, 50, 50, color, boxCount+'b', "None").generate_no_behavior()
-			setCurrFrameData([new_bbox])
-			updateFrameData(currframe_redux, [new_bbox])
+			var frame_dat = getFrameData(getCurrentFrame())
+			frame_dat = Object.assign([], frame_dat)
+			frame_dat.push(new_bbox)
+			updateFrameData(currframe_redux, frame_dat)
+			//updateFrameData(currframe_redux, [new_bbox])
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
@@ -183,6 +185,7 @@ export default function MainUpload() {
 
 		setBoxCount(boxCount + 1);
 	}
+
 
 	useEffect(() =>{
 		if(upload == true){
@@ -240,7 +243,6 @@ export default function MainUpload() {
 			payload: oldAnnotation.get_annotation_data()
 		});
 		setFrameRate(oldAnnotation.get_frame_rate())
-		setCurrFrameData(oldAnnotation.get_frame_data()[0])
 		setCurrAnnotationData(oldAnnotation.get_annotation_data()[0])
 		setBoxCount(oldAnnotation.find_highest_localid())
 	}, [oldAnnotation]);
@@ -344,8 +346,6 @@ export default function MainUpload() {
 			addToCanvas()
 		}else if (event.key === "q"){
 			skip_frame_backward()
-		}else if (event.key === "w"){
-			alert("Video is currently under development, please use images for now!")
 		}else if (event.key === "e"){
 			skip_frame_forward()
 		}else if(event.key === "c"){
