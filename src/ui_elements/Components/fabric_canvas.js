@@ -86,6 +86,13 @@ export default function FabricRender(props){
 	var image_data = useSelector(state => state.media_data)
 	var currframe_redux = useSelector(state => state.current_frame)['data']
 
+	var save_data = () => {
+		console.log(fabricCanvas)
+		if(fabricCanvas){
+			updateFrameData(currindex, fabricCanvas.getObjects())
+		}
+	}
+
 	useEffect(() => {
 
 		var temp_fabricCanvas = (new fabric.Canvas('c', {
@@ -113,6 +120,10 @@ export default function FabricRender(props){
 			opt.e.stopPropagation();
 		});
 
+		temp_fabricCanvas.on('object:moving', function (event) {
+			this.objDrag = true;
+		});
+
 		temp_fabricCanvas.on('mouse:down', function(opt) {
 			var evt = opt.e;
 			if (evt.altKey === true) {
@@ -134,10 +145,18 @@ export default function FabricRender(props){
 			}
 		});
 		temp_fabricCanvas.on('mouse:up', function(opt) {
+			if(this.objDrag){
+				console.log("UPDATED DATA BACKGROUND")
+				save_data()
+				this.objDrag = false;
+			}
 			this.setViewportTransform(this.viewportTransform);
 			this.isDragging = false;
 			this.selection = true;
 		});
+
+
+		 
 
 		var el = ReactDOM.findDOMNode(this);
 		var canvas_elem = document.getElementsByTagName('canvas')[props.stream_num*2]

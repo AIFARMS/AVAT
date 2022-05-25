@@ -1,7 +1,7 @@
 import store from '../store'
 import {getFrameData, getAnnotationData} from './actions'
 
-export async function downloadFileJSON (frame_data, annotation_data, VIDEO_METADATA) {
+export async function downloadFileJSON (frame_data, VIDEO_METADATA) {
     var fileName = "generated_annotations";
    
     const json = JSON.stringify({"vid_metadata": VIDEO_METADATA, "annotations": frame_data, "behavior_data": store.getState().annotation_data.data})
