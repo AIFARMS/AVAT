@@ -40,7 +40,7 @@ export default function CustomNavBar(props){
 	}
 
 	const handleDownloadJSON = () => {
-		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, props.VIDEO_METADATA, store.getState().media_data.data[0]).get_frame_json()
+		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, getMetaData(), store.getState().media_data.data[0]).get_frame_json()
 		console.log(converted_annot)
 		downloadFileJSON(converted_annot, getMetaData())
 	}

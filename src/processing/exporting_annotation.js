@@ -41,7 +41,7 @@ export default class ExportingAnnotation{
                         var width = ((frame_objects[j]['width'] * frame_objects[j]['scaleX']) / this.width) * this.metadata['horizontal_res']
                         var height = ((frame_objects[j]['height'] * frame_objects[j]['scaleY']) / this.height )* this.metadata['vertical_res']
                         var local_id = frame_objects[j]._objects[1]['text']
-                        if(this.image_data.length != 0){
+                        if(this.metadata.media_type == "in_image"){
                             curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id,"fileName:": this.image_data[i]['name'], "dataType": "image"})
                         }else{
                             curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
@@ -50,6 +50,10 @@ export default class ExportingAnnotation{
                     }else if (frame_objects[j]._objects[0]['type'] === "polygon"){
                         var raw_points = frame_objects[j]._objects[0]['points']
                         var points = []
+                        console.log(this.metadata)
+                        console.log(this.metadata['horizontal_res'])
+                        console.log(this.width)
+                        console.log(this.height)
                         for(var k = 0; k < raw_points.length; k++){
                             var x = (raw_points[k]['x'] / this.width) * this.metadata['horizontal_res']
                             var y = (raw_points[k]['y'] / this.height) * this.metadata['vertical_res']
@@ -57,7 +61,7 @@ export default class ExportingAnnotation{
                         }
                         var local_id = frame_objects[j]._objects[1]['text']
 
-                        if(this.image_data.length != 0){
+                        if(this.metadata.media_type == "in_image"){
                             curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.image_data[i]['name'], "dataType": "image"})
                         }else{
                             curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
