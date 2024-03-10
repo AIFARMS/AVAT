@@ -1,6 +1,5 @@
 //Core imports
-import React, { useEffect, useState } from "react"; 
-import ReactPlayer from 'react-player'
+import React, { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 //Constants
@@ -29,17 +28,15 @@ import AnnotationTable from "../Components/change_table";
 import store from '../../store' 
 import {initFrameData, updateFrameData, getFrameData, 
 		initAnnotationData, updateAnnotationData, getAnnotationData, 
-		initColumnData, getColumnData, 
+		getColumnData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
-		initMedia, setMedia,
-		initMetadata, setRes, setFrameRate, setMediaType, setTotalFrames} from '../../processing/actions'
+		initMedia,
+		initMetadata, setRes, setFrameRate, setTotalFrames} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
 
-//TODO ADD DYNAMIC SOLUTION 
-var frame_rate = 15;
-var num_frames = -1;
+//TODO ADD DYNAMIC SOLUTION
 var scaling_factor_width = 1920;
 var scaling_factor_height = 1080;
 
@@ -62,7 +59,7 @@ var disable_buttons = true;
 var toast_text = ""
 var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
-var play_button_text = "ERROR"
+var play_button_text = "Play"
 var segmentation_flag = false;
 
 //TODO remove after fixing null exceptions
@@ -77,7 +74,6 @@ export default function MainUpload() {
 	const [visualToggle, setVisualToggle] = useState(0);
 	const [annotationType, setAnnotationType] = useState("1")
 	const [boxCount, setBoxCount] = useState(0)
-	const [videoFilePath, setVideoFileURL] = useState(null);
 	const [oldAnnotation, setOldAnnotation] = useState(null)
 	const [save, changeSave] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
@@ -303,7 +299,6 @@ export default function MainUpload() {
 		setAnnotationType(event)
 	}
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const onKeyPress = (event) =>{
 		//Making sure input for textbox doesnt get counted as a mode change
 		if(keyCheck === false){
@@ -450,7 +445,7 @@ export default function MainUpload() {
 				</div>
 			}
 			{
-				upload === false &&
+				upload === false &
 				<div>
 					"Video/Image upload not detected. Please upload."
 				</div>

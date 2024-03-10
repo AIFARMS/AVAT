@@ -27,6 +27,7 @@
     "predeploy": "npm run build",
     "deploy": "NODE_ENV=production node_modules//gh-pages/bin/gh-pages.js -d build",
     "start": "react-scripts start",
+    "dev": "NODE_ENV=dev react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
@@ -52,7 +53,8 @@
     "@babel/preset-env": "*",
     "@babel/preset-react": "*",
     "babel-jest": "^24.9.0",
-    "gh-pages": "^3.2.0"
+    "gh-pages": "^3.2.0",
+    "redux-immutable-state-invariant": "^2.1.0"
   },
   "babel": {
     "presets": [

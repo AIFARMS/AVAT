@@ -15,4 +15,5 @@ export default configureStore({
     media_data: mediaDataSlice,
     metadata: metadataSlice
   },
+  devTools: process.env.NODE_ENV !== 'production',
 })
