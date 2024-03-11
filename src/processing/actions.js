@@ -16,6 +16,7 @@ function updateFrameData(frame_number, data){
 	})
 }
 function getFrameData(frame_number){
+	console.log(store.getState())
 	return JSON.parse(JSON.stringify(store.getState().frame_data.data[frame_number]))
 } 
 

@@ -37,7 +37,7 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		
 			fabricCanvas.renderAll();
 		};
-		img.src = URL.createObjectURL(image_url)
+		img.src = image_url
 		return;
 	}else{ //This is for videos
 		
@@ -207,7 +207,8 @@ export default function FabricRender(props){
 						initAnnotationData(parseInt(video.duration))
 						initFrameData(parseInt(video.duration))
 						setTotalFrames(parseInt(video.duration))
-						video.currentTime=0
+					video.currentTime=0
+					video.play()
 						
 					}
 					video.oncanplaythrough = function(){

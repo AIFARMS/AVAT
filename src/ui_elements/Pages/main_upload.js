@@ -112,7 +112,7 @@ export default function MainUpload() {
 				disable_buttons = false
 				initAnnotationData(imagedata_redux[0].length)
 				initFrameData(imagedata_redux[0].length)
-				var url = URL.createObjectURL(imagedata_redux[0][0])
+				var url = (imagedata_redux[0][0])
 				var img = new Image;
 				img.onload = function() {
 					VIDEO_METADATA = {"horizontal_res": img.width, "vertical_res": img.height}

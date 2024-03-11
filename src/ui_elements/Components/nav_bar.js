@@ -58,11 +58,25 @@ export default function CustomNavBar(props){
 		}
 	}
 
+	const convertFileToURLBlob = (file) => {
+		return URL.createObjectURL(file)	
+	}
+
 	const handleMediaUpload = (event) => {
+		let files = event.target.files
+		if (files.length == 0){
+			return
+		}
+
+		let files_as_url = []
+		for(var i = 0; i < files.length; i++){
+			files_as_url.push(convertFileToURLBlob(files[i]))
+		}
+
 		if(videoFormat == INPUT_VIDEO){
-			setMedia(parseInt(event.target.id), event.target.files)
+			setMedia(parseInt(event.target.id), files_as_url)
 		}else{
-			setMedia(parseInt(event.target.id), event.target.files)
+			setMedia(parseInt(event.target.id), files_as_url)
 		}
 	}
 
