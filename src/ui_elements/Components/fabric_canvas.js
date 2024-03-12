@@ -208,9 +208,7 @@ export default function FabricRender(props){
 						initAnnotationData(parseInt(video.duration))
 						initFrameData(parseInt(video.duration))
 						setTotalFrames(parseInt(video.duration))
-					video.currentTime=0
-					video.play()
-						
+						video.currentTime=0
 					}
 					video.oncanplaythrough = function(){
 						if(upload === false){

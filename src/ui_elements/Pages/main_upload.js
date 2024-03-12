@@ -31,7 +31,8 @@ import {initFrameData, updateFrameData, getFrameData,
 		getColumnData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
 		initMedia,
-		initMetadata, setRes, setFrameRate, setTotalFrames} from '../../processing/actions'
+		initMetadata, setRes, setFrameRate, setTotalFrames,
+		initPlay} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
@@ -67,6 +68,7 @@ initAnnotationData(1)
 initFrameData(1)
 initCurrentFrame(0)
 initMetadata(scaling_factor_width, scaling_factor_height, 1, INPUT_VIDEO, 1)
+initPlay()
 
 
 //Current frame counter
@@ -412,7 +414,6 @@ export default function MainUpload() {
 				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(metadata_redux['total_frames'])}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
-				play_button_text={play_button_text}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
 				change_annotation_type={change_annotation_type}

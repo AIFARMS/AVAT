@@ -131,6 +131,20 @@ function getMetaData(){
 	return JSON.parse(JSON.stringify(store.getState().metadata))
 }
 
+function togglePlay(){
+	store.dispatch({
+		type:  "play_status/togglePlay",
+		payload: {}
+	})
+}
+
+function initPlay(){
+	store.dispatch({
+		type:  "play_status/init",
+		payload: {}
+	})
+}
+
 export {initFrameData, 
 		updateFrameData, 
 		getFrameData, 
@@ -150,4 +164,7 @@ export {initFrameData,
 		setMediaType,
 		setTotalFrames,
 		setSkipValue,
-		getMetaData}
+		getMetaData,
+		togglePlay,
+		initPlay
+	}
