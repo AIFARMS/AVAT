@@ -217,7 +217,7 @@ export default function MainUpload() {
 		var promise = downloadOldAnnotation(event)
 		promise.then(function (result) {
 			if(result != null){
-				//alert("WIP on oldUpload- please report this bug")
+				alert("WIP on oldUpload- please report this bug")
 				setOldAnnotation(new ExtractingAnnotation(result, scaling_factor_width, scaling_factor_height));
 				setRes(result.vid_metadata.horizontal_res, result.vid_metadata.vertical_res)
 			}else{

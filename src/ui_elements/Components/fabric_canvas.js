@@ -37,7 +37,7 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		
 			fabricCanvas.renderAll();
 		};
-		img.src = image_url
+		img.src = URL.createObjectURL(image_url)
 		return;
 	}else{ //This is for videos
 		
@@ -184,6 +184,7 @@ export default function FabricRender(props){
 	useEffect(() => {
 		if(fabricCanvas){
 			if(fabricCanvas.getObjects().length != 0){
+				// save to json
 				updateFrameData(currindex, fabricCanvas.getObjects())
 			}
 			setCurrindex(currframe_redux)
