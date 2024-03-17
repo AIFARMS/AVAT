@@ -12,11 +12,13 @@ import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 const fabric = require("fabric").fabric;
 
 
-const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, video, playing=false) => {
+const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, remove_obj=true) => {
 	if(inputType == INPUT_IMAGE){ //This is for when images are uploaded
 		var img = new Image()
 		img.onload = function() {
-			fabricCanvas.clear()
+			if (remove_obj){
+				fabricCanvas.clear();
+			}
 			if(currFrameData != undefined){
 				fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
 					enlivenedObjects.forEach(function (obj, index) {
@@ -37,7 +39,9 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 		img.src = URL.createObjectURL(image_url)
 		return;
 	}else{ //This is for videos
-		fabricCanvas.remove(...fabricCanvas.getObjects());
+		if (remove_obj){
+			fabricCanvas.remove(...fabricCanvas.getObjects());
+		}
 		if(currFrameData != undefined){
 			fabric.util.enlivenObjects(currFrameData, function (enlivenedObjects){
 				enlivenedObjects.forEach(function (obj, index) {
@@ -63,15 +67,14 @@ export default function FabricRender(props){
 	const play_redux = useSelector(state => state.play_status.play)
 	const image_data = image_data_store['data'][props.stream_num]
 
-	var save_data = (frame_number) => {
-		console.log(fabricCanvas)
+	var save_data = (frame_number, reason) => {
 		if(fabricCanvas){
+			console.log('SAVING DATA FOR FRAME', frame_number, reason)
 			updateFrameData(frame_number, fabricCanvas.getObjects())
 		}
 	}
 
 	useEffect(() => {
-
 		var temp_fabricCanvas = (new fabric.Canvas('c', {
 			uniScaleTransform: true,
 			uniformScaling: false,
@@ -102,6 +105,7 @@ export default function FabricRender(props){
 		});
 
 		temp_fabricCanvas.on('mouse:down', function(opt) {
+			save_data(frameToUpdate, "mouse_down")
 			var evt = opt.e;
 			if (evt.altKey === true) {
 				this.isDragging = true;
@@ -111,6 +115,7 @@ export default function FabricRender(props){
 			}
 		});
 		temp_fabricCanvas.on('mouse:move', function(opt) {
+			save_data(frameToUpdate, "mouse_move")
 			if (this.isDragging) {
 				var e = opt.e;
 				var vpt = this.viewportTransform;
@@ -122,9 +127,8 @@ export default function FabricRender(props){
 			}
 		});
 		temp_fabricCanvas.on('mouse:up', function(opt) {
+			save_data(frameToUpdate, "mouse_up")
 			if(this.objDrag){
-				console.log("UPDATED DATA BACKGROUND")
-				save_data()
 				this.objDrag = false;
 			}
 			this.setViewportTransform(this.viewportTransform);
@@ -143,20 +147,18 @@ export default function FabricRender(props){
 		setFabricCanvas(temp_fabricCanvas)
 	}, []);
 
-	
-
 	useEffect(() => {
 		if(fabricCanvas){
-			save_data(frameToUpdate)
+			save_data(frameToUpdate, "frame_change")
 			setFrameToUpdate(currframe_redux)
 			var video = document.getElementsByTagName('video')[props.stream_num]
 			if(upload == true){
 				video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))			
 			}
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
-				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas,video,play_redux)
+				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}else if (metadata_redux['media_type'] == INPUT_IMAGE){
-				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas,play_redux)
+				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
 	}, [currFrame])
@@ -167,7 +169,7 @@ export default function FabricRender(props){
 		}
 		var video = document.getElementsByTagName('video')[props.stream_num]
 		if(play_redux){
-			save_data(frameToUpdate)
+			save_data(frameToUpdate, "play")
 			video.play()
 			fabric.util.requestAnimFrame(function renderLoop() {
 				fabricCanvas.renderAll();
@@ -185,8 +187,9 @@ export default function FabricRender(props){
 	useEffect(() => {
 		// We want to redraw when a annotation is added or removed. Unfortunately this also causes a redraw when the current frame is changed.
 		// This is not ideal, but it is a good enough solution for now. This should NOT save the data.
+
 		if(fabricCanvas){
-			canvasBackgroundUpdate(getFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, play_redux)
+			canvasBackgroundUpdate(getFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 		}
 	}, [frame_redux])
 
@@ -215,14 +218,12 @@ export default function FabricRender(props){
 						video.width = video.videoWidth
 						video.height = video.videoHeight
 						fabricCanvas.setBackgroundImage(new_vid);
-						console.log(new_vid)
-						console.log(props.scaling_factor_width / video.videoWidth, props.scaling_factor_height / video.videoHeight)
 						fabricCanvas.renderAll();
 					}
 					setUpload(true)
 				}
 			}else if(metadata_redux['media_type'] == INPUT_IMAGE){
-				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas,play_redux)
+				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
 	}
