@@ -28,13 +28,13 @@ export default class ExportingAnnotation{
             for(var j = 0; j < frame_objects.length; j++){
                 try {
                     console.log(frame_objects[j])
-                    if(frame_objects[j] == undefined){
+                    if(frame_objects[j] == undefined || frame_objects[j]['type'] !== "group"){
                         continue;
                     }
-                    if(frame_objects[j]['type'] !== "group"){
+                    if (frame_objects[j]._objects == undefined){
                         continue;
                     }
-                    if(frame_objects[j]._objects[0] === "rect"){
+                    if(frame_objects[j]._objects[0]['type'] === "rect"){
                         console.log(frame_objects[j])
                         var x = (frame_objects[j]['left'] / this.width) * this.metadata['horizontal_res']
                         var y = (frame_objects[j]['top'] / this.height) * this.metadata['vertical_res']
@@ -67,6 +67,8 @@ export default class ExportingAnnotation{
                             curr.push({"type": "segmentation", "points": points, "local_id": local_id, "fileName:": this.metadata['name'], "dataType": "video"})
                         }
                         //curr.push({"type": "segmentation", "points": points, "local_id": local_id})
+                    }else{
+                        alert("Error in exporting annotation. Please check the annotation and try again.")
                     }
                 } catch (error) {
                     console.log(error)
