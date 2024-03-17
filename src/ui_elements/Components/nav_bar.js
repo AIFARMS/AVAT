@@ -78,6 +78,7 @@ export default function CustomNavBar(props){
 		promise.then(function (result) {
 			if(result['columns'] == undefined){
 				alert("Error in processing columns. Please check the file and try again.")
+				return;
 			}
 
 			if(result != null){
@@ -85,6 +86,7 @@ export default function CustomNavBar(props){
 				initColumnData(result)
 			}else{
 				alert("Error in processing columns. Please check the file and try again.")
+				return;
 			}
 		})
 	}
