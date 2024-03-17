@@ -1,6 +1,5 @@
 //Core imports
-import React, { useEffect, useState } from "react"; 
-import ReactPlayer from 'react-player'
+import React, { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 //Constants
@@ -29,17 +28,16 @@ import AnnotationTable from "../Components/change_table";
 import store from '../../store' 
 import {initFrameData, updateFrameData, getFrameData, 
 		initAnnotationData, updateAnnotationData, getAnnotationData, 
-		initColumnData, getColumnData, 
+		getColumnData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
-		initMedia, setMedia,
-		initMetadata, setRes, setFrameRate, setMediaType, setTotalFrames} from '../../processing/actions'
+		initMedia,
+		initMetadata, setRes, setFrameRate, setTotalFrames,
+		initPlay} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 const fabric = require("fabric").fabric;
 
-//TODO ADD DYNAMIC SOLUTION 
-var frame_rate = 15;
-var num_frames = -1;
+//TODO ADD DYNAMIC SOLUTION
 var scaling_factor_width = 1920;
 var scaling_factor_height = 1080;
 
@@ -62,7 +60,7 @@ var disable_buttons = true;
 var toast_text = ""
 var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
-var play_button_text = "ERROR"
+var play_button_text = "Play"
 var segmentation_flag = false;
 
 //TODO remove after fixing null exceptions
@@ -70,6 +68,7 @@ initAnnotationData(1)
 initFrameData(1)
 initCurrentFrame(0)
 initMetadata(scaling_factor_width, scaling_factor_height, 1, INPUT_VIDEO, 1)
+initPlay()
 
 
 //Current frame counter
@@ -77,7 +76,6 @@ export default function MainUpload() {
 	const [visualToggle, setVisualToggle] = useState(0);
 	const [annotationType, setAnnotationType] = useState("1")
 	const [boxCount, setBoxCount] = useState(0)
-	const [videoFilePath, setVideoFileURL] = useState(null);
 	const [oldAnnotation, setOldAnnotation] = useState(null)
 	const [save, changeSave] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
@@ -116,7 +114,7 @@ export default function MainUpload() {
 				disable_buttons = false
 				initAnnotationData(imagedata_redux[0].length)
 				initFrameData(imagedata_redux[0].length)
-				var url = URL.createObjectURL(imagedata_redux[0][0])
+				var url = (imagedata_redux[0][0])
 				var img = new Image;
 				img.onload = function() {
 					VIDEO_METADATA = {"horizontal_res": img.width, "vertical_res": img.height}
@@ -216,16 +214,14 @@ export default function MainUpload() {
 		segmentation_flag = !segmentation_flag
 	}
 
-	//ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
 	const handleOldAnnotation = (event) => {
 		var promise = downloadOldAnnotation(event)
 		promise.then(function (result) {
 			if(result != null){
-				//alert("WIP on oldUpload- please report this bug")
 				setOldAnnotation(new ExtractingAnnotation(result, scaling_factor_width, scaling_factor_height));
 				setRes(result.vid_metadata.horizontal_res, result.vid_metadata.vertical_res)
 			}else{
-				alert("Error in processing Annotation")
+				alert("Error in processing Annotation. Please check the file and try again.")
 			}
 		})
 	}
@@ -303,7 +299,6 @@ export default function MainUpload() {
 		setAnnotationType(event)
 	}
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const onKeyPress = (event) =>{
 		//Making sure input for textbox doesnt get counted as a mode change
 		if(keyCheck === false){
@@ -417,7 +412,6 @@ export default function MainUpload() {
 				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(metadata_redux['total_frames'])}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
-				play_button_text={play_button_text}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
 				change_annotation_type={change_annotation_type}
@@ -450,7 +444,7 @@ export default function MainUpload() {
 				</div>
 			}
 			{
-				upload === false &&
+				upload === false &
 				<div>
 					"Video/Image upload not detected. Please upload."
 				</div>

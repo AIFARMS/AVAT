@@ -5,6 +5,7 @@ import columnDataSlice from './reducer/column_annot'
 import currFrameDataSlice from './reducer/current_frame'
 import mediaDataSlice from './reducer/media_data'
 import metadataSlice from './reducer/metadata'
+import playStatusSlice from './reducer/play_status'
 
 export default configureStore({
   reducer: {
@@ -13,6 +14,8 @@ export default configureStore({
     column_annot: columnDataSlice,
     current_frame: currFrameDataSlice,
     media_data: mediaDataSlice,
-    metadata: metadataSlice
+    metadata: metadataSlice,
+    play_status: playStatusSlice,
   },
+  devTools: process.env.NODE_ENV !== 'production',
 })

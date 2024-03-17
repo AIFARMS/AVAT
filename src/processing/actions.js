@@ -16,6 +16,7 @@ function updateFrameData(frame_number, data){
 	})
 }
 function getFrameData(frame_number){
+	console.log(store.getState())
 	return JSON.parse(JSON.stringify(store.getState().frame_data.data[frame_number]))
 } 
 
@@ -130,6 +131,20 @@ function getMetaData(){
 	return JSON.parse(JSON.stringify(store.getState().metadata))
 }
 
+function togglePlay(){
+	store.dispatch({
+		type:  "play_status/togglePlay",
+		payload: {}
+	})
+}
+
+function initPlay(){
+	store.dispatch({
+		type:  "play_status/init",
+		payload: {}
+	})
+}
+
 export {initFrameData, 
 		updateFrameData, 
 		getFrameData, 
@@ -149,4 +164,7 @@ export {initFrameData,
 		setMediaType,
 		setTotalFrames,
 		setSkipValue,
-		getMetaData}
+		getMetaData,
+		togglePlay,
+		initPlay
+	}

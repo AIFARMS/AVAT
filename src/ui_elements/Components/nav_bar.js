@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -20,8 +20,9 @@ import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 import store from '../../store' 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
+import { useSelector } from "react-redux";
 
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData} from '../../processing/actions'
+import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData, togglePlay} from '../../processing/actions'
 
 initMedia(1)
 export default function CustomNavBar(props){
@@ -31,6 +32,7 @@ export default function CustomNavBar(props){
 	const [process, setProcess] = useState(false)
 	const [columnLoad, setColumnLoad] = useState(false)
 	const [numStrems, setNumStreams] = useState(1)
+	const [playText, setPlayText] = useState(false)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -38,6 +40,7 @@ export default function CustomNavBar(props){
 	const handleUploadShow = () => {
 		setUploadShow(true)
 	}
+	const play_redux = useSelector(state => state.play_status.play)
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, getMetaData(), store.getState().media_data.data[0]).get_frame_json()
@@ -58,6 +61,10 @@ export default function CustomNavBar(props){
 		}
 	}
 
+	const convertFileToURLBlob = (file) => {
+		return URL.createObjectURL(file)	
+	}
+
 	const handleMediaUpload = (event) => {
 		if(videoFormat == INPUT_VIDEO){
 			setMedia(parseInt(event.target.id), event.target.files)
@@ -69,11 +76,15 @@ export default function CustomNavBar(props){
 	const handleColumnUpload = (event) => {
 		var promise = downloadColumn(event)
 		promise.then(function (result) {
+			if(result['columns'] == undefined){
+				alert("Error in processing columns. Please check the file and try again.")
+			}
+
 			if(result != null){
 				setColumnLoad(true);
 				initColumnData(result)
 			}else{
-				alert("Error in processing columns")
+				alert("Error in processing columns. Please check the file and try again.")
 			}
 		})
 	}
@@ -123,9 +134,19 @@ export default function CustomNavBar(props){
 			}
 			</div>
 		)
-		
 	}
 
+	const handlePlaying = (event) => {
+		togglePlay()
+	}
+
+	useEffect(() => {
+		if (play_redux == false){
+			setPlayText("Play")
+		}else {
+			setPlayText("Pause")
+		}
+	}, [play_redux])
 
 	return (
 		<div>
@@ -207,7 +228,7 @@ export default function CustomNavBar(props){
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
 					{
 						videoFormat === INPUT_VIDEO && 
-						<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>
+						<Button variant="primary" disabled={props.disable_buttons} onClick={handlePlaying}>{playText}</Button>
 					}
 					{' '}
 					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
