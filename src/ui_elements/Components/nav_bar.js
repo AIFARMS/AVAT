@@ -76,11 +76,15 @@ export default function CustomNavBar(props){
 	const handleColumnUpload = (event) => {
 		var promise = downloadColumn(event)
 		promise.then(function (result) {
+			if(result['columns'] == undefined){
+				alert("Error in processing columns. Please check the file and try again.")
+			}
+
 			if(result != null){
 				setColumnLoad(true);
 				initColumnData(result)
 			}else{
-				alert("Error in processing columns")
+				alert("Error in processing columns. Please check the file and try again.")
 			}
 		})
 	}

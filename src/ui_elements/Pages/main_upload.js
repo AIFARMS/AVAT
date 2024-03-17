@@ -214,16 +214,14 @@ export default function MainUpload() {
 		segmentation_flag = !segmentation_flag
 	}
 
-	//ASYNC Function  - To note that the data that comes out of this will be a bit delayed and this could cause some issues.
 	const handleOldAnnotation = (event) => {
 		var promise = downloadOldAnnotation(event)
 		promise.then(function (result) {
 			if(result != null){
-				alert("WIP on oldUpload- please report this bug")
 				setOldAnnotation(new ExtractingAnnotation(result, scaling_factor_width, scaling_factor_height));
 				setRes(result.vid_metadata.horizontal_res, result.vid_metadata.vertical_res)
 			}else{
-				alert("Error in processing Annotation")
+				alert("Error in processing Annotation. Please check the file and try again.")
 			}
 		})
 	}
