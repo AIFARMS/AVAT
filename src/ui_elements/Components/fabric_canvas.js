@@ -54,6 +54,7 @@ export default function FabricRender(props){
 	const [fabricCanvas, setFabricCanvas] = useState(null)
 	const [currindex, setCurrindex] = useState(0)
 	const [upload, setUpload] = useState(false)
+	const [frameToUpdate, setFrameToUpdate] = useState(0)
 	const metadata_redux = useSelector(state => state.metadata)
 	const frame_redux = useSelector(state => state.frame_data)
 	const image_data_store = useSelector(state => state.media_data)
@@ -62,10 +63,10 @@ export default function FabricRender(props){
 	const play_redux = useSelector(state => state.play_status.play)
 	const image_data = image_data_store['data'][props.stream_num]
 
-	var save_data = () => {
+	var save_data = (frame_number) => {
 		console.log(fabricCanvas)
 		if(fabricCanvas){
-			updateFrameData(currindex, fabricCanvas.getObjects())
+			updateFrameData(frame_number, fabricCanvas.getObjects())
 		}
 	}
 
@@ -146,7 +147,8 @@ export default function FabricRender(props){
 
 	useEffect(() => {
 		if(fabricCanvas){
-
+			save_data(frameToUpdate)
+			setFrameToUpdate(currframe_redux)
 			var video = document.getElementsByTagName('video')[props.stream_num]
 			if(upload == true){
 				video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))			
@@ -165,8 +167,8 @@ export default function FabricRender(props){
 		}
 		var video = document.getElementsByTagName('video')[props.stream_num]
 		if(play_redux){
+			save_data(frameToUpdate)
 			video.play()
-			fabricCanvas.remove(...fabricCanvas.getObjects());
 			fabric.util.requestAnimFrame(function renderLoop() {
 				fabricCanvas.renderAll();
 			  	fabric.util.requestAnimFrame(renderLoop);
@@ -176,9 +178,17 @@ export default function FabricRender(props){
 			let frame_number = Math.ceil((video.currentTime  / video.duration) * metadata_redux['total_frames'])
 			console.log("FRAME NUMBER", frame_number)
 			setCurrentFrame(frame_number)
-			//canvasBackgroundUpdate(getFrameData(frame_number), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, video,play_redux)
 		}
 	}, [play_redux])
+
+
+	useEffect(() => {
+		// We want to redraw when a annotation is added or removed. Unfortunately this also causes a redraw when the current frame is changed.
+		// This is not ideal, but it is a good enough solution for now. This should NOT save the data.
+		if(fabricCanvas){
+			canvasBackgroundUpdate(getFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas, play_redux)
+		}
+	}, [frame_redux])
 
 	
 	if(fabricCanvas != null && image_data != undefined && upload===false && play_redux===false){
