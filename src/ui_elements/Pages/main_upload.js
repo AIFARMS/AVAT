@@ -444,7 +444,7 @@ export default function MainUpload() {
 				</div>
 			}
 			{
-				upload === false &
+				upload === false &&
 				<div>
 					"Video/Image upload not detected. Please upload."
 				</div>
