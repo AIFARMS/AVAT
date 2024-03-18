@@ -16,7 +16,7 @@ import store from './store'
 //REDUX code
 ReactDOM.render(
     <Provider store={store}>
-      <App/>,
+      <App/>
     </Provider>,
     document.getElementById('root')
 );
