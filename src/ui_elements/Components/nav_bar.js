@@ -161,9 +161,9 @@ export default function CustomNavBar(props){
 			<Button variant="secondary" onClick={handleClose}>Close</Button>
 			</Modal.Footer>
 		</Modal>
-		<Modal show={uploadShow} onHide={handleUploadClose} size='lg'>
-			<Modal.Header closeButton>
-				<Modal.Title>Upload</Modal.Title>
+		<Modal show={uploadShow} onHide={handleUploadClose} size='lg' backdrop='static'>
+			<Modal.Header>
+				<Modal.Title disabled={!columnLoad}>Upload</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
 				<div style={{display: "grid"}}>
@@ -203,7 +203,7 @@ export default function CustomNavBar(props){
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
-			<Button variant="success" onClick={handleUploadClose}>Upload</Button>
+			<Button variant="success" disabled={!columnLoad} onClick={handleUploadClose}>Upload</Button>
 			</Modal.Footer>
 		</Modal>
 		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
