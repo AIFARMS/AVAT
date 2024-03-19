@@ -163,7 +163,7 @@ export default function CustomNavBar(props){
 		</Modal>
 		<Modal show={uploadShow} onHide={handleUploadClose} size='lg' backdrop='static'>
 			<Modal.Header>
-				<Modal.Title disabled={!columnLoad}>Upload</Modal.Title>
+				<Modal.Title>Upload</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
 				<div style={{display: "grid"}}>
@@ -193,7 +193,7 @@ export default function CustomNavBar(props){
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
 					</Form>
 					<Form >
-						<Form.File disabled={!columnLoad} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
+						<Form.File accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {setFrameRate(event.target.value);}}></input>
@@ -203,7 +203,7 @@ export default function CustomNavBar(props){
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
-			<Button variant="success" disabled={!columnLoad} onClick={handleUploadClose}>Upload</Button>
+			<Button variant="success"  onClick={handleUploadClose}>Upload</Button>
 			</Modal.Footer>
 		</Modal>
 		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">

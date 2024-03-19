@@ -1,0 +1,17 @@
+{
+  "columns": {
+      "Header": "Annotations",
+      "columns": [
+          {
+          "Header": "Local ID",
+          "accessor": "id"
+          },
+          {
+          "Header": "Global ID",
+          "accessor": "global_id"
+          }
+      ]
+  },
+  "select_data": {
+}
+}
