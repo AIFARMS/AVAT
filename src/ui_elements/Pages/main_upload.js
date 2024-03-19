@@ -32,8 +32,12 @@ import {initFrameData, updateFrameData, getFrameData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
 		initMedia,
 		initMetadata, setRes, setFrameRate, setTotalFrames,
+        initColumnData,
 		initPlay} from '../../processing/actions'
 import { useSelector } from "react-redux";
+
+// Data imports
+import default_column from '../../static_data/basic_column_config.json'
 
 const fabric = require("fabric").fabric;
 
@@ -69,7 +73,10 @@ initFrameData(1)
 initCurrentFrame(0)
 initMetadata(scaling_factor_width, scaling_factor_height, 1, INPUT_VIDEO, 1)
 initPlay()
-
+console.log(default_column)
+initColumnData(
+    default_column
+)
 
 //Current frame counter
 export default function MainUpload() {

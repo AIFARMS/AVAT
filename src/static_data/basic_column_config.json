@@ -1,0 +1,17 @@
+{
+  "columns": {
+      "Header": "Annotations",
+      "columns": [
+          {
+          "Header": "id",
+          "accessor": "id"
+          },
+          {
+          "Header": "Glo23434",
+          "accessor": "global_id"
+          }
+      ]
+  },
+  "select_data": {
+}
+}
