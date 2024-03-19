@@ -3,11 +3,11 @@
       "Header": "Annotations",
       "columns": [
           {
-          "Header": "id",
+          "Header": "Local ID",
           "accessor": "id"
           },
           {
-          "Header": "Glo23434",
+          "Header": "Global ID",
           "accessor": "global_id"
           }
       ]

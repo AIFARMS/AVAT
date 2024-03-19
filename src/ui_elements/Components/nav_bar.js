@@ -193,7 +193,7 @@ export default function CustomNavBar(props){
 						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Column Upload" custom type="file" onChange={handleColumnUpload}/>
 					</Form>
 					<Form >
-						<Form.File disabled={!columnLoad} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
+						<Form.File accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
 					<NavDropdown.Divider />
 					Frame Rate: <input type="number" onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {setFrameRate(event.target.value);}}></input>
