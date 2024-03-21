@@ -67,7 +67,7 @@ export default function FabricRender(props){
 	const play_redux = useSelector(state => state.play_status.play)
 	const image_data = image_data_store['data'][props.stream_num]
 
-	var save_data = (frame_number, reason) => {
+	const save_data = (frame_number, reason) => {
 		if(fabricCanvas){
 			console.log('SAVING DATA FOR FRAME', frame_number, reason)
 			updateFrameData(frame_number, fabricCanvas.getObjects())
@@ -105,7 +105,6 @@ export default function FabricRender(props){
 		});
 
 		temp_fabricCanvas.on('mouse:down', function(opt) {
-			save_data(frameToUpdate, "mouse_down")
 			var evt = opt.e;
 			if (evt.altKey === true) {
 				this.isDragging = true;
@@ -115,7 +114,6 @@ export default function FabricRender(props){
 			}
 		});
 		temp_fabricCanvas.on('mouse:move', function(opt) {
-			save_data(frameToUpdate, "mouse_move")
 			if (this.isDragging) {
 				var e = opt.e;
 				var vpt = this.viewportTransform;
@@ -127,8 +125,8 @@ export default function FabricRender(props){
 			}
 		});
 		temp_fabricCanvas.on('mouse:up', function(opt) {
-			save_data(frameToUpdate, "mouse_up")
-			if(this.objDrag){
+            updateFrameData(currframe_redux, temp_fabricCanvas.getObjects())
+            if(this.objDrag){
 				this.objDrag = false;
 			}
 			this.setViewportTransform(this.viewportTransform);
@@ -150,7 +148,7 @@ export default function FabricRender(props){
 	useEffect(() => {
 		if(fabricCanvas){
 			save_data(frameToUpdate, "frame_change")
-			setFrameToUpdate(currframe_redux)
+			setFrameToUpdate(currframe_redux) 
 			var video = document.getElementsByTagName('video')[props.stream_num]
 			if(upload == true){
 				video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))			
@@ -238,4 +236,5 @@ export default function FabricRender(props){
 			</div>
 		</div>
 	)
+		    //}
 }
