@@ -69,3 +69,5 @@ Setup a virtual environment and install the proper dependencies from ```backend/
 ## Authors
 
 * **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - AVAT
+* **Ana Lucic** [alucic2](https://github.com/alucic2) - Data Conversion Scripts
+* **Zimu Li** [neuroZ68](https://github.com/neuroZ68) - Usage Documentation
