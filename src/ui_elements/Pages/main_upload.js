@@ -33,7 +33,7 @@ import {initFrameData, updateFrameData, getFrameData,
 		initMedia,
 		initMetadata, setRes, setFrameRate, setTotalFrames,
         initColumnData,
-		initPlay} from '../../processing/actions'
+		initPlay, togglePlay} from '../../processing/actions'
 import { useSelector } from "react-redux";
 
 // Data imports
@@ -68,10 +68,10 @@ var play_button_text = "Play"
 var segmentation_flag = false;
 
 //TODO remove after fixing null exceptions
-initAnnotationData(1)
-initFrameData(1)
+//initAnnotationData(1)
+//initFrameData(1)
 initCurrentFrame(0)
-initMetadata(scaling_factor_width, scaling_factor_height, 1, INPUT_VIDEO, 1)
+initMetadata(scaling_factor_width, scaling_factor_height, null, INPUT_VIDEO, 1)
 initPlay()
 console.log(default_column)
 initColumnData(
@@ -351,8 +351,8 @@ export default function MainUpload() {
 			skip_frame_backward()
 		}else if (event.key === "e"){
 			skip_frame_forward()
-		}else if(event.key === "c"){
-			
+		}else if(event.key === "w"){
+		    togglePlay()
 		}
 	}  
 
