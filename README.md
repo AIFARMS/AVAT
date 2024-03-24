@@ -6,7 +6,7 @@ The front-end dashboard that provides the ability to annotate videos of livestoc
 The goal of this project is to create a tool that is easy to use, has a small learning curve and can scale easily to provide the ability to annotate videos efficiently and at scale. The intuition of this project is gained from analyzing similar projects and analyzing the weaknesses and points of frustration and improving them. Another goal is to have an annotation workflow that is extremely fast and efficient, as there are terabytes of video that needs to be processed at large. 
 
 ## USAGE
-Please refer to [USAGE.md](https://github.com/AIFARMS/AVAT/blob/master/README.md) for a detailed guide on how to use the tool.
+Please refer to [USAGE.md](https://github.com/AIFARMS/AVAT/blob/master/USAGE.md) for a detailed guide on how to use the tool.
 
 ## Local Deployment (Frontend)
 
