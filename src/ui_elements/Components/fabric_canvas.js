@@ -102,7 +102,8 @@ export default function FabricRender(props){
 
 		temp_fabricCanvas.on('object:modified', function (event) {
 			this.objDrag = true;
-            updateFrameData(currframe_redux, temp_fabricCanvas.getObjects())
+			const currentFrame = store.getState().current_frame['data']
+            updateFrameData(currentFrame, temp_fabricCanvas.getObjects())
 		});
 
 		temp_fabricCanvas.on('mouse:down', function(opt) {
@@ -147,7 +148,7 @@ export default function FabricRender(props){
 
 	useEffect(() => {
 		if(fabricCanvas){
-			save_data(frameToUpdate, "frame_change")
+			// save_data(frameToUpdate, "frame_change")
 			setFrameToUpdate(currframe_redux) 
 			var video = document.getElementsByTagName('video')[props.stream_num]
 			if(upload == true){

@@ -324,9 +324,9 @@ export default function MainUpload() {
 			changeSave(true)
 			setAnnotationType(ANNOTATION_KEYPOINT)
 		}else if(event.key === ANNOTATION_SEG) {
-			toast_text = "Mode Switch: Segmentation"
-			changeSave(true)
-			setAnnotationType(ANNOTATION_SEG)
+			// toast_text = "Mode Switch: Segmentation"
+			// changeSave(true)
+			// setAnnotationType(ANNOTATION_SEG)
 		}else if(event.key === ANNOTATION_FRAME){
 			toast_text = "Mode Switch: Behavior Annotation"
 			changeSave(true)

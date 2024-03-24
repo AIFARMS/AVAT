@@ -17,6 +17,7 @@ import { useSelector } from "react-redux";
 import { initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData, togglePlay, setTotalFrames } from '../../processing/actions'
 import { init } from '../../reducer/frame_data';
 import media_data from '../../reducer/media_data';
+import default_column from '../../static_data/basic_column_config.json'
 
 export default function UploadModal(props){
 	const [show, setShow] = useState(false);
@@ -47,7 +48,11 @@ export default function UploadModal(props){
             }
 			setTotalFrames(totalFrames)
 			initFrameData(totalFrames)
-            initColumnData(stateColumnData)
+            if (stateColumnData == null) {
+                initColumnData(default_column)
+            }else{
+                initColumnData(stateColumnData)
+            }
 			initAnnotationData(totalFrames)
 		}else if(uploadExistingAnnotation){
             initColumnData(stateColumnData)
