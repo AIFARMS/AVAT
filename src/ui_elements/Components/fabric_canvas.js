@@ -100,8 +100,9 @@ export default function FabricRender(props){
 			opt.e.stopPropagation();
 		});
 
-		temp_fabricCanvas.on('object:moving', function (event) {
+		temp_fabricCanvas.on('object:modified', function (event) {
 			this.objDrag = true;
+            updateFrameData(currframe_redux, temp_fabricCanvas.getObjects())
 		});
 
 		temp_fabricCanvas.on('mouse:down', function(opt) {
@@ -125,7 +126,6 @@ export default function FabricRender(props){
 			}
 		});
 		temp_fabricCanvas.on('mouse:up', function(opt) {
-            updateFrameData(currframe_redux, temp_fabricCanvas.getObjects())
             if(this.objDrag){
 				this.objDrag = false;
 			}
