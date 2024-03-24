@@ -5,18 +5,8 @@ The front-end dashboard that provides the ability to annotate videos of livestoc
 ## Goals
 The goal of this project is to create a tool that is easy to use, has a small learning curve and can scale easily to provide the ability to annotate videos efficiently and at scale. The intuition of this project is gained from analyzing similar projects and analyzing the weaknesses and points of frustration and improving them. Another goal is to have an annotation workflow that is extremely fast and efficient, as there are terabytes of video that needs to be processed at large. 
 
-## Feedback Form
-
-For any feedback, bug repots and feature suggestions please use this form: https://forms.gle/gEbAkvc39NC8p2Pt8
-
-## Browser Support
-
-The below listed browsers should be compatible. If any errors persist please use the latest version of Chrome or Firefox as those have ben extensively tested.
-
-* Chrome 49 (release: 2/3/2016)
-* Firefox 50 (release: 11/15/2016)
-* Safari 10 (release: 9/20/2016)
-* Edge 14 (release: 2/18/2016)
+## USAGE
+Please refer to [USAGE.md](https://github.com/AIFARMS/AVAT/blob/master/README.md) for a detailed guide on how to use the tool.
 
 ## Local Deployment (Frontend)
 
@@ -79,4 +69,3 @@ Setup a virtual environment and install the proper dependencies from ```backend/
 ## Authors
 
 * **Pradeep Senthil** [pradeepsen99](https://github.com/pradeepsen99) - AVAT
-* **JiangongLi** [jli153](jli153@illinois.edu) - Matlab Tool Development
