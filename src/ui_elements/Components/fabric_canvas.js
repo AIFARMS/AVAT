@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useRef, useState } from "react"; 
 import { fabric } from 'fabric';
 
 import store from '../../store' 
@@ -9,6 +9,7 @@ import {initFrameData, updateFrameData, getFrameData,
 import { useSelector } from "react-redux";
 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
+import { getFrameSource } from '../../processing/frame_source_registry'
 
 
 const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, remove_obj=true) => {
@@ -49,7 +50,23 @@ const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_fac
 				fabricCanvas.renderAll();
 			})
 		}
+		if(image_url != null){
+			var f_vid_img = new fabric.Image(image_url, {
+				objectCaching: false,
+				scaleX: scaling_factor_width / image_url.width,
+				scaleY: scaling_factor_height / image_url.height
+			});
+			fabricCanvas.setBackgroundImage(f_vid_img);
+		}
 		fabricCanvas.renderAll();
+	}
+}
+
+const getSafeFrameData = (frameNumber) => {
+	try{
+		return getFrameData(frameNumber) || []
+	}catch(error){
+		return []
 	}
 }
 
@@ -58,6 +75,8 @@ export default function FabricRender(props){
 	const [currindex, setCurrindex] = useState(0)
 	const [upload, setUpload] = useState(false)
 	const [frameToUpdate, setFrameToUpdate] = useState(0)
+	const frameCanvasRef = useRef(null)
+	const renderRequestRef = useRef(0)
 	const metadata_redux = useSelector(state => state.metadata)
 	const frame_redux = useSelector(state => state.frame_data)
 	const image_data_store = useSelector(state => state.media_data)
@@ -137,35 +156,60 @@ export default function FabricRender(props){
 		if(fabricCanvas){
 			// save_data(frameToUpdate, "frame_change")
 			setFrameToUpdate(currframe_redux) 
-			var video = document.getElementsByTagName('video')[props.stream_num]
-			if(upload == true){
-				video.currentTime = (video.duration * ((currframe_redux+1)/metadata_redux['total_frames']))			
-			}
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
-				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_VIDEO, image_data[0], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+				const frameSource = getFrameSource(props.stream_num)
+				if(!frameSource){
+					canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_VIDEO, null, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+					return;
+				}
+
+				const requestId = renderRequestRef.current + 1
+				renderRequestRef.current = requestId
+				frameSource.getFrame(currframe_redux).then((bitmap) => {
+					if(renderRequestRef.current !== requestId){
+						return;
+					}
+
+					let frameCanvas = frameCanvasRef.current
+					if(!frameCanvas){
+						frameCanvas = document.createElement('canvas')
+						frameCanvasRef.current = frameCanvas
+					}
+					frameCanvas.width = frameSource.width
+					frameCanvas.height = frameSource.height
+					const context = frameCanvas.getContext('2d')
+					context.clearRect(0, 0, frameCanvas.width, frameCanvas.height)
+					context.drawImage(bitmap, 0, 0)
+					canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_VIDEO, frameCanvas, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+					frameSource.prefetchAround(currframe_redux)
+				}).catch((error) => {
+					console.error(error)
+				})
 			}else if (metadata_redux['media_type'] == INPUT_IMAGE){
-				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
-	}, [currFrame])
+	}, [currFrame, fabricCanvas])
 
 	useEffect(() => {
 		if (upload==false){
 			return
 		}
-		var video = document.getElementsByTagName('video')[props.stream_num]
 		if(play_redux){
 			save_data(frameToUpdate, "play")
-			video.play()
-			fabric.util.requestAnimFrame(function renderLoop() {
-				fabricCanvas.renderAll();
-			  	fabric.util.requestAnimFrame(renderLoop);
-			});
-		}else{
-			video.pause()
-			let frame_number = Math.ceil((video.currentTime  / video.duration) * metadata_redux['total_frames'])
-			console.log("FRAME NUMBER", frame_number)
-			setCurrentFrame(frame_number)
+			if(metadata_redux['media_type'] == INPUT_VIDEO){
+				const frameSource = getFrameSource(props.stream_num)
+				const frameDelay = frameSource?.averageFrameRate ? 1000 / frameSource.averageFrameRate : 33
+				const interval = setInterval(() => {
+					const currentFrame = store.getState().current_frame['data']
+					const nextFrame = Math.min(currentFrame + 1, metadata_redux['total_frames'] - 1)
+					setCurrentFrame(nextFrame)
+					if(nextFrame === metadata_redux['total_frames'] - 1){
+						clearInterval(interval)
+					}
+				}, frameDelay)
+				return () => clearInterval(interval)
+			}
 		}
 	}, [play_redux])
 
@@ -175,7 +219,11 @@ export default function FabricRender(props){
 		// This is not ideal, but it is a good enough solution for now. This should NOT save the data.
 
 		if(fabricCanvas){
-			canvasBackgroundUpdate(getFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			if(metadata_redux['media_type'] == INPUT_VIDEO){
+				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_VIDEO, null, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			}else{
+				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			}
 		}
 	}, [frame_redux])
 
@@ -183,33 +231,9 @@ export default function FabricRender(props){
 	if(fabricCanvas != null && image_data != undefined && upload===false && play_redux===false){
 		if(image_data.length > 0){
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
-				var video = document.getElementsByTagName('video')[props.stream_num]
-				var source = document.createElement('source');
-				source.src = URL.createObjectURL(image_data[0])
-				source.type = "video/mp4"
-				video.appendChild(source)
-				video.onloadedmetadata = function(){
-					initAnnotationData(parseInt(video.duration))
-					initFrameData(parseInt(video.duration))
-					setTotalFrames(parseInt(video.duration))
-					video.currentTime=0
-				}
-				video.oncanplaythrough = function(){
-					if(upload === false){
-						var new_vid = new fabric.Image(video, {
-							objectCaching: false,
-							scaleX: props.scaling_factor_width / video.videoWidth,
-							scaleY: props.scaling_factor_height / video.videoHeight
-						})
-						video.width = video.videoWidth
-						video.height = video.videoHeight
-						fabricCanvas.setBackgroundImage(new_vid);
-						fabricCanvas.renderAll();
-					}
-					setUpload(true)
-				}
+				setUpload(true)
 			}else if(metadata_redux['media_type'] == INPUT_IMAGE){
-				canvasBackgroundUpdate(getFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
 	}

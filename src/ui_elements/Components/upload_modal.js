@@ -24,6 +24,7 @@ import { INPUT_IMAGE, INPUT_VIDEO } from '../../static_data/const'
 import { useSelector } from "react-redux";
 
 import { initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData, togglePlay, setTotalFrames } from '../../processing/actions'
+import { loadFrameSource } from '../../processing/frame_source_registry'
 import { init } from '../../reducer/frame_data';
 import media_data from '../../reducer/media_data';
 import default_column from '../../static_data/basic_column_config.json'
@@ -34,24 +35,32 @@ export default function UploadModal(props){
 	const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
 	const [firstUpload, setFirstUpload] = useState(false)
 	const [stateFrameRate, setStateFrameRate] = useState(null)
-	const [stateSkipValue, setStateSkipValue] = useState(null)
+    const [stateSkipValue, setStateSkipValue] = useState(null)
     const [stateColumnData, setStateColumnData] = useState(null)
     const [uploadExistingAnnotation, setUploadExistingAnnotation] = useState(false)
+    const [isProcessingVideo, setIsProcessingVideo] = useState(false)
 
 	const frame_count = useSelector(state => state.metadata.total_frames)
     const frame_rate = useSelector(state => state.metadata.frame_rate)
+    const mediaData = useSelector(state => state.media_data.data)
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
-	const handleUpload = () => {
-        props.handleUploadToggle()
+	const handleUpload = async () => {
+		setIsProcessingVideo(true)
+		try{
 		setSkipValue(parseInt(stateSkipValue))
 		if(!firstUpload && !uploadExistingAnnotation){
-			setFirstUpload(true)
             let totalFrames = -1
             if(videoFormat === INPUT_VIDEO){
-                setFrameRate(parseInt(stateFrameRate))
-                totalFrames = parseInt(parseInt(stateFrameRate) * frame_count)
+                const uploadedFile = mediaData?.[0]?.[0]
+                if(!uploadedFile){
+                    alert("Please upload a video file.")
+                    return;
+                }
+                const frameSource = await loadFrameSource(0, uploadedFile)
+                setFrameRate(frameSource.averageFrameRate)
+                totalFrames = frameSource.totalFrames
             }else {
                 totalFrames = frame_count
             }
@@ -63,13 +72,26 @@ export default function UploadModal(props){
                 initColumnData(stateColumnData)
             }
 			initAnnotationData(totalFrames)
+			setFirstUpload(true)
 		}else if(uploadExistingAnnotation){
             initColumnData(stateColumnData)
             if(videoFormat === INPUT_VIDEO){
-                let totalFrames = parseInt(parseInt(frame_rate) * parseInt(frame_count))
+                const uploadedFile = mediaData?.[0]?.[0]
+                if(!uploadedFile){
+                    alert("Please upload a video file.")
+                    return;
+                }
+                const frameSource = await loadFrameSource(0, uploadedFile)
+                let totalFrames = frameSource.totalFrames
                 setTotalFrames(totalFrames)
             }
         }
+		props.handleUploadToggle()
+		}catch(error){
+			alert(error.message || "Error processing video file.")
+		}finally{
+			setIsProcessingVideo(false)
+		}
 	}
 
     const toggleUploadExistingAnnotation = (event) => {
@@ -194,18 +216,14 @@ export default function UploadModal(props){
                                 <InputGroupInput
                                     type="number"
                                     onChange={(event) => { setStateFrameRate(event.target.value ? event.target.value : 1); }}
-                                    disabled={(videoFormat === INPUT_IMAGE) || firstUpload}
-                                    aria-invalid={(stateFrameRate == null || stateFrameRate == undefined || stateFrameRate == "") && videoFormat !== INPUT_IMAGE}
+                                    disabled={true}
+                                    placeholder={videoFormat === INPUT_VIDEO ? "Detected automatically" : "Not used for images"}
+                                    aria-invalid={false}
                                     defaultValue={stateFrameRate}
                                 />
                                 <InputGroupAddon>
                                     <InputGroupText>Frame Rate</InputGroupText>
                                 </InputGroupAddon>
-                                {(stateFrameRate == null || stateFrameRate == undefined || stateFrameRate == "") && videoFormat !== INPUT_IMAGE &&
-                                    <FieldError>
-                                        Please enter a frame rate.
-                                    </FieldError>
-                                }
                             </InputGroup>
                     </div>
                     <div>
@@ -256,9 +274,9 @@ export default function UploadModal(props){
         <DialogFooter>
             <Button 
                 onClick={handleUpload}
-                disabled={((stateFrameRate == null || stateFrameRate == "") && videoFormat !== INPUT_IMAGE) || (stateSkipValue == null || stateSkipValue == "") || props.disable_buttons}
+                disabled={(stateSkipValue == null || stateSkipValue == "") || props.disable_buttons || isProcessingVideo}
             >
-                {firstUpload ? "Save" : "Upload"}
+                {isProcessingVideo ? "Processing Video..." : firstUpload ? "Save" : "Upload"}
             </Button>
         </DialogFooter>
         </DialogContent>

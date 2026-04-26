@@ -7,6 +7,7 @@ import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
+import { getFrameSource } from '../../processing/frame_source_registry'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
@@ -124,11 +125,13 @@ export default function MainUpload() {
 				}
 				img.src = url
 				setVisualToggle(10)
-			}else if(metadata_redux['media_type'] == INPUT_VIDEO){
+			}else if(metadata_redux['media_type'] == INPUT_VIDEO && metadata_redux['total_frames'] > 1){
+				const frameSource = getFrameSource(0)
 				upload = true
 				disable_buttons = false
-				initAnnotationData(imagedata_redux[0].length)
-				initFrameData(imagedata_redux[0].length)
+				if(frameSource){
+					VIDEO_METADATA = {"horizontal_res": frameSource.width, "vertical_res": frameSource.height}
+				}
 				setVisualToggle(10)
 			}
 		}
@@ -148,7 +151,7 @@ export default function MainUpload() {
 		scaling_factor_width = scaling_factor_width * (1/imagedata_redux.length)
 
 
-	}, [imagedata_redux])
+	}, [imagedata_redux, metadata_redux.total_frames, metadata_redux.media_type])
 
 	const addToCanvas = () => {
 		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)

@@ -7,3 +7,8 @@
 /backend/env
 /build/
 /dist/
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+/.playwright-mcp/
