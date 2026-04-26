@@ -88,17 +88,6 @@ export default function FabricRender(props){
 			};
 		})(fabric.Image.prototype.toObject);
 
-		temp_fabricCanvas.on('mouse:wheel', function(opt) {
-			var delta = opt.e.deltaY;
-			var zoom = temp_fabricCanvas.getZoom();
-			zoom *= 0.999 ** delta;
-			if (zoom > 20) zoom = 20;
-			if (zoom < 0.01) zoom = 0.01;
-			temp_fabricCanvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-			opt.e.preventDefault();
-			opt.e.stopPropagation();
-		});
-
 		temp_fabricCanvas.on('object:modified', function (event) {
 			this.objDrag = true;
 			const currentFrame = store.getState().current_frame['data']
