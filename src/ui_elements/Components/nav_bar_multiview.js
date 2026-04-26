@@ -11,9 +11,6 @@ import Dropdown from 'react-bootstrap/Dropdown'
 import { ButtonGroup } from 'react-bootstrap';
 import Modal from 'react-bootstrap/Modal'
 
-import DatePicker from 'react-datepicker'
-import "react-datepicker/dist/react-datepicker.css";
-
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 import { Edit } from '../../annotations/segmentation_edit';
@@ -58,6 +55,11 @@ export default function MultiviewCustomNavBar(props){
 		} catch (error) {
 			alert("Invalid date input!")
 		}
+	}
+
+	const handleDateTimeInput = (event) => {
+		const date = new Date(event.target.value)
+		handleSetStartDate(date)
 	}
 
 	const handleVideoFormat = (type) => {
@@ -144,16 +146,11 @@ export default function MultiviewCustomNavBar(props){
 					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
 						<text>Date and Time: </text>
-						<DatePicker
-							selected={startDate}
-							onChange={(date) => {handleSetStartDate(date)}}
-							timeInputLabel="Time:"
-							dateFormat="yyyy/MM/dd hh:mm"
-							showTimeInput
+						<input
+							type="datetime-local"
+							onChange={handleDateTimeInput}
 							onClick={(event) => {props.toggleKeyCheck(false)}}
-							onClickOutside={(event) => {props.toggleKeyCheck(true)}}
-							onCalendarOpen={(event) => {props.toggleKeyCheck(false)}}
-							onCalendarClose={(event) => {props.toggleKeyCheck(true)}}
+							onBlur={(event) => {props.toggleKeyCheck(true)}}
 						/>
 						<NavDropdown.Divider />
 					</div>

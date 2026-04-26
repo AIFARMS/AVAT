@@ -13,8 +13,6 @@ import Modal from 'react-bootstrap/Modal'
 import Col from 'react-bootstrap/Col'
 import InputGroup from 'react-bootstrap/InputGroup'
 
-import "react-datepicker/dist/react-datepicker.css";
-
 import Instructions from './instructions';
 import { downloadFileJSON } from '../../processing/download';
 
