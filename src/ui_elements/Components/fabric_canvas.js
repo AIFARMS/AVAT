@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react"; 
+import React, { useCallback, useEffect, useRef, useState } from "react"; 
 import { fabric } from 'fabric';
 
 import store from '../../store' 
@@ -70,6 +70,8 @@ const getSafeFrameData = (frameNumber) => {
 	}
 }
 
+const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+
 export default function FabricRender(props){
 	const [fabricCanvas, setFabricCanvas] = useState(null)
 	const [currindex, setCurrindex] = useState(0)
@@ -84,6 +86,44 @@ export default function FabricRender(props){
 	const currframe_redux = currFrame['data']
 	const play_redux = useSelector(state => state.play_status.play)
 	const image_data = image_data_store['data'][props.stream_num]
+
+	const renderVideoFrame = useCallback((frameNumber) => {
+		if(!fabricCanvas){
+			return Promise.resolve(false)
+		}
+
+		const frameSource = getFrameSource(props.stream_num)
+		if(!frameSource){
+			canvasBackgroundUpdate(getSafeFrameData(frameNumber), INPUT_VIDEO, null, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			return Promise.resolve(false)
+		}
+
+		const requestId = renderRequestRef.current + 1
+		renderRequestRef.current = requestId
+
+		return frameSource.getFrame(frameNumber).then((bitmap) => {
+			if(renderRequestRef.current !== requestId){
+				return false
+			}
+
+			let frameCanvas = frameCanvasRef.current
+			if(!frameCanvas){
+				frameCanvas = document.createElement('canvas')
+				frameCanvasRef.current = frameCanvas
+			}
+			frameCanvas.width = frameSource.width
+			frameCanvas.height = frameSource.height
+			const context = frameCanvas.getContext('2d')
+			context.clearRect(0, 0, frameCanvas.width, frameCanvas.height)
+			context.drawImage(bitmap, 0, 0)
+			canvasBackgroundUpdate(getSafeFrameData(frameNumber), INPUT_VIDEO, frameCanvas, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+			frameSource.prefetchAround(frameNumber)
+			return true
+		}).catch((error) => {
+			console.error(error)
+			return false
+		})
+	}, [fabricCanvas, props.scaling_factor_height, props.scaling_factor_width, props.stream_num])
 
 	const save_data = (frame_number, reason) => {
 		if(fabricCanvas){
@@ -154,78 +194,68 @@ export default function FabricRender(props){
 
 	useEffect(() => {
 		if(fabricCanvas){
+			if(play_redux){
+				return;
+			}
 			// save_data(frameToUpdate, "frame_change")
 			setFrameToUpdate(currframe_redux) 
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
-				const frameSource = getFrameSource(props.stream_num)
-				if(!frameSource){
-					canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_VIDEO, null, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
-					return;
-				}
-
-				const requestId = renderRequestRef.current + 1
-				renderRequestRef.current = requestId
-				frameSource.getFrame(currframe_redux).then((bitmap) => {
-					if(renderRequestRef.current !== requestId){
-						return;
-					}
-
-					let frameCanvas = frameCanvasRef.current
-					if(!frameCanvas){
-						frameCanvas = document.createElement('canvas')
-						frameCanvasRef.current = frameCanvas
-					}
-					frameCanvas.width = frameSource.width
-					frameCanvas.height = frameSource.height
-					const context = frameCanvas.getContext('2d')
-					context.clearRect(0, 0, frameCanvas.width, frameCanvas.height)
-					context.drawImage(bitmap, 0, 0)
-					canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_VIDEO, frameCanvas, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
-					frameSource.prefetchAround(currframe_redux)
-				}).catch((error) => {
-					console.error(error)
-				})
+				renderVideoFrame(currframe_redux)
 			}else if (metadata_redux['media_type'] == INPUT_IMAGE){
 				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
-	}, [currFrame, fabricCanvas])
+	}, [currFrame, fabricCanvas, play_redux, renderVideoFrame])
 
 	useEffect(() => {
 		if (upload==false){
 			return
 		}
 		if(play_redux){
-			save_data(frameToUpdate, "play")
+			save_data(store.getState().current_frame['data'], "play")
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
 				const frameSource = getFrameSource(props.stream_num)
 				const frameDelay = frameSource?.averageFrameRate ? 1000 / frameSource.averageFrameRate : 33
-				const interval = setInterval(() => {
-					const currentFrame = store.getState().current_frame['data']
-					const nextFrame = Math.min(currentFrame + 1, metadata_redux['total_frames'] - 1)
-					setCurrentFrame(nextFrame)
-					if(nextFrame === metadata_redux['total_frames'] - 1){
-						clearInterval(interval)
+				let cancelled = false
+				const playFrames = async () => {
+					while(!cancelled){
+						const currentFrame = store.getState().current_frame['data']
+						const frameStartedAt = performance.now()
+						await renderVideoFrame(currentFrame)
+						if(cancelled || currentFrame >= metadata_redux['total_frames'] - 1){
+							return;
+						}
+
+						await sleep(Math.max(0, frameDelay - (performance.now() - frameStartedAt)))
+						if(cancelled){
+							return;
+						}
+
+						const nextFrame = Math.min(currentFrame + 1, metadata_redux['total_frames'] - 1)
+						setCurrentFrame(nextFrame)
 					}
-				}, frameDelay)
-				return () => clearInterval(interval)
+				}
+				playFrames()
+				return () => {
+					cancelled = true
+				}
 			}
 		}
-	}, [play_redux])
+	}, [play_redux, upload, metadata_redux, renderVideoFrame])
 
 
 	useEffect(() => {
 		// We want to redraw when a annotation is added or removed. Unfortunately this also causes a redraw when the current frame is changed.
 		// This is not ideal, but it is a good enough solution for now. This should NOT save the data.
 
-		if(fabricCanvas){
+		if(fabricCanvas && !play_redux){
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
-				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_VIDEO, null, props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
+				renderVideoFrame(currframe_redux)
 			}else{
 				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
-	}, [frame_redux])
+	}, [frame_redux, play_redux, renderVideoFrame])
 
 	
 	if(fabricCanvas != null && image_data != undefined && upload===false && play_redux===false){
