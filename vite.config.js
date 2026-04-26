@@ -1,3 +1,5 @@
+import path from 'path';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, transformWithEsbuild } from 'vite';
 import react from '@vitejs/plugin-react';
 
@@ -17,8 +19,13 @@ const jsAsJsx = {
 };
 
 export default defineConfig({
-  plugins: [jsAsJsx, react()],
+  plugins: [jsAsJsx, react(), tailwindcss()],
   base: './',
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
   optimizeDeps: {
     esbuildOptions: {
       loader: {
