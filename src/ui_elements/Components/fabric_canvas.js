@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react"; 
-import ReactDOM from 'react-dom'
 import { fabric } from 'fabric';
 
 import store from '../../store' 
@@ -135,7 +134,6 @@ export default function FabricRender(props){
 			this.selection = true;
 		});
 
-		var el = ReactDOM.findDOMNode(this);
 		var canvas_elem = document.getElementsByTagName('canvas')[props.stream_num*2]
 		temp_fabricCanvas.initialize(canvas_elem, {
 			height: props.scaling_factor_height,

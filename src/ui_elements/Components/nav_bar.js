@@ -73,6 +73,7 @@ export default function CustomNavBar(props) {
 				onHide={handleClose}
 				size='lg'
 				backdrop='static'
+				animation={false}
 			>
 				<Modal.Header closeButton>
 					<Modal.Title>Instructions</Modal.Title>
@@ -110,8 +111,8 @@ export default function CustomNavBar(props) {
 									placeholder='Skip Value'
 									type='number'
 									onChange={(event) => { setSkipValue(event.target.value) }}
-									onClick={props.toggleKeyCheck(false)}
-									onBlur={props.toggleKeyCheck(true)}
+									onClick={() => { props.toggleKeyCheck(false) }}
+									onBlur={() => { props.toggleKeyCheck(true) }}
 									defaultValue={props.skip_value}
 								/>
 							</Form>

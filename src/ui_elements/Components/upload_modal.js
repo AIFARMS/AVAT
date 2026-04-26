@@ -149,7 +149,7 @@ export default function UploadModal(props){
 	}
 
     return(
-        <Modal show={props.uploadShow} size='lg' backdrop='static'>
+        <Modal show={props.uploadShow} size='lg' backdrop='static' animation={false}>
         <Modal.Header>
             <Modal.Title>Upload</Modal.Title>
         </Modal.Header>

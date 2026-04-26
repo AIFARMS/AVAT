@@ -122,7 +122,7 @@ export default function MultiviewCustomNavBar(props){
 				video_link={videoLink}
 			/>
 		}
-		<Modal show={show} onHide={handleClose} size='lg'>
+		<Modal show={show} onHide={handleClose} size='lg' animation={false}>
 			<Modal.Header closeButton>
 			<Modal.Title>Instructions</Modal.Title>
 			</Modal.Header>
@@ -131,7 +131,7 @@ export default function MultiviewCustomNavBar(props){
 			<Button variant="secondary" onClick={handleClose}>Close</Button>
 			</Modal.Footer>
 		</Modal>
-		<Modal show={uploadShow} onHide={handleUploadClose} size='lg'>
+		<Modal show={uploadShow} onHide={handleUploadClose} size='lg' animation={false}>
 			<Modal.Header closeButton>
 				<Modal.Title>Upload</Modal.Title>
 			</Modal.Header>

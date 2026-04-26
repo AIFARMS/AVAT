@@ -45,7 +45,7 @@ export default function ProcessVideo(props){
     }
     console.log(test_frame)
     return(
-        <Modal show={show} onHide={handleClose} size='lg'>
+        <Modal show={show} onHide={handleClose} size='lg' animation={false}>
             <Modal.Header closeButton>
             <Modal.Title>Processing Video...</Modal.Title>
             </Modal.Header>

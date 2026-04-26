@@ -28,7 +28,7 @@ function SelectionScreen(){
     }else{
         return (
             <div>
-                <Modal show={show} onHide={handleClose} size='lg'>
+                <Modal show={show} onHide={handleClose} size='lg' animation={false}>
                     <Modal.Header closeButton>
                     <Modal.Title>Instructions</Modal.Title>
                     </Modal.Header>
