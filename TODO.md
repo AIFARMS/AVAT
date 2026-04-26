@@ -33,12 +33,6 @@
 * [ ] CSV export accuracy
 * [ ] Standardize the output for bounding boxes - ignore screen resolution
 
-## AI Assisted Annotations
-* [x] Tensorflow integration
-* [x] Bounding box generation using COCO
-* [ ] Segmentation generation
-* [ ] Ability for custom models to be added
-
 ## SOP + Code documentation
 * [ ] Document all functions
 * [ ] Auto generate documentation
@@ -53,7 +47,6 @@
 * [ ] key_point.js test
 * [ ] segmentation_edit.js test
 * [ ] segmentation.js
-* [ ] Tensorflow basic testing (testing model works and generates data)
 * [ ] Upload testing
 * [ ] Export testing
 * [ ] Export accuracy testing

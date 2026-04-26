@@ -1,11 +1,5 @@
 [
     {
-        "src": "/assets/tensorflow.gif",
-        "altText": "Model assisted annotation",
-        "description": "Supports integration with pre-trained Tensorflow models to accelerate annotation",
-        "slide_time": 10000
-    },
-    {
         "src": "/assets/add_remove.gif",
         "altText": "Quickly add and remove annotations",
         "description": "Add and remove annotations with ease with individual edits or whole frame edits",

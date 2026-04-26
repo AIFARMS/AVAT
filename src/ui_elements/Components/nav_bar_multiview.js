@@ -18,9 +18,6 @@ import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
 import { Edit } from '../../annotations/segmentation_edit';
 
-import {run_model, load} from '../../tensorflow/ObjectDetection';
-import { run_model_segment } from '../../tensorflow/SemanticSegmentation';
-
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 
@@ -37,7 +34,6 @@ export default function MultiviewCustomNavBar(props){
 	const [verticalRes, setVerticalRes] = useState(0)
 	const [videoFormat, setVideoFormat] = useState(2)
 	const [videoLink, setVideoLink] = useState("")
-	const [model, setModel] = useState("")
 	const [process, setProcess] = useState(false)
 	const [editSeg, setEditSeg] = useState(false)
 
@@ -76,14 +72,6 @@ export default function MultiviewCustomNavBar(props){
 			setVideoFormat(2)
 			props.handleInputType(1)
 		}
-	}
-
-	const handleEnableModel = (event) => {
-		//Defualt value is true which is disbaled. False turns it on!
-		if(model === ""){
-			alert("Please select a model")
-		}
-		load(model)
 	}
 
 	const handleVideoLink = (event) => {
@@ -202,17 +190,6 @@ export default function MultiviewCustomNavBar(props){
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
 					<NavDropdown.Divider />
-					<div>
-						Enable Object Detection Model:{' '}
-						<select defaultValue={model} onChange={(event) => {setModel(event.target.value)}} id='base_model'>
-							<option value="">Select</option>
-							<option value="lite_mobilenet_v2">SSD Lite Mobilenet V2</option>
-							<option value="mobilenet_v1">SSD Mobilenet v1</option>
-							<option value="mobilenet_v2">SSD Mobilenet v2</option>
-						</select>{' '}
-						<Button size='sm' variant='outline-success' onClick={handleEnableModel}>Enable</Button>
-					</div>
-					<NavDropdown.Divider />
 				</div>
 			</Modal.Body>
 			<Modal.Footer>
@@ -231,10 +208,6 @@ export default function MultiviewCustomNavBar(props){
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
-					{
-						model.length > 0 &&
-						<Button id="run" variant="outline-info" onClick={(event) => {run_model_segment(props.fabricCanvas, props.annotation_data, props.currentFrame, props.save_data, props.handle_visual_toggle); props.handle_visual_toggle();}}>Run model</Button>
-					}
 					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
 					{
 						editSeg === false && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
