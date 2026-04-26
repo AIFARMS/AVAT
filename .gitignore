@@ -5,3 +5,5 @@
 /test/nohup.out
 .DS_Store
 /backend/env
+/build/
+/dist/
