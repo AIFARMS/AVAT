@@ -19,22 +19,17 @@
     "react-player": "^2.9.0",
     "react-redux": "^7.2.6",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^3.4.4",
     "react-table": "^7.7.0",
     "tensorflow-models": "^0.0.1"
   },
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "NODE_ENV=production node_modules//gh-pages/bin/gh-pages.js -d build",
-    "start": "react-scripts start",
-    "dev": "NODE_ENV=dev react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "deploy": "gh-pages -d dist",
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "reset": "rm -rf node_modules && rm package-lock.json && npm i"
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": {
     "production": [
@@ -54,7 +49,9 @@
     "@babel/preset-react": "*",
     "babel-jest": "^24.9.0",
     "gh-pages": "^3.2.0",
-    "redux-immutable-state-invariant": "^2.1.0"
+    "redux-immutable-state-invariant": "^2.1.0",
+    "vite": "^5.4.19",
+    "@vitejs/plugin-react": "^4.4.1"
   },
   "babel": {
     "presets": [

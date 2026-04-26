@@ -1,5 +1,4 @@
-const fabric = require("fabric").fabric;
-const $ = require("jquery")
+import { fabric } from 'fabric';
 
 function polygonPositionHandler(dim, finalMatrix, fabricObject) {
     var x = (fabricObject.points[this.pointIndex].x - fabricObject.pathOffset.x),

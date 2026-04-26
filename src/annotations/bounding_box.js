@@ -1,5 +1,5 @@
 import { boundingbox } from '../fabric_types/fabric_boundingbox'
-const fabric = require("fabric").fabric;
+import { fabric } from 'fabric';
 
 class BoundingBox {
     constructor(top, left, width, height, color, id, behavior) {

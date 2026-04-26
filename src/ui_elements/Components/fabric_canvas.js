@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react"; 
 import ReactDOM from 'react-dom'
+import { fabric } from 'fabric';
 
 import store from '../../store' 
 import {initFrameData, updateFrameData, getFrameData, 
@@ -9,7 +10,6 @@ import {initFrameData, updateFrameData, getFrameData,
 import { useSelector } from "react-redux";
 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
-const fabric = require("fabric").fabric;
 
 
 const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, remove_obj=true) => {

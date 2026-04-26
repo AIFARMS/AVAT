@@ -1,6 +1,5 @@
 import { Edit } from "./segmentation_edit";
-const fabric = require("fabric").fabric;
-const $ = require("jquery")
+import { fabric } from 'fabric';
 
 class Segmentation {
     generate_polygon(canvas, id, segmentation_flag){

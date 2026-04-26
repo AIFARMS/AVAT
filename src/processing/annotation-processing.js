@@ -1,6 +1,5 @@
 import {BoundingBox} from '../annotations/bounding_box'
-const fabric = require("fabric").fabric;
-const $ = require("jquery")
+import { fabric } from 'fabric';
 
 export default class ExtractingAnnotation{
     constructor(annotation_json, width, height){

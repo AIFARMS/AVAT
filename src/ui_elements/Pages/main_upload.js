@@ -1,6 +1,7 @@
 //Core imports
 import React, { useEffect, useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { fabric } from 'fabric';
 
 //Constants
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
@@ -38,8 +39,6 @@ import { useSelector } from "react-redux";
 
 // Data imports
 import default_column from '../../static_data/basic_column_config.json'
-
-const fabric = require("fabric").fabric;
 
 //TODO ADD DYNAMIC SOLUTION
 var scaling_factor_width = 1920;

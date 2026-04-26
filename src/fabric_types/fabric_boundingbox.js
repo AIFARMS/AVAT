@@ -1,4 +1,4 @@
-const fabric = require("fabric").fabric;
+import { fabric } from 'fabric';
 
 var boundingbox = fabric.util.createClass(fabric.Rect, {
     type: 'boundingbox',

@@ -12,7 +12,7 @@ import Instructions from "../Components/instructions";
 
 import selection_items from '../../static_data/selectionscreen_info.json'
 
-//<img src={process.env.PUBLIC_URL + '/favicon.ico'} alt="logo" style={{width: "30%"}} />
+//<img src="/favicon.ico" alt="logo" style={{width: "30%"}} />
 function SelectionScreen(){
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -57,7 +57,7 @@ function SelectionScreen(){
                                                 top="true"
                                                 width='100%'
                                             >
-                                                <Card.Img width="60%" variant="top" src={process.env.PUBLIC_URL + item.src} />
+                                                <Card.Img width="60%" variant="top" src={item.src} />
                                                 <Card.Body style={{"textAlign": "center"}}>
                                                     <Card.Title>{item.altText}</Card.Title>
                                                     <Card.Text>{item.description}</Card.Text>

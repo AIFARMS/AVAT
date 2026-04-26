@@ -1,4 +1,4 @@
-const fabric = require("fabric").fabric;
+import { fabric } from 'fabric';
 
 class KeyPoint {
     //TODO Optimize this code. Right now there is a significant performance penalty if there are multiple keypoints on the canvas
