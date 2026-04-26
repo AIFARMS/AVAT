@@ -1,10 +1,5 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import "bootstrap/dist/css/bootstrap.min.css";
-
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
-import { NavLink } from 'react-bootstrap';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -93,9 +88,9 @@ export default function CustomNavBar(props) {
 				handleUploadToggle={handleUploadToggle}
 				uploadShow={uploadShow}
 			/>
-			<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
-				<Navbar.Brand href="#home">AVAT</Navbar.Brand>
-				<Nav className="mr-auto">
+			<header className="sticky top-0 z-50 flex items-center gap-4 bg-zinc-950 px-4 py-2 text-white">
+				<a href="#home" className="text-lg font-semibold">AVAT</a>
+				<nav className="mr-auto flex items-center gap-2">
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
 							<Button variant="ghost" className="text-white hover:text-white" disabled={props.disable_buttons}>Export</Button>
@@ -105,10 +100,10 @@ export default function CustomNavBar(props) {
 							<DropdownMenuSeparator />
 						</DropdownMenuContent>
 					</DropdownMenu>
-					<NavLink onClick={handleShow}>Instructions</NavLink>
-					<NavLink onClick={props.handle_link_open}>Report</NavLink>
-				</Nav>
-				<div>
+					<Button variant="ghost" className="text-white hover:text-white" onClick={handleShow}>Instructions</Button>
+					<Button variant="ghost" className="text-white hover:text-white" onClick={props.handle_link_open}>Report</Button>
+				</nav>
+				<div className="flex items-center gap-2">
 					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
 					{' '}
 					<DropdownMenu>
@@ -155,7 +150,7 @@ export default function CustomNavBar(props) {
 					</DropdownMenu>
 					{/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
 				</div>
-			</Navbar>
+			</header>
 		</div>
 	)
 }

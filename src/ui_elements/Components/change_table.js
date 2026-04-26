@@ -1,10 +1,4 @@
 import React from "react"; 
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-import BootstrapTable from 'react-bootstrap-table-next';
-import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
-import paginationFactory from 'react-bootstrap-table2-paginator';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -94,20 +88,3 @@ export default function AnnotationTable(props){
            
     )
 }
-/*
-                <Tab eventKey="swap" title="Swap">
-                    <SwapAnnotTable columns={anno_col} data={getAnnotationTableCount()}></SwapAnnotTable>
-                </Tab>
-*/
-/*
-<Tab eventKey="profile" title="Previous">
-                <BootstrapTable
-                    keyField='frame_num'
-                    data={data} 
-                    columns={anno_col((props.handleSetCurrentFrame))}
-                    table
-                    noDataIndication={ () => <div>No recorded annotations or behaviors for this video.</div> }
-                    pagination={ paginationFactory() }
-                />
-            </Tab>
-*/

@@ -1,7 +1,8 @@
-import { Type } from 'react-bootstrap-table2-editor';
 import {behaviors} from './behaviors'
 import {posture} from './posture'
 import {status} from './status'
+
+const SELECT_EDITOR = 'select'
 
 const columns = [{
   dataField: "id",
@@ -13,7 +14,7 @@ const columns = [{
   dataField: "status",
   text: "Status",
   editor: {
-      type: Type.SELECT,
+      type: SELECT_EDITOR,
       options: status
     }
 },{
@@ -23,7 +24,7 @@ const columns = [{
   dataField: "Behavior",
   text: "Pos",
   editor: {
-      type: Type.SELECT,
+      type: SELECT_EDITOR,
       options: posture
     }
 }]

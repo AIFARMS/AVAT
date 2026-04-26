@@ -1,8 +1,6 @@
 
 import React, { useState } from "react";
-import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Carousel from 'react-bootstrap/Carousel'
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -14,7 +12,6 @@ import {
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 import MainUpload from './main_upload'
-import { Container, Jumbotron } from "react-bootstrap";
 import Instructions from "../Components/instructions";
 
 import selection_items from '../../static_data/selectionscreen_info.json'
@@ -47,32 +44,28 @@ function SelectionScreen(){
                     </DialogContent>
                 </Dialog>
                 <main>
-                    <Jumbotron className="text-center">
-                        <Container>
-                            <h1 className="jumbotron-heading">AVAT</h1>
-                            <p className="lead text-muted"> Analysis tool to record data for livestock behavior and computer vision applications. </p>
-                            <p>
-                                <Button onClick={handleUpload} className="mx-1 my-2">Video Upload</Button>
-                            </p>
-                        </Container>
-                    </Jumbotron>
-                        <Carousel controls={false} fade style={{"width": "70%", "marginLeft": "auto", "marginRight": "auto"}}>
+                    <section className="mx-auto max-w-5xl px-4 py-12 text-center">
+                        <h1 className="text-4xl font-semibold tracking-tight">AVAT</h1>
+                        <p className="mt-3 text-lg text-muted-foreground"> Analysis tool to record data for livestock behavior and computer vision applications. </p>
+                        <p>
+                            <Button onClick={handleUpload} className="mx-1 my-2">Video Upload</Button>
+                        </p>
+                    </section>
+                        <div className="mx-auto grid w-[70%] gap-6">
                             {
                                 selection_items.map((item, key) => {
                                     return(
-                                        <Carousel.Item key={key} interval={item.slide_time}>
-                                            <Card className="mb-5 box-shadow" style={{width: '100%'}}>
-                                                <img width="60%" src={item.src} />
+                                            <Card key={key} className="mb-5 shadow-sm" style={{width: '100%'}}>
+                                                <img width="60%" src={item.src} alt={item.altText} />
                                                 <CardContent style={{"textAlign": "center"}}>
                                                     <CardTitle>{item.altText}</CardTitle>
                                                     <p>{item.description}</p>
                                                 </CardContent>
                                             </Card>
-                                        </Carousel.Item>
                                     )
                                 })
                             }
-                        </Carousel>
+                        </div>
                 </main>
             </div>
         )

@@ -5,8 +5,7 @@
 
  import React from "react"; 
  import './App.css';
- import 'bootstrap/dist/css/bootstrap.min.css';
- 
+  
  import SelectionScreen from './ui_elements/Pages/selection_screen'
  
  //<FrontEnd></FrontEnd>

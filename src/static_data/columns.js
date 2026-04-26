@@ -1,10 +1,11 @@
 import React from "react"; 
-import { Type } from 'react-bootstrap-table2-editor';
 import {behaviors} from './behaviors'
 import {posture} from './posture'
 import {status} from './status'
 import {confidence} from './confidence'
 import { Button } from '@/components/ui/button'
+
+const SELECT_EDITOR = 'select'
 
 const columns = (remove_table_index) => [{
   dataField: "id",
@@ -19,7 +20,7 @@ const columns = (remove_table_index) => [{
   dataField: "posture",
   text: "Posture",
   editor: {
-      type: Type.SELECT,
+      type: SELECT_EDITOR,
       options: posture,
   }
 },
@@ -27,14 +28,14 @@ const columns = (remove_table_index) => [{
   dataField: "behavior",
   text: "Behavior",
   editor: {
-      type: Type.SELECT,
+      type: SELECT_EDITOR,
       options: behaviors,
   }
 },{
   dataField: "confidence",
   text: "Confidence",
   editor: {
-      type: Type.SELECT,
+      type: SELECT_EDITOR,
       options: confidence,
   }
 },{

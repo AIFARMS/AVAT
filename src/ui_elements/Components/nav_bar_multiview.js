@@ -1,11 +1,5 @@
 import React from 'react';
 import { useState } from 'react';
-import "bootstrap/dist/css/bootstrap.min.css";
-
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
-import { NavLink } from 'react-bootstrap';
-import Form from 'react-bootstrap/Form'
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -145,7 +139,7 @@ export default function MultiviewCustomNavBar(props){
 				</DialogHeader>
 				<div style={{display: "grid"}}>
 					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-					<Form style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
+					<div style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
 						Video Format: 
 						<NativeSelect
 							id="inlineFormCustomSelect"
@@ -155,7 +149,7 @@ export default function MultiviewCustomNavBar(props){
 							<NativeSelectOption value="2">Image</NativeSelectOption>
 						</NativeSelect>
 						<Separator className="my-3" />
-					</Form>
+					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
 						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
 						<Separator className="my-3" />
@@ -171,9 +165,9 @@ export default function MultiviewCustomNavBar(props){
 						<Separator className="my-3" />
 					</div>
 					{videoFormat === 0 && 
-						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+						<div style={{float: "left",gridColumn: 1, gridRow:4}}>
 							<Input multiple id="file" aria-label="Video Upload" accept=".mp4" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
-						</Form>
+						</div>
 					}
 					{videoFormat === 1 &&
 						<div>
@@ -183,20 +177,20 @@ export default function MultiviewCustomNavBar(props){
 						</div>
 					}{videoFormat === 2 &&
                         <div>
-                            <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+                            <div style={{float: "left",gridColumn: 1, gridRow:4}}>
                                 <Input multiple id="file" aria-label="Image-set 1 Upload" accept="image/*" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
-                            </Form>
-                            <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+                            </div>
+                            <div style={{float: "left",gridColumn: 1, gridRow:4}}>
                                 <Input multiple id="file" aria-label="Image-set 2 Upload" accept="image/*" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
-                            </Form>
-                            <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
+                            </div>
+                            <div style={{float: "left",gridColumn: 1, gridRow:4}}>
                                 <Input multiple id="file" aria-label="Image-set 3 Upload" accept="image/*" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
-                            </Form>
+                            </div>
                         </div>
 					}
-					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
+					<div style={{float: "left",gridColumn: 1, gridRow:5}}>
 						<Input disabled={props.disable_buttons} accept=".json" id="file" aria-label="Annotation Upload" type="file" onChange={props.handleOldAnnotation}/>
-					</Form>
+					</div>
 					<Separator className="my-3" />
 					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
 					<Separator className="my-3" />
@@ -209,9 +203,9 @@ export default function MultiviewCustomNavBar(props){
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
-		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
-				<Navbar.Brand href="#home">AVAT</Navbar.Brand>
-				<Nav className="mr-auto">
+		<header className="sticky top-0 z-50 flex items-center gap-4 bg-zinc-950 px-4 py-2 text-white">
+				<a href="#home" className="text-lg font-semibold">AVAT</a>
+				<nav className="mr-auto flex items-center gap-2">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button variant="ghost" className="text-white hover:text-white" disabled={props.disable_buttons}>Export</Button>
@@ -222,10 +216,10 @@ export default function MultiviewCustomNavBar(props){
 								<DropdownMenuItem onClick={handleDownloadCSV}>CSV</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
-						<NavLink onClick={handleShow}>Instructions</NavLink>
-						<NavLink onClick={props.handle_link_open}>Report</NavLink>
-				</Nav>
-				<div>
+						<Button variant="ghost" className="text-white hover:text-white" onClick={handleShow}>Instructions</Button>
+						<Button variant="ghost" className="text-white hover:text-white" onClick={props.handle_link_open}>Report</Button>
+				</nav>
+				<div className="flex items-center gap-2">
 					<Button variant="outline" onClick={handleUploadShow}>Upload</Button>{' '}
 					{
 						editSeg === false && <Button variant="outline" onClick={edit_click}>Edit Seg</Button>
@@ -265,7 +259,7 @@ export default function MultiviewCustomNavBar(props){
 					</DropdownMenu>
 					{/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
 				</div>
-		</Navbar>
+		</header>
 		</div>
 	)
 }

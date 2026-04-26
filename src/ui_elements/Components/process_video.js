@@ -1,8 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import "bootstrap/dist/css/bootstrap.min.css";
 
-import Carousel from 'react-bootstrap/Carousel'
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -55,22 +53,20 @@ export default function ProcessVideo(props){
                     {text}
                     {
                         frames != null &&
-                        <Carousel controls={true} fade style={{objectFit: 'contain', height: '100%', width: '100%'}}>
+                        <div className="grid gap-4" style={{objectFit: 'contain', height: '100%', width: '100%'}}>
                         {
                             frames.map((x) => {
                                 return(
-                                        <Carousel.Item >eee
-                                            <Card className="mb-5 box-shadow" top
+                                            <Card className="mb-5 shadow-sm" top
                                                 width='100%'
                                             >
-                                                <img style={{objectFit: 'contain', height: '100%', width: '100%'}} src={x} />
+                                                <img style={{objectFit: 'contain', height: '100%', width: '100%'}} src={x} alt="Extracted video frame" />
                                             </Card>
-                                        </Carousel.Item>
                                     )
                             })
                         }
-                            
-                        </Carousel>
+                             
+                        </div>
                     }
                 </div>
             <DialogFooter>

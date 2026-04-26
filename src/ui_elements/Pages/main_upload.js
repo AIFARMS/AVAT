@@ -1,13 +1,9 @@
 //Core imports
 import React, { useEffect, useState } from "react";
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { fabric } from 'fabric';
 
 //Constants
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
-
-//UI Element imports
-import Toast from 'react-bootstrap/Toast'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
@@ -359,6 +355,14 @@ export default function MainUpload() {
 		document.addEventListener("keydown", onKeyPress);
 		return () => document.removeEventListener("keydown", onKeyPress);
 	}, [onKeyPress]);
+
+	useEffect(() => {
+		if (!save) {
+			return;
+		}
+		const timeout = setTimeout(() => changeSave(false), 500);
+		return () => clearTimeout(timeout);
+	}, [save]);
 	
 
 	const handle_visual_toggle = () => {
@@ -425,15 +429,11 @@ export default function MainUpload() {
 				toggleKeyCheck={toggleKeyCheck}
 				handle_visual_toggle={handle_visual_toggle}
 			/>
-			<Toast 
-				onClose={() => changeSave(false)} 
-				show={save} delay={500} autohide
-				style={{ position: 'absolute', top: '100', left: '100', zIndex: '100'}}
-			>
-				<Toast.Header>
-					<strong className="mr-auto">{toast_text}</strong>
-				</Toast.Header>
-			</Toast>
+			{save &&
+				<div className="absolute left-[100px] top-[100px] z-[100] rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-md">
+					{toast_text}
+				</div>
+			}
 			{
 				upload === true && 
 				<div style={{display: "grid"}}>

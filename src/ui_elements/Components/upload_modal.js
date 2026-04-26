@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import "bootstrap/dist/css/bootstrap.min.css";
 
 import { Button } from '@/components/ui/button';
 import {
@@ -11,8 +10,6 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { FieldError } from '@/components/ui/field';
-import Form from 'react-bootstrap/Form'
-import Col from 'react-bootstrap/Col'
 import { Input } from '@/components/ui/input';
 import {
     InputGroup,
@@ -132,14 +129,14 @@ export default function UploadModal(props){
 		var uploadButtons = []
 		for (var i = 0; i < 1; i++) {
 			let button_image = (
-				<Form key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
+				<div key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
 					<Input multiple id={i + ""} key={i} aria-label={"Image Upload"} accept="image/*" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
-				</Form>
+				</div>
 			)
 			let button_video = (
-				<Form key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
+				<div key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
 					<Input id={i + ""} key={i} aria-label={"Video Upload"} accept=".mp4" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
-				</Form>
+				</div>
 			)
 			if (videoFormat === INPUT_IMAGE) {
 				uploadButtons.push(button_image)
@@ -168,8 +165,8 @@ export default function UploadModal(props){
         </DialogHeader>
             <div style={{ display: "grid" }}>
                 {/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-                <Form.Row>
-                    <Col>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div>
 
                         <NativeSelect
                             id="inlineFormCustomSelect"
@@ -180,20 +177,19 @@ export default function UploadModal(props){
                             <NativeSelectOption value={INPUT_VIDEO}>Video</NativeSelectOption>
                             <NativeSelectOption value={INPUT_IMAGE}>Image</NativeSelectOption>
                         </NativeSelect>
-                    </Col>
-                    <Col>
+                    </div>
+                    <div>
                         {
                             generateUploadButtons()
                         }
-                    </Col>
+                    </div>
 
-                </Form.Row>
+                </div>
 
                 <Separator className="my-3" />
 
-                <Form.Row>
-                    <Col>
-                        <Form.Group>
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div>
                             <InputGroup className="mb-3">
                                 <InputGroupInput
                                     type="number"
@@ -211,10 +207,8 @@ export default function UploadModal(props){
                                     </FieldError>
                                 }
                             </InputGroup>
-                        </Form.Group>
-                    </Col>
-                    <Col>
-                        <Form.Group>
+                    </div>
+                    <div>
                             <InputGroup className="mb-3">
                                 <InputGroupInput
                                     type='number'
@@ -231,13 +225,11 @@ export default function UploadModal(props){
                                     </FieldError>
                                 }
                             </InputGroup>
-                        </Form.Group>
-
-                    </Col>
-                </Form.Row>
+                    </div>
+                </div>
                 <Separator className="my-3" />
-                <Form.Row>
-                    <Col >
+                <div className="grid gap-4 md:grid-cols-2">
+                    <div>
                         <Input
                             disabled={props.disable_buttons || firstUpload}
                             accept=".json"
@@ -247,8 +239,8 @@ export default function UploadModal(props){
                             onChange={handleColumnUpload}
 
                         />
-                    </Col>
-                    <Col >
+                    </div>
+                    <div>
                         <Input
                             accept=".json"
                             id="file"
@@ -257,8 +249,8 @@ export default function UploadModal(props){
                             onChange={toggleUploadExistingAnnotation}
                             disabled={props.disable_buttons || firstUpload}
                         />
-                    </Col>
-                </Form.Row>
+                    </div>
+                </div>
                 <Separator className="my-3" />
             </div>
         <DialogFooter>
