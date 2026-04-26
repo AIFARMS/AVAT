@@ -2,12 +2,26 @@ import React, { useEffect } from 'react';
 import { useState } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import Button from 'react-bootstrap/Button'
-import { NavDropdown, NavLink } from 'react-bootstrap';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { FieldError } from '@/components/ui/field';
 import Form from 'react-bootstrap/Form'
-import Modal from 'react-bootstrap/Modal'
 import Col from 'react-bootstrap/Col'
-import InputGroup from 'react-bootstrap/InputGroup'
+import { Input } from '@/components/ui/input';
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupInput,
+    InputGroupText,
+} from '@/components/ui/input-group';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Separator } from '@/components/ui/separator';
 
 import { INPUT_IMAGE, INPUT_VIDEO } from '../../static_data/const'
 import { useSelector } from "react-redux";
@@ -119,12 +133,12 @@ export default function UploadModal(props){
 		for (var i = 0; i < 1; i++) {
 			let button_image = (
 				<Form key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
-					<Form.File multiple id={i + ""} key={i} label={"Image Upload"} accept="image/*" custom type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
+					<Input multiple id={i + ""} key={i} aria-label={"Image Upload"} accept="image/*" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
 				</Form>
 			)
 			let button_video = (
 				<Form key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
-					<Form.File id={i + ""} key={i} label={"Video Upload"} accept=".mp4" custom type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
+					<Input id={i + ""} key={i} aria-label={"Video Upload"} accept=".mp4" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
 				</Form>
 			)
 			if (videoFormat === INPUT_IMAGE) {
@@ -147,28 +161,25 @@ export default function UploadModal(props){
 	}
 
     return(
-        <Modal show={props.uploadShow} size='lg' backdrop='static' animation={false}>
-        <Modal.Header>
-            <Modal.Title>Upload</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+        <Dialog open={props.uploadShow}>
+        <DialogContent className="sm:max-w-3xl" showCloseButton={false}>
+        <DialogHeader>
+            <DialogTitle>Upload</DialogTitle>
+        </DialogHeader>
             <div style={{ display: "grid" }}>
                 {/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
                 <Form.Row>
                     <Col>
 
-                        <Form.Control
-                            as="select"
+                        <NativeSelect
                             id="inlineFormCustomSelect"
                             onChange={(event) => { handleVideoFormat(event.target.value) }}
                             defaultValue={videoFormat}
-                            htmlSize={2}
-                            custom
                             disabled={firstUpload}
                         >
-                            <option value={INPUT_VIDEO}>Video</option>
-                            <option value={INPUT_IMAGE}>Image</option>
-                        </Form.Control>
+                            <NativeSelectOption value={INPUT_VIDEO}>Video</NativeSelectOption>
+                            <NativeSelectOption value={INPUT_IMAGE}>Image</NativeSelectOption>
+                        </NativeSelect>
                     </Col>
                     <Col>
                         {
@@ -178,84 +189,87 @@ export default function UploadModal(props){
 
                 </Form.Row>
 
-                <NavDropdown.Divider />
+                <Separator className="my-3" />
 
                 <Form.Row>
                     <Col>
                         <Form.Group>
                             <InputGroup className="mb-3">
-                                <InputGroup.Prepend>
-                                    <InputGroup.Text>Frame Rate</InputGroup.Text>
-                                </InputGroup.Prepend>
-                                <Form.Control
+                                <InputGroupInput
                                     type="number"
                                     onChange={(event) => { setStateFrameRate(event.target.value ? event.target.value : 1); }}
                                     disabled={(videoFormat === INPUT_IMAGE) || firstUpload}
-                                    isInvalid={(stateFrameRate == null || stateFrameRate == undefined || stateFrameRate == "") && videoFormat !== INPUT_IMAGE}
+                                    aria-invalid={(stateFrameRate == null || stateFrameRate == undefined || stateFrameRate == "") && videoFormat !== INPUT_IMAGE}
                                     defaultValue={stateFrameRate}
                                 />
-                                <Form.Control.Feedback type="invalid">
-                                    Please enter a frame rate.
-                                </Form.Control.Feedback>
+                                <InputGroupAddon>
+                                    <InputGroupText>Frame Rate</InputGroupText>
+                                </InputGroupAddon>
+                                {(stateFrameRate == null || stateFrameRate == undefined || stateFrameRate == "") && videoFormat !== INPUT_IMAGE &&
+                                    <FieldError>
+                                        Please enter a frame rate.
+                                    </FieldError>
+                                }
                             </InputGroup>
                         </Form.Group>
                     </Col>
                     <Col>
                         <Form.Group>
                             <InputGroup className="mb-3">
-                                <InputGroup.Prepend>
-                                    <InputGroup.Text>Skip Value</InputGroup.Text>
-                                </InputGroup.Prepend>
-                                <Form.Control
+                                <InputGroupInput
                                     type='number'
                                     onChange={(event) => { setStateSkipValue(event.target.value ? event.target.value : 1) }}
-                                    isInvalid={stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == ""}
+                                    aria-invalid={stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == ""}
                                     defaultValue={stateSkipValue}
                                 />
-                                <Form.Control.Feedback type="invalid">
-                                    Please enter a skip value.
-                                </Form.Control.Feedback>
+                                <InputGroupAddon>
+                                    <InputGroupText>Skip Value</InputGroupText>
+                                </InputGroupAddon>
+                                {(stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == "") &&
+                                    <FieldError>
+                                        Please enter a skip value.
+                                    </FieldError>
+                                }
                             </InputGroup>
                         </Form.Group>
 
                     </Col>
                 </Form.Row>
-                <NavDropdown.Divider />
+                <Separator className="my-3" />
                 <Form.Row>
                     <Col >
-                        <Form.File
+                        <Input
                             disabled={props.disable_buttons || firstUpload}
                             accept=".json"
                             id="file"
-                            label="Column Upload"
-                            custom type="file"
+                            aria-label="Column Upload"
+                            type="file"
                             onChange={handleColumnUpload}
 
                         />
                     </Col>
                     <Col >
-                        <Form.File
+                        <Input
                             accept=".json"
                             id="file"
-                            label="Annotation Upload"
-                            custom type="file"
+                            aria-label="Annotation Upload"
+                            type="file"
                             onChange={toggleUploadExistingAnnotation}
                             disabled={props.disable_buttons || firstUpload}
                         />
                     </Col>
                 </Form.Row>
-                <NavDropdown.Divider />
+                <Separator className="my-3" />
             </div>
-        </Modal.Body>
-        <Modal.Footer>
+        <DialogFooter>
             <Button 
-                variant="success"
                 onClick={handleUpload}
                 disabled={((stateFrameRate == null || stateFrameRate == "") && videoFormat !== INPUT_IMAGE) || (stateSkipValue == null || stateSkipValue == "") || props.disable_buttons}
             >
                 {firstUpload ? "Save" : "Upload"}
             </Button>
-        </Modal.Footer>
-    </Modal>
+        </DialogFooter>
+        </DialogContent>
+    </Dialog>
     )
 }

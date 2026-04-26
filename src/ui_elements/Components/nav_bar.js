@@ -4,14 +4,25 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
-import Button from 'react-bootstrap/Button'
-import { NavDropdown, NavLink } from 'react-bootstrap';
-import Form from 'react-bootstrap/Form'
-import Dropdown from 'react-bootstrap/Dropdown'
-import { ButtonGroup } from 'react-bootstrap';
-import Modal from 'react-bootstrap/Modal'
-import Col from 'react-bootstrap/Col'
-import InputGroup from 'react-bootstrap/InputGroup'
+import { NavLink } from 'react-bootstrap';
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 import Instructions from './instructions';
 import { downloadFileJSON } from '../../processing/download';
@@ -66,21 +77,17 @@ export default function CustomNavBar(props) {
 
 	return (
 		<div>
-			<Modal
-				show={show}
-				onHide={handleClose}
-				size='lg'
-				backdrop='static'
-				animation={false}
-			>
-				<Modal.Header closeButton>
-					<Modal.Title>Instructions</Modal.Title>
-				</Modal.Header>
-				<Modal.Body><Instructions></Instructions></Modal.Body>
-				<Modal.Footer>
-					<Button variant="secondary" onClick={handleClose}>Close</Button>
-				</Modal.Footer>
-			</Modal>
+			<Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
+				<DialogContent className="sm:max-w-3xl">
+					<DialogHeader>
+						<DialogTitle>Instructions</DialogTitle>
+					</DialogHeader>
+					<Instructions></Instructions>
+					<DialogFooter>
+						<Button variant="secondary" onClick={handleClose}>Close</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 			<UploadModal
 				handleOldAnnotation={props.handleOldAnnotation}
 				handleUploadToggle={handleUploadToggle}
@@ -89,23 +96,32 @@ export default function CustomNavBar(props) {
 			<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
 				<Navbar.Brand href="#home">AVAT</Navbar.Brand>
 				<Nav className="mr-auto">
-					<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">
-						<NavDropdown.Item onClick={handleDownloadJSON}>JSON</NavDropdown.Item>
-						<NavDropdown.Divider />
-					</NavDropdown>
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" className="text-white hover:text-white" disabled={props.disable_buttons}>Export</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuItem onClick={handleDownloadJSON}>JSON</DropdownMenuItem>
+							<DropdownMenuSeparator />
+						</DropdownMenuContent>
+					</DropdownMenu>
 					<NavLink onClick={handleShow}>Instructions</NavLink>
 					<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
-					<Button variant="outline-success" onClick={handleUploadToggle}>Settings</Button>{' '}
+					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
 					{' '}
-					<Dropdown as={ButtonGroup}>
-						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
-						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
-						<Dropdown.Menu>
-							<Form>
-								<Form.Label>Skip Value</Form.Label>
-								<Form.Control
+					<DropdownMenu>
+						<ButtonGroup>
+							<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
+							<DropdownMenuTrigger asChild>
+								<Button variant="secondary" aria-label="Frame options">v</Button>
+							</DropdownMenuTrigger>
+						</ButtonGroup>
+						<DropdownMenuContent>
+							<div className="grid gap-2 p-2">
+								<Label>Skip Value</Label>
+								<Input
 									placeholder='Skip Value'
 									type='number'
 									onChange={(event) => { setSkipValue(event.target.value) }}
@@ -113,26 +129,30 @@ export default function CustomNavBar(props) {
 									onBlur={() => { props.toggleKeyCheck(true) }}
 									defaultValue={props.skip_value}
 								/>
-							</Form>
-						</Dropdown.Menu>
-					</Dropdown>{' '}
+							</div>
+						</DropdownMenuContent>
+					</DropdownMenu>{' '}
 
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
+					<Button disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
 					{
 						videoFormat === INPUT_VIDEO &&
-						<Button variant="primary" disabled={props.disable_buttons} onClick={handlePlaying}>{playText}</Button>
+						<Button disabled={props.disable_buttons} onClick={handlePlaying}>{playText}</Button>
 					}
 					{' '}
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
-					<Dropdown as={ButtonGroup} drop='left'>
-						<Button variant="success" onClick={props.addToCanvas}>Add</Button>
-						<Dropdown.Toggle split variant="success" id="dropdown-split-basic" />
-						<Dropdown.Menu>
-							<Dropdown.Item onClick={(event) => { props.change_annotation_type("1") }}>Behavior Annotation</Dropdown.Item>
-							<Dropdown.Item onClick={(event) => { props.change_annotation_type("2") }}>BoundingBox</Dropdown.Item>
-							<Dropdown.Item onClick={(event) => { props.change_annotation_type("3") }}>Segmentation</Dropdown.Item>
-						</Dropdown.Menu>
-					</Dropdown>
+					<Button disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
+					<DropdownMenu>
+						<ButtonGroup>
+							<Button onClick={props.addToCanvas}>Add</Button>
+							<DropdownMenuTrigger asChild>
+								<Button aria-label="Annotation type options">v</Button>
+							</DropdownMenuTrigger>
+						</ButtonGroup>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={(event) => { props.change_annotation_type("1") }}>Behavior Annotation</DropdownMenuItem>
+							<DropdownMenuItem onClick={(event) => { props.change_annotation_type("2") }}>BoundingBox</DropdownMenuItem>
+							<DropdownMenuItem onClick={(event) => { props.change_annotation_type("3") }}>Segmentation</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 					{/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
 				</div>
 			</Navbar>

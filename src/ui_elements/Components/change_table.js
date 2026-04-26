@@ -6,10 +6,7 @@ import cellEditFactory, { Type } from 'react-bootstrap-table2-editor';
 import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 
-import Tabs from 'react-bootstrap/Tabs'
-import Tab from 'react-bootstrap/Tab'
-import Button from 'react-bootstrap/Button'
-import { FormControl } from "react-bootstrap";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import AnnotTable from './annot_table'
 import SwapAnnotTable from "./cumulative_annot_table";
@@ -83,10 +80,13 @@ export default function AnnotationTable(props){
         <div>
         {
             col.length != 0 &&
-            <Tabs defaultActiveKey="home" id="uncontrolled-tab-example">
-                <Tab eventKey="home" title="Current">
+            <Tabs defaultValue="home">
+                <TabsList>
+                    <TabsTrigger value="home">Current</TabsTrigger>
+                </TabsList>
+                <TabsContent value="home">
                     <AnnotTable columns={columns} data={annotation_data} select_data={select_data} current_frame={props.currentFrame} change_annot={props.handleChangeAnnot}/>
-                </Tab>
+                </TabsContent>
 
             </Tabs>
         }   

@@ -2,12 +2,19 @@
 import React, { useState } from "react";
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Button from 'react-bootstrap/Button'
-import Modal from 'react-bootstrap/Modal'
 import Carousel from 'react-bootstrap/Carousel'
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 import MainUpload from './main_upload'
-import { Container, Jumbotron, Card} from "react-bootstrap";
+import { Container, Jumbotron } from "react-bootstrap";
 import Instructions from "../Components/instructions";
 
 import selection_items from '../../static_data/selectionscreen_info.json'
@@ -28,22 +35,24 @@ function SelectionScreen(){
     }else{
         return (
             <div>
-                <Modal show={show} onHide={handleClose} size='lg' animation={false}>
-                    <Modal.Header closeButton>
-                    <Modal.Title>Instructions</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body><Instructions></Instructions></Modal.Body>
-                    <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>Close</Button>
-                    </Modal.Footer>
-                </Modal>
+                <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
+                    <DialogContent className="sm:max-w-3xl">
+                        <DialogHeader>
+                            <DialogTitle>Instructions</DialogTitle>
+                        </DialogHeader>
+                        <Instructions></Instructions>
+                        <DialogFooter>
+                            <Button variant="secondary" onClick={handleClose}>Close</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
                 <main>
                     <Jumbotron className="text-center">
                         <Container>
                             <h1 className="jumbotron-heading">AVAT</h1>
                             <p className="lead text-muted"> Analysis tool to record data for livestock behavior and computer vision applications. </p>
                             <p>
-                                <Button onClick={handleUpload} variant="success" className="mx-1 my-2">Video Upload</Button>
+                                <Button onClick={handleUpload} className="mx-1 my-2">Video Upload</Button>
                             </p>
                         </Container>
                     </Jumbotron>
@@ -52,16 +61,12 @@ function SelectionScreen(){
                                 selection_items.map((item, key) => {
                                     return(
                                         <Carousel.Item key={key} interval={item.slide_time}>
-                                            <Card 
-                                                className="mb-5 box-shadow" 
-                                                top="true"
-                                                width='100%'
-                                            >
-                                                <Card.Img width="60%" variant="top" src={item.src} />
-                                                <Card.Body style={{"textAlign": "center"}}>
-                                                    <Card.Title>{item.altText}</Card.Title>
-                                                    <Card.Text>{item.description}</Card.Text>
-                                                </Card.Body>
+                                            <Card className="mb-5 box-shadow" style={{width: '100%'}}>
+                                                <img width="60%" src={item.src} />
+                                                <CardContent style={{"textAlign": "center"}}>
+                                                    <CardTitle>{item.altText}</CardTitle>
+                                                    <p>{item.description}</p>
+                                                </CardContent>
                                             </Card>
                                         </Carousel.Item>
                                     )

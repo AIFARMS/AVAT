@@ -4,12 +4,27 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import Navbar from 'react-bootstrap/Navbar'
 import Nav from 'react-bootstrap/Nav'
-import Button from 'react-bootstrap/Button'
-import { NavDropdown, NavLink } from 'react-bootstrap';
+import { NavLink } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form'
-import Dropdown from 'react-bootstrap/Dropdown'
-import { ButtonGroup } from 'react-bootstrap';
-import Modal from 'react-bootstrap/Modal'
+import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { Separator } from '@/components/ui/separator';
 
 import Instructions from './instructions';
 import { downloadFileJSON , downloadFileCSV} from '../../processing/download';
@@ -112,37 +127,38 @@ export default function MultiviewCustomNavBar(props){
 				video_link={videoLink}
 			/>
 		}
-		<Modal show={show} onHide={handleClose} size='lg' animation={false}>
-			<Modal.Header closeButton>
-			<Modal.Title>Instructions</Modal.Title>
-			</Modal.Header>
-			<Modal.Body><Instructions></Instructions></Modal.Body>
-			<Modal.Footer>
-			<Button variant="secondary" onClick={handleClose}>Close</Button>
-			</Modal.Footer>
-		</Modal>
-		<Modal show={uploadShow} onHide={handleUploadClose} size='lg' animation={false}>
-			<Modal.Header closeButton>
-				<Modal.Title>Upload</Modal.Title>
-			</Modal.Header>
-			<Modal.Body>
+		<Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
+			<DialogContent className="sm:max-w-3xl">
+				<DialogHeader>
+					<DialogTitle>Instructions</DialogTitle>
+				</DialogHeader>
+				<Instructions></Instructions>
+				<DialogFooter>
+					<Button variant="secondary" onClick={handleClose}>Close</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+		<Dialog open={uploadShow} onOpenChange={(open) => !open && handleUploadClose()}>
+			<DialogContent className="sm:max-w-3xl">
+				<DialogHeader>
+					<DialogTitle>Upload</DialogTitle>
+				</DialogHeader>
 				<div style={{display: "grid"}}>
 					{/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
 					<Form style={{float: "left",gridColumn: 1, gridRow:1, zIndex:99}}>
 						Video Format: 
-						<Form.Control
-							as="select"
+						<NativeSelect
 							id="inlineFormCustomSelect"
 							onChange={(event)=>{handleVideoFormat(event.target.value)}}
 							defaultValue={videoFormat}
 						>
-							<option value="2">Image</option>
-						</Form.Control>
-						<NavDropdown.Divider />
+							<NativeSelectOption value="2">Image</NativeSelectOption>
+						</NativeSelect>
+						<Separator className="my-3" />
 					</Form>
 					<div style={{float: "left",gridColumn: 1, gridRow:2, zIndex:99}}>
 						Annotator Name: <input type='text' defaultValue={props.ANNOTATOR_NAME} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.change_annotator_name(event.target.value)}}></input>
-						<NavDropdown.Divider />
+						<Separator className="my-3" />
 					</div>
 					<div style={{float: "left",gridColumn: 1, gridRow:3, zIndex:99}}>
 						<text>Date and Time: </text>
@@ -152,11 +168,11 @@ export default function MultiviewCustomNavBar(props){
 							onClick={(event) => {props.toggleKeyCheck(false)}}
 							onBlur={(event) => {props.toggleKeyCheck(true)}}
 						/>
-						<NavDropdown.Divider />
+						<Separator className="my-3" />
 					</div>
 					{videoFormat === 0 && 
 						<Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-							<Form.File multiple id="file" label="Video Upload" accept=".mp4" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+							<Input multiple id="file" aria-label="Video Upload" accept=".mp4" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
 						</Form>
 					}
 					{videoFormat === 1 &&
@@ -168,72 +184,85 @@ export default function MultiviewCustomNavBar(props){
 					}{videoFormat === 2 &&
                         <div>
                             <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-                                <Form.File multiple id="file" label="Image-set 1 Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+                                <Input multiple id="file" aria-label="Image-set 1 Upload" accept="image/*" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
                             </Form>
                             <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-                                <Form.File multiple id="file" label="Image-set 2 Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+                                <Input multiple id="file" aria-label="Image-set 2 Upload" accept="image/*" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
                             </Form>
                             <Form style={{float: "left",gridColumn: 1, gridRow:4}}>
-                                <Form.File multiple id="file" label="Image-set 3 Upload" accept="image/*" custom type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
+                                <Input multiple id="file" aria-label="Image-set 3 Upload" accept="image/*" type="file" onChange={(event) => {props.handleVideoUpload(event); handleVideoLink(event)}} />
                             </Form>
                         </div>
 					}
 					<Form style={{float: "left",gridColumn: 1, gridRow:5}}>
-						<Form.File disabled={props.disable_buttons} accept=".json" id="file" label="Annotation Upload" custom type="file" onChange={props.handleOldAnnotation}/>
+						<Input disabled={props.disable_buttons} accept=".json" id="file" aria-label="Annotation Upload" type="file" onChange={props.handleOldAnnotation}/>
 					</Form>
-					<NavDropdown.Divider />
+					<Separator className="my-3" />
 					Frame Rate: <input type="number" value={props.frame_rate} onClick={(event) => {props.toggleKeyCheck(false)}} onBlur={(event) => {props.toggleKeyCheck(true)}} onChange={(event) => {props.setFrameRate(parseInt(event.target.value)); setFrameRate(parseInt(event.target.value))}}></input>
-					<NavDropdown.Divider />
+					<Separator className="my-3" />
 					Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 					Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
-					<NavDropdown.Divider />
+					<Separator className="my-3" />
 				</div>
-			</Modal.Body>
-			<Modal.Footer>
-			<Button variant="success" onClick={handleUploadClose}>Upload</Button>
-			</Modal.Footer>
-		</Modal>
+				<DialogFooter>
+					<Button onClick={handleUploadClose}>Upload</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
 		<Navbar sticky="top" bg="dark" variant="dark" className="bg-5">
 				<Navbar.Brand href="#home">AVAT</Navbar.Brand>
 				<Nav className="mr-auto">
-						<NavDropdown disabled={props.disable_buttons} title="Export" id="basic-nav-dropdown">
-							<NavDropdown.Item onClick={handleDownloadJSON}>JSON</NavDropdown.Item>
-							<NavDropdown.Divider />
-							<NavDropdown.Item onClick={handleDownloadCSV}>CSV</NavDropdown.Item>
-						</NavDropdown>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<Button variant="ghost" className="text-white hover:text-white" disabled={props.disable_buttons}>Export</Button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent>
+								<DropdownMenuItem onClick={handleDownloadJSON}>JSON</DropdownMenuItem>
+								<DropdownMenuSeparator />
+								<DropdownMenuItem onClick={handleDownloadCSV}>CSV</DropdownMenuItem>
+							</DropdownMenuContent>
+						</DropdownMenu>
 						<NavLink onClick={handleShow}>Instructions</NavLink>
 						<NavLink onClick={props.handle_link_open}>Report</NavLink>
 				</Nav>
 				<div>
-					<Button variant="outline-success" onClick={handleUploadShow}>Upload</Button>{' '}
+					<Button variant="outline" onClick={handleUploadShow}>Upload</Button>{' '}
 					{
-						editSeg === false && <Button variant="outline-success" onClick={edit_click}>Edit Seg</Button>
+						editSeg === false && <Button variant="outline" onClick={edit_click}>Edit Seg</Button>
 					}
 					{
-						editSeg === true && <Button variant="outline-success" onClick={edit_click}>Confirm</Button>
+						editSeg === true && <Button variant="outline" onClick={edit_click}>Confirm</Button>
 					}
 					{' '}
-					<Dropdown as={ButtonGroup}>
-						<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
-						<Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
-						<Dropdown.Menu>
+					<DropdownMenu>
+						<ButtonGroup>
+							<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
+							<DropdownMenuTrigger asChild>
+								<Button variant="secondary" aria-label="Frame options">v</Button>
+							</DropdownMenuTrigger>
+						</ButtonGroup>
+						<DropdownMenuContent>
 							Skip Value: <input type='number' defaultValue="1" onChange={(event) => {props.change_skip_value(parseInt(event.target.value))}}></input>
 							Playback Rate: <input type='number' defaultValue="1" onChange={(event) => {props.handleSetPlaybackRate(parseInt(event.target.value))}}></input>
-						</Dropdown.Menu>
-					</Dropdown>{' '}
+						</DropdownMenuContent>
+					</DropdownMenu>{' '}
 					
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
-					<Button variant="primary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
-					<Dropdown as={ButtonGroup} drop='left'>
-						<Button variant="success" onClick={props.addToCanvas}>Add</Button>
-						<Dropdown.Toggle split variant="success" id="dropdown-split-basic" />
-						<Dropdown.Menu>
-							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("1")}}>Behavior Annotation</Dropdown.Item>
-							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("2")}}>BoundingBox</Dropdown.Item>
-							<Dropdown.Item onClick={(event) =>{props.change_annotation_type("3")}}>Segmentation</Dropdown.Item>
-						</Dropdown.Menu>
-					</Dropdown>
+					<Button disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
+					<Button disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
+					<Button disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
+					<DropdownMenu>
+						<ButtonGroup>
+							<Button onClick={props.addToCanvas}>Add</Button>
+							<DropdownMenuTrigger asChild>
+								<Button aria-label="Annotation type options">v</Button>
+							</DropdownMenuTrigger>
+						</ButtonGroup>
+						<DropdownMenuContent align="end">
+							<DropdownMenuItem onClick={(event) =>{props.change_annotation_type("1")}}>Behavior Annotation</DropdownMenuItem>
+							<DropdownMenuItem onClick={(event) =>{props.change_annotation_type("2")}}>BoundingBox</DropdownMenuItem>
+							<DropdownMenuItem onClick={(event) =>{props.change_annotation_type("3")}}>Segmentation</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 					{/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
 				</div>
 		</Navbar>

@@ -2,17 +2,16 @@ import React from 'react';
 import { useState } from 'react';
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import Navbar from 'react-bootstrap/Navbar'
-import Nav from 'react-bootstrap/Nav'
-import Button from 'react-bootstrap/Button'
-import { NavDropdown, NavLink } from 'react-bootstrap';
-import Form from 'react-bootstrap/Form'
-import Dropdown from 'react-bootstrap/Dropdown'
-import { ButtonGroup } from 'react-bootstrap';
-import Modal from 'react-bootstrap/Modal'
 import Carousel from 'react-bootstrap/Carousel'
-
-import { Container, Jumbotron, Col, Row, Card} from "react-bootstrap";
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Card } from '@/components/ui/card';
 
 
 import videoFrameExtract from '../../processing/video_to_frame';
@@ -45,11 +44,11 @@ export default function ProcessVideo(props){
     }
     console.log(test_frame)
     return(
-        <Modal show={show} onHide={handleClose} size='lg' animation={false}>
-            <Modal.Header closeButton>
-            <Modal.Title>Processing Video...</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
+        <Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
+            <DialogContent className="sm:max-w-3xl">
+            <DialogHeader>
+            <DialogTitle>Processing Video...</DialogTitle>
+            </DialogHeader>
                 <div>
                     <video id='process_vid' style={{objectFit: 'contain', height: '100%', width: '100%'}} src={props.video_link}></video>
                     <Button onClick={handleProcess} enable={frames!=null} >Process Video</Button>
@@ -64,7 +63,7 @@ export default function ProcessVideo(props){
                                             <Card className="mb-5 box-shadow" top
                                                 width='100%'
                                             >
-                                                <Card.Img style={{objectFit: 'contain', height: '100%', width: '100%'}} src={x} />
+                                                <img style={{objectFit: 'contain', height: '100%', width: '100%'}} src={x} />
                                             </Card>
                                         </Carousel.Item>
                                     )
@@ -74,10 +73,10 @@ export default function ProcessVideo(props){
                         </Carousel>
                     }
                 </div>
-            </Modal.Body>
-            <Modal.Footer>
+            <DialogFooter>
             <Button variant="secondary" onClick={handleClose}>Close</Button>
-            </Modal.Footer>
-        </Modal>
+            </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }

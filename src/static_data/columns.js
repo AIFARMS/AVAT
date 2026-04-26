@@ -4,7 +4,7 @@ import {behaviors} from './behaviors'
 import {posture} from './posture'
 import {status} from './status'
 import {confidence} from './confidence'
-import Button from 'react-bootstrap/Button'
+import { Button } from '@/components/ui/button'
 
 const columns = (remove_table_index) => [{
   dataField: "id",
@@ -46,7 +46,8 @@ const columns = (remove_table_index) => [{
     <div>
       Del
       <Button
-        className="btn btn-danger btn-xs"
+        variant="destructive"
+        size="xs"
         onClick={() => remove_table_index()}
         label="Del"
       >
@@ -57,7 +58,8 @@ const columns = (remove_table_index) => [{
     return (
       <div>        
         <Button
-          className="btn btn-danger btn-xs"
+          variant="destructive"
+          size="xs"
             onClick={() => remove_table_index(row.id)}
             label="Del"
           >
