@@ -20,13 +20,16 @@ export async function downloadFileJSON (frame_data, VIDEO_METADATA) {
 //Legacy code below - Can be refrenced later IF need for CSV is present. Currently broken.
 function convert_data_csv(data, columns){
     console.log(columns)
+    columns = getLeafColumns(columns)
     var csv = new Array(data.length + 1)
     for(var i = 0; i < csv.length; i++){
         csv[i] = []
     }
     csv[0].push("frame_num")
     for(var i = 0; i < columns.length; i++){
-        csv[0].push(columns[i]['dataField'])
+        if(columns[i]['accessorKey']){
+            csv[0].push(columns[i]['accessorKey'])
+        }
     }
     for(var i = 0; i < data.length; i++){
         for(var j = 0; j < data[i].length; j++){
@@ -39,6 +42,21 @@ function convert_data_csv(data, columns){
     }
     csv = csv.join("\n")
     return csv
+}
+
+function getLeafColumns(columns){
+    var leafColumns = []
+    if(!columns){
+        return leafColumns
+    }
+    for(var i = 0; i < columns.length; i++){
+        if(columns[i].columns){
+            leafColumns = leafColumns.concat(getLeafColumns(columns[i].columns))
+        }else{
+            leafColumns.push(columns[i])
+        }
+    }
+    return leafColumns
 }
 
 export async function downloadFileCSV (ANNOTATION_VIDEO_NAME, ANNOTATOR_NAME, annotation_data, columns) {

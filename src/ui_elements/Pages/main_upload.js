@@ -196,10 +196,12 @@ export default function MainUpload() {
 	const create_annotation = (id) => {
 		var columns = getColumnData()
 		var new_data = {}
-		columns = columns['data']['columns']['columns']
+		columns = getLeafColumns(columns['data']['columns'])
 		for(var i = 0; i < columns.length; i++){
 			var curr_val = columns[i]
-			new_data[curr_val.accessor] = ""
+			if(curr_val.accessorKey){
+				new_data[curr_val.accessorKey] = ""
+			}
 		}
 		if(inputType === INPUT_IMAGE){
 			new_data['dataType'] = "image"
@@ -210,6 +212,21 @@ export default function MainUpload() {
 		}
 		new_data['id'] = id
 		return new_data
+	}
+
+	const getLeafColumns = (columns) => {
+		var leafColumns = []
+		if(!columns){
+			return leafColumns
+		}
+		for(var i = 0; i < columns.length; i++){
+			if(columns[i].columns){
+				leafColumns = leafColumns.concat(getLeafColumns(columns[i].columns))
+			}else{
+				leafColumns.push(columns[i])
+			}
+		}
+		return leafColumns
 	}
 
 	const toggle_segmentation = (event) => {

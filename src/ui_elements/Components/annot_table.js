@@ -1,132 +1,154 @@
 import React from 'react'
-import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData} from '../../processing/actions'
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
 
-import { useTable, usePagination } from 'react-table'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
+import { getFrameData, getAnnotationData, updateAnnotationData, updateFrameData } from '../../processing/actions'
 
-export default function AnnotTable({columns, data, select_data, current_frame, change_annot}){
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-      } = useTable({
-        columns,
-        data,
-      })
-      if(!columns){
+export default function AnnotTable({columns, data, select_data, current_frame}){
+    const tableColumns = React.useMemo(
+        () => withAnnotationCells(columns || [], select_data || {}, current_frame),
+        [columns, select_data, current_frame]
+    )
+
+    const table = useReactTable({
+        columns: tableColumns,
+        data: data || [],
+        getCoreRowModel: getCoreRowModel(),
+    })
+
+    if(!columns || columns.length === 0){
         return (
-            <div>
-                {"No column upload detected."}
+            <div className="rounded-md border p-3 text-sm text-muted-foreground">
+                No column upload detected.
             </div>
         )
     }
 
     return(
-        <table {...getTableProps()} style={{ border: 'solid 1px blue' }}>
-            <thead>
-                {headerGroups.map(headerGroup => (
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                    {headerGroup.headers.map(column => (
-                    <th {...column.getHeaderProps()} 
-                    style={{
-                      background: '#657',
-                      color: 'white',
-                      fontWeight: 'bold'
-                    }}>{column.render('Header')}</th>
-                    ))}
-                </tr>
+        <Table className="border">
+            <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                            <TableHead key={header.id} className="bg-zinc-700 text-white">
+                                {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                            </TableHead>
+                        ))}
+                    </TableRow>
                 ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-                {rows.map((row, i) => {
-                    prepareRow(row)
-                    const {id, global_id, posture, behavior, confidence} = row
-                    var selection = genSelection(row.original, select_data, columns, i, current_frame)
-                    return(selection)
-                })}
-            </tbody>
-        </table>
+            </TableHeader>
+            <TableBody>
+                {table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                            <TableCell key={cell.id}>
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                        ))}
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
     )
 }
 
-const change_row = (e) => {
-    var curr_data = getAnnotationData(e.target.dataset.curr)
-    if (curr_data.length === 0){
-        alert("Row changing value failed - please report this bug.")
-        return;
-    }
-    curr_data[e.target.id][e.target.dataset.type] = e.target.value
-    updateAnnotationData(parseInt(e.target.dataset.curr), curr_data)
+function withAnnotationCells(columns, selectData, currentFrame){
+    return columns.map((column) => {
+        if(column.columns){
+            return {
+                ...column,
+                columns: withAnnotationCells(column.columns, selectData, currentFrame),
+            }
+        }
+
+        const columnId = column.accessorKey || column.id
+        return {
+            ...column,
+            cell: column.cell || ((context) => renderAnnotationCell(context, columnId, selectData, currentFrame)),
+        }
+    })
 }
 
-const delete_row = (e) => {
-    var curr_data = getAnnotationData(e.target.dataset.curr)
+function renderAnnotationCell({ row, getValue }, columnId, selectData, currentFrame){
+    const rowIndex = row.index
+    const value = getValue() || ''
+
+    if(columnId === 'id'){
+        return value
+    }
+
+    if(columnId === 'remove'){
+        return (
+            <Button
+                type="button"
+                variant="destructive"
+                size="xs"
+                onClick={() => deleteRow(currentFrame, rowIndex)}
+            >
+                Del
+            </Button>
+        )
+    }
+
+    if(selectData[columnId]){
+        return (
+            <NativeSelect
+                size="sm"
+                defaultValue={value}
+                onChange={(event) => updateCell(currentFrame, rowIndex, columnId, event.target.value)}
+            >
+                <NativeSelectOption value=""></NativeSelectOption>
+                {selectData[columnId].map((option) => (
+                    <NativeSelectOption key={option.value} value={option.value}>{option.value}</NativeSelectOption>
+                ))}
+            </NativeSelect>
+        )
+    }
+
+    return (
+        <Input
+            className="h-7 min-w-24"
+            defaultValue={value}
+            onChange={(event) => updateCell(currentFrame, rowIndex, columnId, event.target.value)}
+        />
+    )
+}
+
+function updateCell(currentFrame, rowIndex, columnId, value){
+    var curr_data = getAnnotationData(currentFrame)
+    if (curr_data.length === 0){
+        alert("Row changing value failed - please report this bug.")
+        return
+    }
+    curr_data[rowIndex][columnId] = value
+    updateAnnotationData(parseInt(currentFrame), curr_data)
+}
+
+function deleteRow(currentFrame, rowIndex){
+    var curr_data = getAnnotationData(currentFrame)
     if (curr_data.length === 0){
         alert("Row deletion failed - please report this bug.")
-        return;
+        return
     }
-    var annot_delte = curr_data[e.target.id]['id']
-    console.log(annot_delte)
-    curr_data.splice(e.target.id, 1)
-    updateAnnotationData(parseInt(e.target.dataset.curr), curr_data)
-    var curr_img_data = getFrameData(e.target.dataset.curr)
+    var annot_delete = curr_data[rowIndex]['id']
+    curr_data.splice(rowIndex, 1)
+    updateAnnotationData(parseInt(currentFrame), curr_data)
+
+    var curr_img_data = getFrameData(currentFrame)
     for(var i = 0; i < curr_img_data.length; i++){
-        if(curr_img_data[i].objects[1].text == annot_delte){
+        if(curr_img_data[i].objects[1].text == annot_delete){
             curr_img_data.splice(i, 1)
         }
     }
-    updateFrameData(parseInt(e.target.dataset.curr), curr_img_data)
-}
-
-function genSelection(elem, select_data, columns, curr_idx, current_frame){
-    var row_vals = []
-    console.log(current_frame)
-    for(var i = 0; i < columns[0].columns.length; i++){
-        var curr_elem = columns[0].columns[i]['accessor']
-        if(!check_keys(select_data, curr_elem)){
-            continue
-        }
-        let temp = (
-            <select id={curr_idx} data-type={curr_elem} data-curr={current_frame} defaultValue={elem[curr_elem]} onChange={change_row}>
-                <option value=""></option>
-                {
-                    select_data[curr_elem].map((beh, _) => {
-                        return(
-                            <option value={beh.value}>{beh.value}</option>
-                        )
-                    })
-                }
-            </select>
-        )
-        row_vals.push(temp)
-    }
-    
-    let combined_elems = (
-        <tr key={elem.id}>
-            <td>{elem.id}</td>
-            <td>
-                <input type={"text"} style={{width: "50%"}} defaultValue={elem.global_id} id={curr_idx} data-type={"global_id"} data-curr={current_frame} onChange={change_row}></input>
-            </td>
-            {
-                row_vals.map((i, j) => {
-                    return(<td id={j}>{i}</td>)
-                })
-            }
-            <td>
-                <input type={"button"} style={{backgroundColor: "#f44336"}} defaultValue={elem.global_id} id={curr_idx} data-type={"global_id"} data-curr={current_frame} onClick={delete_row}></input>
-            </td>
-        </tr>
-    )
-    return combined_elems
-}
-
-function check_keys(obj, key){
-    let obj_keys = Object.keys(obj)
-    for(var i = 0; i < obj_keys.length; i++){
-        if(obj_keys[i] === key){
-            return true
-        }
-    }
-    return false
+    updateFrameData(parseInt(currentFrame), curr_img_data)
 }
