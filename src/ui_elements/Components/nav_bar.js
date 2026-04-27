@@ -186,9 +186,9 @@ export default function CustomNavBar(props) {
 					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
 					<DropdownMenu>
 						<ButtonGroup>
-							<Button onClick={props.addToCanvas}>Add</Button>
+							<Button variant="success" onClick={props.addToCanvas}>Add</Button>
 							<DropdownMenuTrigger asChild>
-								<Button aria-label="Annotation type options">v</Button>
+								<Button variant="success" aria-label="Annotation type options">v</Button>
 							</DropdownMenuTrigger>
 						</ButtonGroup>
 						<DropdownMenuContent align="end">
@@ -254,12 +254,12 @@ export default function CustomNavBar(props) {
 					<div className="flex flex-wrap items-center gap-2">
 						<Button size="sm" variant="secondary" disabled={controlsDisabled} onClick={props.skip_frame_backward}>Prev</Button>
 						{props.mediaType === INPUT_VIDEO &&
-							<Button size="sm" disabled={controlsDisabled} onClick={handlePlaying}>{playText}</Button>
+							<Button size="sm" variant="media" disabled={controlsDisabled} onClick={handlePlaying}>{playText}</Button>
 						}
 						<Button size="sm" variant="secondary" disabled={controlsDisabled} onClick={props.skip_frame_forward}>Next</Button>
-						<Button size="sm" variant="outline" disabled={controlsDisabled} onClick={props.goToPreviousAnnotatedFrame}>Prev Annotated</Button>
-						<Button size="sm" variant="outline" disabled={controlsDisabled} onClick={props.goToNextAnnotatedFrame}>Next Annotated</Button>
-						<Button size="sm" variant="outline" disabled={controlsDisabled} onClick={props.goToNextIncompleteFrame}>Next Incomplete</Button>
+						<Button size="sm" variant="surface" disabled={controlsDisabled} onClick={props.goToPreviousAnnotatedFrame}>Prev Annotated</Button>
+						<Button size="sm" variant="surface" disabled={controlsDisabled} onClick={props.goToNextAnnotatedFrame}>Next Annotated</Button>
+						<Button size="sm" variant="surface" disabled={controlsDisabled} onClick={props.goToNextIncompleteFrame}>Next Incomplete</Button>
 					</div>
 					<Input
 						className="h-2 w-full cursor-pointer border-0 bg-transparent px-0 accent-white"

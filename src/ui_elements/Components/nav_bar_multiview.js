@@ -241,14 +241,14 @@ export default function MultiviewCustomNavBar(props){
 						</DropdownMenuContent>
 					</DropdownMenu>{' '}
 					
-					<Button disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
-					<Button disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
-					<Button disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
+					<Button variant="secondary" disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
+					<Button variant="media" disabled={props.disable_buttons} onClick={props.handlePlaying}>{props.play_button_text}</Button>{' '}
+					<Button variant="secondary" disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
 					<DropdownMenu>
 						<ButtonGroup>
-							<Button onClick={props.addToCanvas}>Add</Button>
+							<Button variant="success" onClick={props.addToCanvas}>Add</Button>
 							<DropdownMenuTrigger asChild>
-								<Button aria-label="Annotation type options">v</Button>
+								<Button variant="success" aria-label="Annotation type options">v</Button>
 							</DropdownMenuTrigger>
 						</ButtonGroup>
 						<DropdownMenuContent align="end">

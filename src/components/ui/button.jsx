@@ -9,15 +9,21 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        default: "bg-blue-600 text-white hover:bg-blue-700 aria-expanded:bg-blue-700 aria-expanded:text-white",
         outline:
-          "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
+          "border-zinc-300 bg-white text-zinc-950 hover:bg-zinc-100 aria-expanded:bg-zinc-100 aria-expanded:text-zinc-950 dark:border-input dark:bg-input/30 dark:text-foreground dark:hover:bg-input/50",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
+          "bg-zinc-200 text-zinc-950 hover:bg-zinc-300 aria-expanded:bg-zinc-300 aria-expanded:text-zinc-950",
+        success:
+          "bg-emerald-600 text-white hover:bg-emerald-700 aria-expanded:bg-emerald-700 aria-expanded:text-white",
+        media:
+          "bg-indigo-500 text-white hover:bg-indigo-600 aria-expanded:bg-indigo-600 aria-expanded:text-white",
+        surface:
+          "border-white/20 bg-white/10 text-zinc-100 hover:bg-white/20 hover:text-white aria-expanded:bg-white/20 aria-expanded:text-white",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
-          "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+          "bg-red-600 text-white hover:bg-red-700 focus-visible:border-red-400 focus-visible:ring-red-500/30 dark:focus-visible:ring-red-500/40",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
