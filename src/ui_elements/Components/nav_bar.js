@@ -44,6 +44,7 @@ export default function CustomNavBar(props) {
 	const [stateSkipValue, setStateSkipValue] = useState(null)
 
 	const play_redux = useSelector(state => state.play_status.play)
+	const annotationTool = props.annotation_tool || { label: "Behavior Annotation", shortcut: "1" }
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -109,6 +110,11 @@ export default function CustomNavBar(props) {
 					<Button variant="ghost" className="text-white hover:text-white" onClick={handleShow}>Instructions</Button>
 					<Button variant="ghost" className="text-white hover:text-white" onClick={props.handle_link_open}>Report</Button>
 				</nav>
+				<div className="hidden items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm sm:flex">
+					<span className="text-zinc-300">Tool</span>
+					<span className="font-semibold">{annotationTool.label}</span>
+					<span className="rounded bg-white/15 px-1.5 py-0.5 text-xs text-zinc-200">Add A</span>
+				</div>
 				<div className="flex items-center gap-2">
 					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
 					{' '}

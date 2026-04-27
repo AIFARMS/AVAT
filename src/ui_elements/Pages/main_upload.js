@@ -37,6 +37,13 @@ import { useSelector } from "react-redux";
 // Data imports
 import default_column from '../../static_data/basic_column_config.json'
 
+const ANNOTATION_TOOL_DETAILS = {
+	[ANNOTATION_FRAME]: { label: "Behavior Annotation", shortcut: "1" },
+	[ANNOTATION_BBOX]: { label: "Bounding Box", shortcut: "2" },
+	[ANNOTATION_SEG]: { label: "Segmentation", shortcut: null },
+	[ANNOTATION_KEYPOINT]: { label: "Key Point", shortcut: "4" },
+}
+
 const NAV_HEIGHT = 48;
 const WORKSPACE_PADDING = 24;
 const WORKSPACE_GAP = 12;
@@ -108,6 +115,7 @@ export default function MainUpload() {
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [isLoading, setIsLoading] = useState(true)
 	const [isUploadModalOpen, setIsUploadModalOpen] = useState(true)
+	const [toastText, setToastText] = useState("")
 
 	//New state vars
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
@@ -331,8 +339,19 @@ export default function MainUpload() {
 		}
 	}
 
+	const getAnnotationToolDetails = (toolType) => {
+		return ANNOTATION_TOOL_DETAILS[toolType] || { label: "Unknown Tool", shortcut: null }
+	}
+
+	const showToast = (message) => {
+		toast_text = message
+		setToastText(message)
+		changeSave(true)
+	}
+
 	const change_annotation_type = (event) => {
 		setAnnotationType(event)
+		showToast("Switched to " + getAnnotationToolDetails(event).label)
 	}
 
 	const onKeyPress = (event) =>{
@@ -348,33 +367,17 @@ export default function MainUpload() {
 			return;
 		}
 		if (event.key === ANNOTATION_BBOX){
-			toast_text = "Mode Switch: Bounding Box"
-			changeSave(true)
-			setAnnotationType(ANNOTATION_BBOX)
+			change_annotation_type(ANNOTATION_BBOX)
 		}else if (event.key === ANNOTATION_KEYPOINT){
-			toast_text = "Mode Switch: Key Point"
-			changeSave(true)
-			setAnnotationType(ANNOTATION_KEYPOINT)
+			change_annotation_type(ANNOTATION_KEYPOINT)
 		}else if(event.key === ANNOTATION_SEG) {
 			// toast_text = "Mode Switch: Segmentation"
 			// changeSave(true)
 			// setAnnotationType(ANNOTATION_SEG)
 		}else if(event.key === ANNOTATION_FRAME){
-			toast_text = "Mode Switch: Behavior Annotation"
-			changeSave(true)
-			setAnnotationType(ANNOTATION_FRAME)
+			change_annotation_type(ANNOTATION_FRAME)
 		}else if (event.key === "a"){
-			var annotext = ""
-			if(annotationType === ANNOTATION_BBOX){
-				annotext = "Bounding Box"
-			}else if(annotationType === ANNOTATION_FRAME){
-				annotext = "Behavior Data"
-			}else if (annotationType === ANNOTATION_KEYPOINT){
-				annotext = "Keypoint"
-			}else if (annotationType === ANNOTATION_SEG){
-				annotext = "Segmentation"
-			}
-			toast_text = "Added Annotation - " + annotext
+			showToast("Added Annotation - " + getAnnotationToolDetails(annotationType).label)
 			if(annotationType !== ANNOTATION_SEG){
 				changeSave(true)
 			}
@@ -397,9 +400,9 @@ export default function MainUpload() {
 		if (!save) {
 			return;
 		}
-		const timeout = setTimeout(() => changeSave(false), 500);
+		const timeout = setTimeout(() => changeSave(false), 1200);
 		return () => clearTimeout(timeout);
-	}, [save]);
+	}, [save, toastText]);
 	
 
 	const handle_visual_toggle = () => {
@@ -462,6 +465,7 @@ export default function MainUpload() {
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
 				change_annotation_type={change_annotation_type}
+				annotation_tool={getAnnotationToolDetails(annotationType)}
 				VIDEO_METADATA={VIDEO_METADATA}
 				toggleKeyCheck={toggleKeyCheck}
 				onUploadModalChange={setIsUploadModalOpen}
@@ -469,7 +473,7 @@ export default function MainUpload() {
 			/>
 			{save &&
 				<div className="absolute left-[100px] top-[100px] z-[100] rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-md">
-					{toast_text}
+					{toastText || toast_text}
 				</div>
 			}
 			{
