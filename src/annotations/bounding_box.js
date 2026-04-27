@@ -18,7 +18,9 @@ class BoundingBox {
             height: this.height,
             width: this.width,
             fill: this.color,
-            opacity: '.4',
+            opacity: '.28',
+            stroke: this.color,
+            strokeWidth: 2,
             top: this.top,
             left: this.left,
         });
@@ -27,9 +29,12 @@ class BoundingBox {
     //TODO Add text scaling
     id_text(){
         return new fabric.Text(this.id.toString(), {
-            fontSize: 20,
-            top: this.top,
-            left: this.left,
+            fontSize: 16,
+            fontWeight: 'bold',
+            top: this.top + 3,
+            left: this.left + 4,
+            fill: 'white',
+            backgroundColor: 'rgba(0,0,0,0.7)',
             uniScaleTransform: false,
           });
     }
@@ -38,6 +43,12 @@ class BoundingBox {
         var group = new fabric.Group([this.rectangle(), this.id_text()],{
             borderColor: '#000000',
             hasBorders: true,
+            cornerColor: '#ffffff',
+            cornerStrokeColor: '#111827',
+            cornerSize: 10,
+            transparentCorners: false,
+            hasRotatingPoint: false,
+            lockRotation: true,
             uniScaleTransform: true
         });
         /* var box = new boundingbox({
@@ -65,6 +76,13 @@ class BoundingBox {
 
         var temp = this.id 
         group.local_id = temp
+        group.toObject = (function(toObject) {
+            return function() {
+                return fabric.util.object.extend(toObject.call(this), {
+                    local_id: this.local_id
+                });
+            };
+        })(group.toObject);
         //canvas.add(group)
         //console.log(group.toJSON())
         return group.toJSON()

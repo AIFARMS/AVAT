@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 import { getFrameSource } from '../../processing/frame_source_registry'
+import { BoundingBox } from '../../annotations/bounding_box'
 
 
 const canvasBackgroundUpdate = (currFrameData, inputType, image_url, scaling_factor_width, scaling_factor_height, fabricCanvas, remove_obj=true) => {
@@ -79,6 +80,7 @@ export default function FabricRender(props){
 	const [frameToUpdate, setFrameToUpdate] = useState(0)
 	const frameCanvasRef = useRef(null)
 	const renderRequestRef = useRef(0)
+	const lastDeleteRequestRef = useRef(0)
 	const metadata_redux = useSelector(state => state.metadata)
 	const frame_redux = useSelector(state => state.frame_data)
 	const image_data_store = useSelector(state => state.media_data)
@@ -201,6 +203,154 @@ export default function FabricRender(props){
 			fabricCanvas.renderAll()
 		}
 	}, [fabricCanvas, props.scaling_factor_height, props.scaling_factor_width])
+
+	useEffect(() => {
+		if(!fabricCanvas || !props.pendingBoundingBox){
+			return
+		}
+
+		let isDrawing = false
+		let originX = 0
+		let originY = 0
+		let previewRect = null
+		const previousSelection = fabricCanvas.selection
+		const previousCursor = fabricCanvas.defaultCursor
+
+		fabricCanvas.discardActiveObject()
+		fabricCanvas.selection = false
+		fabricCanvas.defaultCursor = 'crosshair'
+		fabricCanvas.forEachObject((object) => {
+			object.selectable = false
+		})
+		fabricCanvas.requestRenderAll()
+
+		const cleanupPreview = () => {
+			if(previewRect){
+				fabricCanvas.remove(previewRect)
+				previewRect = null
+			}
+		}
+
+		const finishDrawingMode = () => {
+			fabricCanvas.selection = previousSelection
+			fabricCanvas.defaultCursor = previousCursor
+			fabricCanvas.forEachObject((object) => {
+				object.selectable = true
+			})
+			fabricCanvas.requestRenderAll()
+		}
+
+		const handleMouseDown = (event) => {
+			if(event.e.altKey){
+				return
+			}
+			const pointer = fabricCanvas.getPointer(event.e)
+			isDrawing = true
+			originX = pointer.x
+			originY = pointer.y
+			previewRect = new fabric.Rect({
+				left: originX,
+				top: originY,
+				originX: 'left',
+				originY: 'top',
+				width: 0,
+				height: 0,
+				fill: props.pendingBoundingBox.color,
+				opacity: 0.28,
+				stroke: props.pendingBoundingBox.color,
+				strokeWidth: 2,
+				selectable: false,
+				evented: false,
+			})
+			fabricCanvas.add(previewRect)
+		}
+
+		const handleMouseMove = (event) => {
+			if(!isDrawing || !previewRect){
+				return
+			}
+			const pointer = fabricCanvas.getPointer(event.e)
+			previewRect.set({
+				left: Math.min(originX, pointer.x),
+				top: Math.min(originY, pointer.y),
+				width: Math.abs(originX - pointer.x),
+				height: Math.abs(originY - pointer.y),
+			})
+			fabricCanvas.requestRenderAll()
+		}
+
+		const handleMouseUp = () => {
+			if(!isDrawing || !previewRect){
+				return
+			}
+
+			isDrawing = false
+			const left = previewRect.left
+			const top = previewRect.top
+			const width = previewRect.width
+			const height = previewRect.height
+			cleanupPreview()
+
+			if(width < 6 || height < 6){
+				finishDrawingMode()
+				props.onBoundingBoxCancelled?.()
+				return
+			}
+
+			const boxData = new BoundingBox(top, left, width, height, props.pendingBoundingBox.color, props.pendingBoundingBox.id, "None").generate_no_behavior()
+			fabric.util.enlivenObjects([boxData], function (enlivenedObjects){
+				const boxObject = enlivenedObjects[0]
+				boxObject.local_id = props.pendingBoundingBox.id
+				boxObject.set({
+					cornerColor: '#ffffff',
+					cornerStrokeColor: '#111827',
+					cornerSize: 10,
+					transparentCorners: false,
+					lockRotation: true,
+					hasRotatingPoint: false,
+				})
+				fabricCanvas.add(boxObject)
+				fabricCanvas.setActiveObject(boxObject)
+				finishDrawingMode()
+				updateFrameData(store.getState().current_frame['data'], fabricCanvas.getObjects())
+				props.onBoundingBoxCreated?.(props.pendingBoundingBox)
+			})
+		}
+
+		fabricCanvas.on('mouse:down', handleMouseDown)
+		fabricCanvas.on('mouse:move', handleMouseMove)
+		fabricCanvas.on('mouse:up', handleMouseUp)
+
+		return () => {
+			fabricCanvas.off('mouse:down', handleMouseDown)
+			fabricCanvas.off('mouse:move', handleMouseMove)
+			fabricCanvas.off('mouse:up', handleMouseUp)
+			cleanupPreview()
+			finishDrawingMode()
+		}
+	}, [fabricCanvas, props.pendingBoundingBox])
+
+	useEffect(() => {
+		if(!fabricCanvas || !props.deleteSelectedRequest || props.deleteSelectedRequest === lastDeleteRequestRef.current){
+			return
+		}
+
+		lastDeleteRequestRef.current = props.deleteSelectedRequest
+		const activeObject = fabricCanvas.getActiveObject()
+		if(!activeObject || activeObject.type !== 'group'){
+			return
+		}
+
+		const localId = activeObject.local_id || activeObject.item?.(1)?.text
+		if(!localId){
+			return
+		}
+
+		fabricCanvas.remove(activeObject)
+		fabricCanvas.discardActiveObject()
+		updateFrameData(store.getState().current_frame['data'], fabricCanvas.getObjects())
+		props.onBoundingBoxDeleted?.(localId)
+	}, [fabricCanvas, props.deleteSelectedRequest])
 
 	useEffect(() => {
 		if(fabricCanvas){

@@ -19,9 +19,6 @@ import ExportingAnnotation from '../../processing/exporting_annotation'
 import { getFrameSource, loadFrameSource } from '../../processing/frame_source_registry'
 import { deleteAutosaveSession, getAutosaveSession, saveAutosaveSession } from '../../processing/session_autosave'
 
-//Annotations
-import { BoundingBox } from '../../annotations/bounding_box'
-
 //Column information + data structure
 import {columns} from '../../static_data/columns'
 import {ANNOTATION_FRAME, ANNOTATION_BBOX, ANNOTATION_KEYPOINT, ANNOTATION_SEG} from '../../static_data/constants'
@@ -61,6 +58,7 @@ const WORKSPACE_GAP = 12;
 const SIDE_PANEL_WIDTH = 560;
 const VIDEO_ASPECT_RATIO = 16 / 9;
 const AUTOSAVE_DEBOUNCE_MS = 1500;
+const BBOX_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
 
 const autosaveStatusText = {
 	idle: "Autosave ready",
@@ -157,6 +155,8 @@ export default function MainUpload() {
 	const [lastSavedAt, setLastSavedAt] = useState(null)
 	const [autosaveError, setAutosaveError] = useState("")
 	const [forceUploadClosedToken, setForceUploadClosedToken] = useState(0)
+	const [pendingBoundingBox, setPendingBoundingBox] = useState(null)
+	const [deleteSelectedRequest, setDeleteSelectedRequest] = useState(0)
 	const autosaveTimeoutRef = useRef(null)
 	const autosaveReadyRef = useRef(false)
 	const restoredAutosaveRef = useRef(false)
@@ -372,8 +372,6 @@ export default function MainUpload() {
 	}, [imagedata_redux, metadata_redux.total_frames, metadata_redux.media_type])
 
 	const addToCanvas = () => {
-		var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
-		
 		if(currAnnotationData == null){
 			setCurrAnnotationData([])
 		}
@@ -381,13 +379,8 @@ export default function MainUpload() {
 		var annotation_type_txt = "error"
 
 		if (annotationType === ANNOTATION_BBOX){
-			annotation_type_txt = "b"
-			var new_bbox = new BoundingBox(50, 50, 50, 50, color, boxCount+'b', "None").generate_no_behavior()
-			var frame_dat = getFrameData(getCurrentFrame())
-			frame_dat = Object.assign([], frame_dat)
-			frame_dat.push(new_bbox)
-			updateFrameData(currframe_redux, frame_dat)
-			//updateFrameData(currframe_redux, [new_bbox])
+			beginBoundingBoxDraw()
+			return
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
@@ -405,6 +398,52 @@ export default function MainUpload() {
 		updateAnnotationData(currframe_redux, saved_annot)
 
 		setBoxCount(boxCount + 1);
+	}
+
+	const beginBoundingBoxDraw = () => {
+		if(pendingBoundingBox){
+			showToast("Drag on the media to finish the current bounding box")
+			return
+		}
+
+		const id = boxCount + 'b'
+		setPendingBoundingBox({
+			id,
+			color: BBOX_COLORS[boxCount % BBOX_COLORS.length],
+		})
+		showToast("Drag on the media to draw bounding box " + id)
+	}
+
+	const handleBoundingBoxCreated = (boundingBox) => {
+		var saved_annot = getAnnotationData(getCurrentFrame())
+		var generated_annotation = create_annotation(boundingBox.id)
+		saved_annot = Object.assign([], saved_annot)
+		saved_annot.push(generated_annotation)
+		updateAnnotationData(currframe_redux, saved_annot)
+		setPendingBoundingBox(null)
+		setBoxCount(boxCount + 1)
+		showToast("Added bounding box " + boundingBox.id)
+	}
+
+	const handleBoundingBoxCancelled = () => {
+		setPendingBoundingBox(null)
+		showToast("Bounding box cancelled")
+	}
+
+	const handleBoundingBoxDeleted = (localId) => {
+		var curr_data = getAnnotationData(getCurrentFrame()) || []
+		var next_data = curr_data.filter((annotation) => annotation.id !== localId)
+		updateAnnotationData(currframe_redux, next_data)
+		showToast("Removed annotation " + localId)
+	}
+
+	const removeSelectedAnnotation = () => {
+		if(pendingBoundingBox){
+			setPendingBoundingBox(null)
+			showToast("Bounding box cancelled")
+			return
+		}
+		setDeleteSelectedRequest((request) => request + 1)
 	}
 
 
@@ -603,6 +642,40 @@ export default function MainUpload() {
 		goToFrame(targetFrame)
 	}
 
+	const copyPreviousFrameAnnotations = () => {
+		if(currframe_redux <= 0){
+			showToast("No previous frame to copy")
+			return
+		}
+
+		var currentFrameData = getFrameData(currframe_redux) || []
+		var currentAnnotationData = getAnnotationData(currframe_redux) || []
+		if(currentFrameData.length > 0 || currentAnnotationData.length > 0){
+			showToast("Current frame already has annotations")
+			return
+		}
+
+		var previousFrame = currframe_redux - 1
+		var previousFrameData = getFrameData(previousFrame) || []
+		var previousAnnotationData = getAnnotationData(previousFrame) || []
+		if(previousFrameData.length === 0 && previousAnnotationData.length === 0){
+			showToast("Previous frame has no annotations")
+			return
+		}
+
+		var copiedAnnotationData = previousAnnotationData.map((annotation) => {
+			var copiedAnnotation = Object.assign({}, annotation)
+			if(inputType === INPUT_VIDEO){
+				copiedAnnotation.fileName = "frame_" + currframe_redux
+			}
+			return copiedAnnotation
+		})
+
+		updateFrameData(currframe_redux, previousFrameData)
+		updateAnnotationData(currframe_redux, copiedAnnotationData)
+		showToast("Copied annotations from previous frame")
+	}
+
 	const handlePlaybackSpeedChange = (speed) => {
 		var parsedSpeed = parseFloat(speed)
 		setPlaybackSpeed(parsedSpeed > 0 ? parsedSpeed : 1)
@@ -653,6 +726,13 @@ export default function MainUpload() {
 			goToNextAnnotatedFrame()
 		}else if(event.key === "i"){
 			goToNextIncompleteFrame()
+		}else if(event.key === "c"){
+			copyPreviousFrameAnnotations()
+		}else if(event.key === "r"){
+			removeSelectedAnnotation()
+		}else if(event.key === "Escape" && pendingBoundingBox){
+			setPendingBoundingBox(null)
+			showToast("Bounding box cancelled")
 		}
 	}  
 
@@ -755,6 +835,11 @@ export default function MainUpload() {
 						scaling_factor_height={scaling_factor_height}
 						scaling_factor_width={scaling_factor_width}
 						stream_num={i}
+						pendingBoundingBox={pendingBoundingBox}
+						onBoundingBoxCreated={handleBoundingBoxCreated}
+						onBoundingBoxCancelled={handleBoundingBoxCancelled}
+						deleteSelectedRequest={deleteSelectedRequest}
+						onBoundingBoxDeleted={handleBoundingBoxDeleted}
 					/>
 				</div>
 			)
