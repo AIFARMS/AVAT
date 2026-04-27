@@ -33,6 +33,9 @@ export default function Instructions(){
           <li><code>e</code>: Skip forward to the next frame.</li>
           <li><code>q</code>: Skip backward to the previous frame.</li>
           <li><code>w</code>: Toggle pause/play for video.</li>
+          <li><code>[</code>: Jump to the previous annotated frame.</li>
+          <li><code>]</code>: Jump to the next annotated frame.</li>
+          <li><code>i</code>: Jump to the next incomplete or completely unannotated frame.</li>
           <li><code>c</code>: Copy the previous annotation.</li>
           <li><code>f</code>: Toggle scrub mode for quick timeline navigation.</li>
           <li><code>a</code>: Add a new annotation.</li>
@@ -45,7 +48,7 @@ export default function Instructions(){
           The left side of the interface displays the media being annotated. The right side contains the annotation table, including local ID, global ID, descriptors such as posture and behavior, confidence score, and deletion controls.
         </p>
         <p>
-          The top navigation provides export controls, instructions, frame status, playback controls, settings, and annotation actions.
+          The top navigation provides export controls, instructions, settings, and annotation actions. The bottom media bar provides frame status, the timeline scrubber, jump-to-frame input, playback speed, and frame navigation.
         </p>
       </Section>
 

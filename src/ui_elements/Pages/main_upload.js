@@ -40,7 +40,7 @@ import {initFrameData, updateFrameData, getFrameData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
 		initMedia, setMedia,
 		initMetadata, setRes, setFrameRate, setTotalFrames,
-        setSkipValue,
+        setSkipValue, setPlaybackSpeed,
         initColumnData,
 		initPlay, togglePlay} from '../../processing/actions'
 import { useSelector } from "react-redux";
@@ -55,7 +55,7 @@ const ANNOTATION_TOOL_DETAILS = {
 	[ANNOTATION_KEYPOINT]: { label: "Key Point", shortcut: "4" },
 }
 
-const NAV_HEIGHT = 48;
+const NAV_HEIGHT = 160;
 const WORKSPACE_PADDING = 24;
 const WORKSPACE_GAP = 12;
 const SIDE_PANEL_WIDTH = 560;
@@ -171,7 +171,10 @@ export default function MainUpload() {
 	const imagedata_redux = useSelector(state => state.media_data.data)
 	const metadata_redux = useSelector(state => state.metadata)
 	var inputType = metadata_redux['media_type']
-	var skip_value = parseInt(metadata_redux['skip_value'])
+	var skip_value = parseInt(metadata_redux['skip_value']) || 1
+	var total_frames = parseInt(metadata_redux['total_frames']) || 0
+	var frame_rate = parseFloat(metadata_redux['frame_rate']) || 0
+	var playback_speed = parseFloat(metadata_redux['playback_speed']) || 1
 
 	const createAutosavePayload = () => {
 		const state = store.getState()
@@ -236,7 +239,8 @@ export default function MainUpload() {
 				savedMetadata.vertical_res,
 				savedMetadata.frame_rate,
 				savedMetadata.media_type,
-				savedMetadata.total_frames
+				savedMetadata.total_frames,
+				savedMetadata.playback_speed || 1
 			)
 			setSkipValue(savedMetadata.skip_value || 1)
 			if(autosaveCandidate.columnData){
@@ -496,39 +500,29 @@ export default function MainUpload() {
 		})
 	}
   
-	const skip_frame_forward = e =>{
-		var frameVal = currframe_redux + skip_value
-
-		if(frameVal >= metadata_redux['total_frames']){
-			if(inputType === INPUT_IMAGE){
-				setCurrentFrame(metadata_redux['total_frames']-1)
-				return;
-			}
-			setCurrentFrame(metadata_redux['total_frames']-1)
-		}else{
-			if(inputType === INPUT_IMAGE){
-				setCurrentFrame(frameVal)
-				return;
-			}
-			setCurrentFrame(frameVal)
+	const clampFrame = (frameNumber) => {
+		var lastFrame = Math.max(0, total_frames - 1)
+		var parsedFrame = parseInt(frameNumber)
+		if(Number.isNaN(parsedFrame)){
+			return currframe_redux || 0
 		}
+		return Math.min(Math.max(parsedFrame, 0), lastFrame)
+	}
+
+	const goToFrame = (frameNumber) => {
+		setCurrentFrame(clampFrame(frameNumber))
+	}
+
+	const jumpToFrameNumber = (frameNumber) => {
+		goToFrame(parseInt(frameNumber) - 1)
+	}
+
+	const skip_frame_forward = e =>{
+		goToFrame(currframe_redux + skip_value)
 	}
 
 	const skip_frame_backward = e => {
-		var frameVal = currframe_redux - skip_value
-		if(frameVal < 0){
-			if(inputType === INPUT_IMAGE){
-				setCurrentFrame(0)
-				return;
-			}
-			setCurrentFrame(0)
-		}else{
-			if(inputType === INPUT_IMAGE){
-				setCurrentFrame(frameVal)
-				return;
-			}
-			setCurrentFrame(frameVal)
-		}
+		goToFrame(currframe_redux - skip_value)
 	}
 
 	const getAnnotationToolDetails = (toolType) => {
@@ -539,6 +533,79 @@ export default function MainUpload() {
 		toast_text = message
 		setToastText(message)
 		changeSave(true)
+	}
+
+	const getEditableAnnotationKeys = () => {
+		var leafColumns = getLeafColumns(column_redux?.columns || [])
+		return leafColumns
+			.map((column) => column.accessorKey || column.id)
+			.filter((columnId) => columnId && !["id", "remove", "dataType", "fileName"].includes(columnId))
+	}
+
+	const isBlankAnnotationValue = (value) => {
+		return value === undefined || value === null || String(value).trim() === ""
+	}
+
+	const isAnnotatedFrame = (frameNumber) => {
+		return Boolean((frame_redux?.[frameNumber]?.length || 0) > 0 || (annot_redux?.[frameNumber]?.length || 0) > 0)
+	}
+
+	const isIncompleteFrame = (frameNumber) => {
+		var frameAnnotations = annot_redux?.[frameNumber] || []
+		var frameObjects = frame_redux?.[frameNumber] || []
+		if(frameAnnotations.length === 0 && frameObjects.length === 0){
+			return true
+		}
+
+		var editableKeys = getEditableAnnotationKeys()
+		if(editableKeys.length === 0){
+			return false
+		}
+
+		return frameAnnotations.some((annotation) => {
+			return editableKeys.some((columnId) => isBlankAnnotationValue(annotation[columnId]))
+		})
+	}
+
+	const findFrame = (startFrame, step, predicate) => {
+		for(var frameNumber = startFrame; frameNumber >= 0 && frameNumber < total_frames; frameNumber += step){
+			if(predicate(frameNumber)){
+				return frameNumber
+			}
+		}
+		return null
+	}
+
+	const goToPreviousAnnotatedFrame = () => {
+		var targetFrame = findFrame(currframe_redux - 1, -1, isAnnotatedFrame)
+		if(targetFrame === null){
+			showToast("No previous annotated frame")
+			return
+		}
+		goToFrame(targetFrame)
+	}
+
+	const goToNextAnnotatedFrame = () => {
+		var targetFrame = findFrame(currframe_redux + 1, 1, isAnnotatedFrame)
+		if(targetFrame === null){
+			showToast("No next annotated frame")
+			return
+		}
+		goToFrame(targetFrame)
+	}
+
+	const goToNextIncompleteFrame = () => {
+		var targetFrame = findFrame(currframe_redux + 1, 1, isIncompleteFrame)
+		if(targetFrame === null){
+			showToast("No incomplete frame ahead")
+			return
+		}
+		goToFrame(targetFrame)
+	}
+
+	const handlePlaybackSpeedChange = (speed) => {
+		var parsedSpeed = parseFloat(speed)
+		setPlaybackSpeed(parsedSpeed > 0 ? parsedSpeed : 1)
 	}
 
 	const change_annotation_type = (event) => {
@@ -580,6 +647,12 @@ export default function MainUpload() {
 			skip_frame_forward()
 		}else if(event.key === "w"){
 		    togglePlay()
+		}else if(event.key === "["){
+			goToPreviousAnnotatedFrame()
+		}else if(event.key === "]"){
+			goToNextAnnotatedFrame()
+		}else if(event.key === "i"){
+			goToNextIncompleteFrame()
 		}
 	}  
 
@@ -733,9 +806,19 @@ export default function MainUpload() {
 				skip_value={skip_value} 
 				handleOldAnnotation={handleOldAnnotation}
 				currentFrame={currframe_redux}
+				totalFrames={total_frames}
+				frameRate={frame_rate}
+				playbackSpeed={playback_speed}
+				mediaType={inputType}
 				display_frame_num={"Frame #" + parseInt(currframe_redux+1)+' / '+parseInt(metadata_redux['total_frames'])}
+				goToFrame={goToFrame}
+				jumpToFrameNumber={jumpToFrameNumber}
 				skip_frame_forward={skip_frame_forward}
 				skip_frame_backward={skip_frame_backward}
+				goToPreviousAnnotatedFrame={goToPreviousAnnotatedFrame}
+				goToNextAnnotatedFrame={goToNextAnnotatedFrame}
+				goToNextIncompleteFrame={goToNextIncompleteFrame}
+				onPlaybackSpeedChange={handlePlaybackSpeedChange}
 				addToCanvas={addToCanvas}
 				ANNOTATION_VIDEO_NAME={ANNOTATION_VIDEO_NAME}
 				change_annotation_type={change_annotation_type}
@@ -752,13 +835,13 @@ export default function MainUpload() {
 				autosaveError={autosaveError}
 			/>
 			{save &&
-				<div className="absolute left-[100px] top-[100px] z-[100] rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-md">
+				<div className="absolute left-[100px] top-[64px] z-[100] rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-md">
 					{toastText || toast_text}
 				</div>
 			}
 			{
 				upload === true && 
-				<main className="grid min-h-[calc(100vh-48px)] grid-cols-1 gap-3 overflow-auto p-3 xl:h-[calc(100vh-48px)] xl:grid-cols-[minmax(0,1fr)_560px] xl:overflow-hidden">
+				<main className="grid min-h-[calc(100vh-160px)] grid-cols-1 gap-3 overflow-auto p-3 xl:h-[calc(100vh-160px)] xl:grid-cols-[minmax(0,1fr)_560px] xl:overflow-hidden">
 					<section className="min-h-0 overflow-auto rounded-lg bg-zinc-950 p-3 shadow-inner">
 						<div className="flex min-h-full items-start justify-center">
 							{genFabricCanvas()}

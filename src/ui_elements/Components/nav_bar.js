@@ -17,7 +17,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 
 import Instructions from './instructions';
 import { downloadFileJSON } from '../../processing/download';
@@ -25,26 +25,49 @@ import { downloadFileJSON } from '../../processing/download';
 import ExportingAnnotation from '../../processing/exporting_annotation';
 import ProcessVideo from './process_video';
 import store from '../../store'
-import { INPUT_IMAGE, INPUT_VIDEO } from '../../static_data/const'
+import { INPUT_VIDEO } from '../../static_data/const'
 import { useSelector } from "react-redux";
 import UploadModal from './upload_modal';
 
 import { initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData, togglePlay, setTotalFrames } from '../../processing/actions'
 import { init } from '../../reducer/frame_data';
 
+const PLAYBACK_SPEEDS = [0.25, 0.5, 1, 1.5, 2, 4]
+
+const formatTimePart = (value) => String(value).padStart(2, "0")
+
+const formatTimestamp = (seconds) => {
+	var wholeSeconds = Math.max(0, Math.floor(seconds || 0))
+	var hours = Math.floor(wholeSeconds / 3600)
+	var minutes = Math.floor((wholeSeconds % 3600) / 60)
+	var remainingSeconds = wholeSeconds % 60
+	if(hours > 0){
+		return hours + ":" + formatTimePart(minutes) + ":" + formatTimePart(remainingSeconds)
+	}
+	return formatTimePart(minutes) + ":" + formatTimePart(remainingSeconds)
+}
+
 initMedia(1)
 export default function CustomNavBar(props) {
 	const [show, setShow] = useState(false);
 	const [uploadShow, setUploadShow] = useState(true);
-	const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
 	const [process, setProcess] = useState(false)
 	const [playText, setPlayText] = useState(false)
 	const [firstUpload, setFirstUpload] = useState(false)
 	const [stateFrameRate, setStateFrameRate] = useState(null)
 	const [stateSkipValue, setStateSkipValue] = useState(null)
+	const [frameInputValue, setFrameInputValue] = useState("1")
 
 	const play_redux = useSelector(state => state.play_status.play)
 	const annotationTool = props.annotation_tool || { label: "Behavior Annotation", shortcut: "1" }
+	const currentFrame = props.currentFrame || 0
+	const totalFrames = props.totalFrames || 0
+	const hasFrames = totalFrames > 0
+	const controlsDisabled = props.disable_buttons || !hasFrames
+	const scrubberMax = Math.max(totalFrames - 1, 0)
+	const timestampText = props.mediaType === INPUT_VIDEO && props.frameRate > 0
+		? formatTimestamp(currentFrame / props.frameRate) + " / " + formatTimestamp(Math.max(totalFrames - 1, 0) / props.frameRate)
+		: "--:--"
 
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
@@ -64,6 +87,10 @@ export default function CustomNavBar(props) {
 		}
 	}, [props.forceUploadClosedToken])
 
+	useEffect(() => {
+		setFrameInputValue(String(hasFrames ? currentFrame + 1 : 0))
+	}, [currentFrame, hasFrames])
+
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, getMetaData(), store.getState().media_data.data[0]).get_frame_json()
@@ -73,6 +100,31 @@ export default function CustomNavBar(props) {
 
 	const handlePlaying = (event) => {
 		togglePlay()
+	}
+
+	const handleJumpCommit = () => {
+		var parsedFrame = parseInt(frameInputValue)
+		if(Number.isNaN(parsedFrame)){
+			setFrameInputValue(String(hasFrames ? currentFrame + 1 : 0))
+			return
+		}
+
+		var clampedFrame = Math.min(Math.max(parsedFrame, 1), Math.max(totalFrames, 1))
+		setFrameInputValue(String(clampedFrame))
+		if(props.jumpToFrameNumber){
+			props.jumpToFrameNumber(clampedFrame)
+		}
+	}
+
+	const handleJumpKeyDown = (event) => {
+		if(event.key === "Enter"){
+			event.currentTarget.blur()
+		}
+	}
+
+	const handleSkipValueChange = (event) => {
+		var nextSkipValue = parseInt(event.target.value)
+		setSkipValue(nextSkipValue > 0 ? nextSkipValue : 1)
 	}
 
 	useEffect(() => {
@@ -104,7 +156,7 @@ export default function CustomNavBar(props) {
 					onProjectNameChange={props.onProjectNameChange}
 				/>
 			}
-			<header className="sticky top-0 z-50 flex items-center gap-4 bg-zinc-950 px-4 py-2 text-white">
+			<header className="sticky top-0 z-50 flex flex-wrap items-center gap-3 bg-zinc-950 px-4 py-2 text-white">
 				<a href="#home" className="text-lg font-semibold">AVAT</a>
 				<nav className="mr-auto flex items-center gap-2">
 					<DropdownMenu>
@@ -132,36 +184,6 @@ export default function CustomNavBar(props) {
 				</div>
 				<div className="flex items-center gap-2">
 					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
-					{' '}
-					<DropdownMenu>
-						<ButtonGroup>
-							<Button variant="secondary" disabled={true}>{props.display_frame_num}</Button>{' '}
-							<DropdownMenuTrigger asChild>
-								<Button variant="secondary" aria-label="Frame options">v</Button>
-							</DropdownMenuTrigger>
-						</ButtonGroup>
-						<DropdownMenuContent>
-							<div className="grid gap-2 p-2">
-								<Label>Skip Value</Label>
-								<Input
-									placeholder='Skip Value'
-									type='number'
-									onChange={(event) => { setSkipValue(event.target.value) }}
-									onClick={() => { props.toggleKeyCheck(false) }}
-									onBlur={() => { props.toggleKeyCheck(true) }}
-									defaultValue={props.skip_value}
-								/>
-							</div>
-						</DropdownMenuContent>
-					</DropdownMenu>{' '}
-
-					<Button disabled={props.disable_buttons} onClick={props.skip_frame_backward}>Prev</Button>{' '}
-					{
-						videoFormat === INPUT_VIDEO &&
-						<Button disabled={props.disable_buttons} onClick={handlePlaying}>{playText}</Button>
-					}
-					{' '}
-					<Button disabled={props.disable_buttons} onClick={props.skip_frame_forward}>Next</Button>{' '}
 					<DropdownMenu>
 						<ButtonGroup>
 							<Button onClick={props.addToCanvas}>Add</Button>
@@ -178,6 +200,78 @@ export default function CustomNavBar(props) {
 					{/*<Button variant="danger" onClick={remove} disabled={disable_buttons} style={{position:"relative"}}>Remove</Button>{' '}*/}
 				</div>
 			</header>
+			<div className="fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2 border-t border-white/15 bg-zinc-950 px-4 py-2 text-xs text-zinc-200 shadow-lg">
+					<div className="flex flex-wrap items-center gap-2">
+						<span className="font-semibold text-white">{props.display_frame_num}</span>
+						<span className="rounded bg-white/10 px-2 py-1 font-mono text-zinc-300">{timestampText}</span>
+						<label className="flex items-center gap-1 text-zinc-300">
+							<span>Jump</span>
+							<Input
+								className="h-7 w-20 border-white/15 bg-zinc-950/40 text-white"
+								type="number"
+								min="1"
+								max={Math.max(totalFrames, 1)}
+								value={frameInputValue}
+								disabled={controlsDisabled}
+								onChange={(event) => setFrameInputValue(event.target.value)}
+								onFocus={() => { props.toggleKeyCheck(false) }}
+								onBlur={() => { props.toggleKeyCheck(true); handleJumpCommit() }}
+								onKeyDown={handleJumpKeyDown}
+							/>
+						</label>
+						<label className="flex items-center gap-1 text-zinc-300">
+							<span>Skip</span>
+							<Input
+								className="h-7 w-16 border-white/15 bg-zinc-950/40 text-white"
+								type="number"
+								min="1"
+								defaultValue={props.skip_value}
+								disabled={props.disable_buttons}
+								onChange={handleSkipValueChange}
+								onFocus={() => { props.toggleKeyCheck(false) }}
+								onBlur={() => { props.toggleKeyCheck(true) }}
+							/>
+						</label>
+						{props.mediaType === INPUT_VIDEO &&
+							<label className="flex items-center gap-1 text-zinc-300">
+								<span>Speed</span>
+								<NativeSelect
+									size="sm"
+									className="w-24 [&_select]:border-white/15 [&_select]:bg-zinc-950/40 [&_select]:text-white"
+									value={String(props.playbackSpeed || 1)}
+									disabled={props.disable_buttons}
+									onChange={(event) => props.onPlaybackSpeedChange(event.target.value)}
+									onFocus={() => { props.toggleKeyCheck(false) }}
+									onBlur={() => { props.toggleKeyCheck(true) }}
+								>
+									{PLAYBACK_SPEEDS.map((speed) => (
+										<NativeSelectOption key={speed} value={String(speed)}>{speed}x</NativeSelectOption>
+									))}
+								</NativeSelect>
+							</label>
+						}
+					</div>
+					<div className="flex flex-wrap items-center gap-2">
+						<Button size="sm" variant="secondary" disabled={controlsDisabled} onClick={props.skip_frame_backward}>Prev</Button>
+						{props.mediaType === INPUT_VIDEO &&
+							<Button size="sm" disabled={controlsDisabled} onClick={handlePlaying}>{playText}</Button>
+						}
+						<Button size="sm" variant="secondary" disabled={controlsDisabled} onClick={props.skip_frame_forward}>Next</Button>
+						<Button size="sm" variant="outline" disabled={controlsDisabled} onClick={props.goToPreviousAnnotatedFrame}>Prev Annotated</Button>
+						<Button size="sm" variant="outline" disabled={controlsDisabled} onClick={props.goToNextAnnotatedFrame}>Next Annotated</Button>
+						<Button size="sm" variant="outline" disabled={controlsDisabled} onClick={props.goToNextIncompleteFrame}>Next Incomplete</Button>
+					</div>
+					<Input
+						className="h-2 w-full cursor-pointer border-0 bg-transparent px-0 accent-white"
+						type="range"
+						min="0"
+						max={scrubberMax}
+						value={Math.min(currentFrame, scrubberMax)}
+						disabled={controlsDisabled || totalFrames <= 1}
+						onChange={(event) => props.goToFrame(Number(event.target.value))}
+						aria-label="Frame scrubber"
+					/>
+			</div>
 		</div>
 	)
 }

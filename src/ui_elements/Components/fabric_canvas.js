@@ -225,7 +225,9 @@ export default function FabricRender(props){
 			save_data(store.getState().current_frame['data'], "play")
 			if(metadata_redux['media_type'] == INPUT_VIDEO){
 				const frameSource = getFrameSource(props.stream_num)
-				const frameDelay = frameSource?.averageFrameRate ? 1000 / frameSource.averageFrameRate : 33
+				const playbackSpeed = parseFloat(metadata_redux.playback_speed) || 1
+				const baseFrameDelay = frameSource?.averageFrameRate ? 1000 / frameSource.averageFrameRate : 33
+				const frameDelay = baseFrameDelay / playbackSpeed
 				let cancelled = false
 				const playFrames = async () => {
 					while(!cancelled){

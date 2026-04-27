@@ -85,10 +85,10 @@ function setMedia(stream_num, media){
 	})
 }
 
-function initMetadata(horizontal_res, vertical_res, frame_rate, media_type, total_frames){
+function initMetadata(horizontal_res, vertical_res, frame_rate, media_type, total_frames, playback_speed=1){
 	store.dispatch({
 		type: "metadata/init",
-		payload: {horizontal_res: horizontal_res, vertical_res: vertical_res, frame_rate: frame_rate, media_type: media_type, total_frames: total_frames}
+		payload: {horizontal_res: horizontal_res, vertical_res: vertical_res, frame_rate: frame_rate, media_type: media_type, total_frames: total_frames, playback_speed: playback_speed}
 	})
 }
 
@@ -124,6 +124,13 @@ function setSkipValue(skip_val){
 	store.dispatch({
 		type: "metadata/setSkipValue",
 		payload: {skip_value: skip_val}
+	})
+}
+
+function setPlaybackSpeed(playback_speed){
+	store.dispatch({
+		type: "metadata/setPlaybackSpeed",
+		payload: {playback_speed: playback_speed}
 	})
 }
 
@@ -164,6 +171,7 @@ export {initFrameData,
 		setMediaType,
 		setTotalFrames,
 		setSkipValue,
+		setPlaybackSpeed,
 		getMetaData,
 		togglePlay,
 		initPlay
