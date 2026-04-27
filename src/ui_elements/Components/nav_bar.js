@@ -48,8 +48,14 @@ export default function CustomNavBar(props) {
 	const handleClose = () => setShow(false);
 	const handleShow = () => setShow(true);
 	const handleUploadToggle = () => {
-		setUploadShow(!uploadShow)
+		setUploadShow((currentUploadShow) => !currentUploadShow)
 	}
+
+	useEffect(() => {
+		if(props.onUploadModalChange){
+			props.onUploadModalChange(uploadShow)
+		}
+	}, [uploadShow, props.onUploadModalChange])
 
 
 	const handleDownloadJSON = () => {

@@ -63,6 +63,24 @@ var VIDEO_METADATA = {}
 var play_button_text = "Play"
 var segmentation_flag = false;
 
+const isKeybindTargetBlocked = (event) => {
+	const target = event.target
+	if(!target){
+		return false
+	}
+
+	if(target.isContentEditable){
+		return true
+	}
+
+	const tagName = target.tagName
+	if(!tagName){
+		return false
+	}
+
+	return ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(tagName)
+}
+
 //TODO remove after fixing null exceptions
 //initAnnotationData(1)
 //initFrameData(1)
@@ -83,6 +101,7 @@ export default function MainUpload() {
 	const [save, changeSave] = useState(false);
 	const [keyCheck, changeKeyCheck] = useState(true)
 	const [isLoading, setIsLoading] = useState(true)
+	const [isUploadModalOpen, setIsUploadModalOpen] = useState(true)
 
 	//New state vars
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
@@ -322,6 +341,9 @@ export default function MainUpload() {
 	}
 
 	const onKeyPress = (event) =>{
+		if(upload !== true || isUploadModalOpen || isKeybindTargetBlocked(event)){
+			return;
+		}
 		//Making sure input for textbox doesnt get counted as a mode change
 		if(keyCheck === false){
 			return;
@@ -447,6 +469,7 @@ export default function MainUpload() {
 				change_annotation_type={change_annotation_type}
 				VIDEO_METADATA={VIDEO_METADATA}
 				toggleKeyCheck={toggleKeyCheck}
+				onUploadModalChange={setIsUploadModalOpen}
 				handle_visual_toggle={handle_visual_toggle}
 			/>
 			{save &&
