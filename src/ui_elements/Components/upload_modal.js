@@ -246,25 +246,31 @@ export default function UploadModal(props){
                     </div>
                 </div>
                 <Separator className="my-3" />
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                        <Input
-                            disabled={props.disable_buttons || firstUpload}
-                            accept=".json"
-                            id="file"
-                            aria-label="Column Upload"
-                            type="file"
-                            onChange={handleColumnUpload}
+				<div className="grid gap-4 md:grid-cols-2">
+					<div>
+						<label className="mb-2 block text-sm font-medium" htmlFor="column-upload">
+							Column Upload
+						</label>
+						<Input
+							disabled={props.disable_buttons || firstUpload}
+							accept=".json"
+							id="column-upload"
+							aria-label="Column Upload"
+							type="file"
+							onChange={handleColumnUpload}
 
-                        />
-                    </div>
-                    <div>
-                        <Input
-                            accept=".json"
-                            id="file"
-                            aria-label="Annotation Upload"
-                            type="file"
-                            onChange={toggleUploadExistingAnnotation}
+						/>
+					</div>
+					<div>
+						<label className="mb-2 block text-sm font-medium" htmlFor="annotation-upload">
+							Annotation Upload
+						</label>
+						<Input
+							accept=".json"
+							id="annotation-upload"
+							aria-label="Annotation Upload"
+							type="file"
+							onChange={toggleUploadExistingAnnotation}
                             disabled={props.disable_buttons || firstUpload}
                         />
                     </div>
