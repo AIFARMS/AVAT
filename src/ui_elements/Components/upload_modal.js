@@ -89,6 +89,9 @@ export default function UploadModal(props){
                     setTotalFrames(totalFrames)
                 }
             }
+            if(props.onProjectNameChange && projectName.trim() !== ""){
+                props.onProjectNameChange(projectName.trim())
+            }
             props.handleUploadToggle()
         }catch(error){
             alert(error.message || "Error processing video file.")

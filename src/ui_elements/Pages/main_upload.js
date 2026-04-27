@@ -1,13 +1,23 @@
 //Core imports
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { fabric } from 'fabric';
+import { Button } from '@/components/ui/button';
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from '@/components/ui/dialog';
 
 //Constants
 import {INPUT_IMAGE, INPUT_VIDEO} from '../../static_data/const'
 
 //Processing
 import ExtractingAnnotation from '../../processing/annotation-processing'
-import { getFrameSource } from '../../processing/frame_source_registry'
+import ExportingAnnotation from '../../processing/exporting_annotation'
+import { getFrameSource, loadFrameSource } from '../../processing/frame_source_registry'
+import { deleteAutosaveSession, getAutosaveSession, saveAutosaveSession } from '../../processing/session_autosave'
 
 //Annotations
 import { BoundingBox } from '../../annotations/bounding_box'
@@ -28,8 +38,9 @@ import {initFrameData, updateFrameData, getFrameData,
 		initAnnotationData, updateAnnotationData, getAnnotationData, 
 		getColumnData,
 		initCurrentFrame, getCurrentFrame, setCurrentFrame,
-		initMedia,
+		initMedia, setMedia,
 		initMetadata, setRes, setFrameRate, setTotalFrames,
+        setSkipValue,
         initColumnData,
 		initPlay, togglePlay} from '../../processing/actions'
 import { useSelector } from "react-redux";
@@ -49,6 +60,15 @@ const WORKSPACE_PADDING = 24;
 const WORKSPACE_GAP = 12;
 const SIDE_PANEL_WIDTH = 560;
 const VIDEO_ASPECT_RATIO = 16 / 9;
+const AUTOSAVE_DEBOUNCE_MS = 1500;
+
+const autosaveStatusText = {
+	idle: "Autosave ready",
+	dirty: "Unsaved changes",
+	saving: "Saving locally...",
+	saved: "Saved locally",
+	error: "Autosave failed",
+}
 
 const getCanvasDisplaySize = (streamCount = 1) => {
 	if(typeof window === 'undefined'){
@@ -94,6 +114,19 @@ const isKeybindTargetBlocked = (event) => {
 	return ["INPUT", "TEXTAREA", "SELECT", "BUTTON"].includes(tagName)
 }
 
+const serializeMediaData = (mediaData) => {
+	return (mediaData || []).map((streamMedia) => {
+		if(!streamMedia){
+			return []
+		}
+		return Array.from(streamMedia).filter(Boolean)
+	})
+}
+
+const hasAutosaveMedia = (session) => {
+	return Boolean(session?.mediaData?.some((streamMedia) => streamMedia?.length > 0))
+}
+
 //TODO remove after fixing null exceptions
 //initAnnotationData(1)
 //initFrameData(1)
@@ -116,17 +149,176 @@ export default function MainUpload() {
 	const [isLoading, setIsLoading] = useState(true)
 	const [isUploadModalOpen, setIsUploadModalOpen] = useState(true)
 	const [toastText, setToastText] = useState("")
+	const [projectName, setProjectName] = useState("")
+	const [autosaveCandidate, setAutosaveCandidate] = useState(null)
+	const [isCheckingAutosave, setIsCheckingAutosave] = useState(true)
+	const [isRestoringAutosave, setIsRestoringAutosave] = useState(false)
+	const [autosaveStatus, setAutosaveStatus] = useState("idle")
+	const [lastSavedAt, setLastSavedAt] = useState(null)
+	const [autosaveError, setAutosaveError] = useState("")
+	const [forceUploadClosedToken, setForceUploadClosedToken] = useState(0)
+	const autosaveTimeoutRef = useRef(null)
+	const autosaveReadyRef = useRef(false)
+	const restoredAutosaveRef = useRef(false)
 
 	//New state vars
 	const [currAnnotationData, setCurrAnnotationData] = useState([])
 
 	const annot_redux = useSelector(state => state.annotation_data.data)
+	const frame_redux = useSelector(state => state.frame_data.data)
 	const column_redux = useSelector(state => state.column_annot.data)
 	const currframe_redux = useSelector(state => state.current_frame)['data']
 	const imagedata_redux = useSelector(state => state.media_data.data)
 	const metadata_redux = useSelector(state => state.metadata)
 	var inputType = metadata_redux['media_type']
 	var skip_value = parseInt(metadata_redux['skip_value'])
+
+	const createAutosavePayload = () => {
+		const state = store.getState()
+		const metadata = JSON.parse(JSON.stringify(state.metadata))
+		const exportedAnnotations = new ExportingAnnotation(
+			state.frame_data.data,
+			scaling_factor_width,
+			scaling_factor_height,
+			metadata,
+			state.media_data.data[0]
+		).get_frame_json()
+
+		return {
+			projectName: projectName || ANNOTATION_VIDEO_NAME || "Untitled AVAT project",
+			annotationType,
+			boxCount,
+			currentFrame: state.current_frame.data || 0,
+			metadata,
+			columnData: state.column_annot.data,
+			mediaData: serializeMediaData(state.media_data.data),
+			annotationJson: {
+				vid_metadata: metadata,
+				annotations: exportedAnnotations,
+				behavior_data: state.annotation_data.data,
+			},
+		}
+	}
+
+	const handleProjectNameChange = (name) => {
+		ANNOTATION_VIDEO_NAME = name
+		setProjectName(name)
+	}
+
+	const handleRestoreAutosave = async () => {
+		if(!autosaveCandidate){
+			return
+		}
+
+		setIsRestoringAutosave(true)
+		try{
+			const savedMediaData = autosaveCandidate.mediaData || [[]]
+			const savedMetadata = autosaveCandidate.metadata || autosaveCandidate.annotationJson?.vid_metadata || metadata_redux
+			const currentFrame = autosaveCandidate.currentFrame || 0
+
+			initMedia(Math.max(1, savedMediaData.length))
+			for(var i = 0; i < savedMediaData.length; i++){
+				setMedia(i, savedMediaData[i] || [])
+			}
+
+			if(savedMetadata.media_type === INPUT_VIDEO){
+				const savedVideoFile = savedMediaData?.[0]?.[0]
+				if(!savedVideoFile){
+					throw new Error("Autosaved annotations were found, but the source video is no longer available in browser storage.")
+				}
+				await loadFrameSource(0, savedVideoFile)
+			}else if(savedMetadata.media_type === INPUT_IMAGE && !hasAutosaveMedia(autosaveCandidate)){
+				throw new Error("Autosaved annotations were found, but the source images are no longer available in browser storage.")
+			}
+
+			initMetadata(
+				savedMetadata.horizontal_res,
+				savedMetadata.vertical_res,
+				savedMetadata.frame_rate,
+				savedMetadata.media_type,
+				savedMetadata.total_frames
+			)
+			setSkipValue(savedMetadata.skip_value || 1)
+			if(autosaveCandidate.columnData){
+				initColumnData(autosaveCandidate.columnData)
+			}else{
+				initColumnData(default_column)
+			}
+
+			const restoredAnnotation = new ExtractingAnnotation(autosaveCandidate.annotationJson, scaling_factor_width, scaling_factor_height)
+			store.dispatch({
+				type: "frame_data/initOldAnnotation",
+				payload: restoredAnnotation.get_frame_data()
+			});
+			store.dispatch({
+				type: "annotation_data/initOldAnnotation",
+				payload: restoredAnnotation.get_annotation_data()
+			});
+			setCurrentFrame(currentFrame)
+			setAnnotationType(autosaveCandidate.annotationType || ANNOTATION_FRAME)
+			setBoxCount(autosaveCandidate.boxCount || 0)
+			setProjectName(autosaveCandidate.projectName || "")
+			ANNOTATION_VIDEO_NAME = autosaveCandidate.projectName || ""
+			setCurrAnnotationData(restoredAnnotation.get_annotation_data()?.[currentFrame] || [])
+
+			upload = true
+			disable_buttons = false
+			setVisualToggle(Math.floor(Math.random() * 999999999999))
+			setIsUploadModalOpen(false)
+			setForceUploadClosedToken((token) => token + 1)
+			setAutosaveCandidate(null)
+			setAutosaveStatus("saved")
+			setAutosaveError("")
+			setLastSavedAt(autosaveCandidate.updatedAt ? new Date(autosaveCandidate.updatedAt) : new Date())
+			restoredAutosaveRef.current = true
+		} catch(error){
+			setAutosaveError(error.message || "Unable to restore autosaved session.")
+			setAutosaveStatus("error")
+		} finally {
+			setIsRestoringAutosave(false)
+		}
+	}
+
+	const handleDiscardAutosave = async () => {
+		try{
+			await deleteAutosaveSession()
+			setAutosaveCandidate(null)
+			setAutosaveStatus("idle")
+			setAutosaveError("")
+		} catch(error){
+			setAutosaveError(error.message || "Unable to delete autosaved session.")
+			setAutosaveStatus("error")
+		}
+	}
+
+	useEffect(() => {
+		let cancelled = false
+		getAutosaveSession()
+			.then((session) => {
+				if(cancelled){
+					return
+				}
+				if(session?.annotationJson){
+					setAutosaveCandidate(session)
+					setLastSavedAt(session.updatedAt ? new Date(session.updatedAt) : null)
+				}
+			})
+			.catch((error) => {
+				if(!cancelled){
+					setAutosaveError(error.message || "Autosave storage is unavailable.")
+				}
+			})
+			.finally(() => {
+				if(!cancelled){
+					setIsCheckingAutosave(false)
+					autosaveReadyRef.current = true
+				}
+			})
+
+		return () => {
+			cancelled = true
+		}
+	}, [])
 
 	useEffect(() => {
 		if(upload == true){
@@ -136,7 +328,7 @@ export default function MainUpload() {
 	}, [currframe_redux])
 
 	useEffect(()=>{
-		if(annot_redux.length === 1){
+		if(annot_redux.length === 1 && !restoredAutosaveRef.current){
 			initAnnotationData(metadata_redux.total_frames)
 			initFrameData(metadata_redux.total_frames)
 		}
@@ -403,6 +595,64 @@ export default function MainUpload() {
 		const timeout = setTimeout(() => changeSave(false), 1200);
 		return () => clearTimeout(timeout);
 	}, [save, toastText]);
+
+	useEffect(() => {
+		return () => {
+			if(autosaveTimeoutRef.current){
+				clearTimeout(autosaveTimeoutRef.current)
+			}
+		}
+	}, [])
+
+	useEffect(() => {
+		if(!autosaveReadyRef.current || isCheckingAutosave || autosaveCandidate || isRestoringAutosave || upload !== true){
+			return
+		}
+		if(!frame_redux || frame_redux.length === 0 || !metadata_redux.total_frames){
+			return
+		}
+		if(restoredAutosaveRef.current){
+			restoredAutosaveRef.current = false
+			return
+		}
+
+		if(autosaveTimeoutRef.current){
+			clearTimeout(autosaveTimeoutRef.current)
+		}
+
+		setAutosaveStatus("dirty")
+		autosaveTimeoutRef.current = setTimeout(async () => {
+			setAutosaveStatus("saving")
+			try{
+				await saveAutosaveSession(createAutosavePayload())
+				setLastSavedAt(new Date())
+				setAutosaveStatus("saved")
+				setAutosaveError("")
+			}catch(error){
+				setAutosaveError(error.message || "Unable to save this session locally.")
+				setAutosaveStatus("error")
+			}
+		}, AUTOSAVE_DEBOUNCE_MS)
+
+		return () => {
+			if(autosaveTimeoutRef.current){
+				clearTimeout(autosaveTimeoutRef.current)
+			}
+		}
+	}, [annot_redux, frame_redux, column_redux, metadata_redux, currframe_redux, imagedata_redux, annotationType, boxCount, projectName, visualToggle, isCheckingAutosave, autosaveCandidate, isRestoringAutosave])
+
+	useEffect(() => {
+		const warnBeforeUnload = (event) => {
+			if(autosaveStatus !== "dirty" && autosaveStatus !== "saving" && autosaveStatus !== "error"){
+				return
+			}
+			event.preventDefault()
+			event.returnValue = ""
+		}
+
+		window.addEventListener("beforeunload", warnBeforeUnload)
+		return () => window.removeEventListener("beforeunload", warnBeforeUnload)
+	}, [autosaveStatus])
 	
 
 	const handle_visual_toggle = () => {
@@ -452,6 +702,30 @@ export default function MainUpload() {
 
 	return (
 		<div className="min-h-screen bg-zinc-100">
+			<Dialog open={Boolean(autosaveCandidate) && !isCheckingAutosave}>
+				<DialogContent className="sm:max-w-lg" showCloseButton={false}>
+					<DialogHeader>
+						<DialogTitle>Restore autosaved session?</DialogTitle>
+						<div className="space-y-2 text-sm text-zinc-600">
+							<p>
+								A local autosave was found for {autosaveCandidate?.projectName || "an AVAT project"}.
+							</p>
+							{lastSavedAt &&
+								<p>Last saved: {lastSavedAt.toLocaleString()}</p>
+							}
+							{autosaveError &&
+								<p className="rounded-md border border-red-200 bg-red-50 p-2 text-red-700">{autosaveError}</p>
+							}
+						</div>
+					</DialogHeader>
+					<DialogFooter>
+						<Button variant="outline" onClick={handleDiscardAutosave} disabled={isRestoringAutosave}>Start new project</Button>
+						<Button onClick={handleRestoreAutosave} disabled={isRestoringAutosave}>
+							{isRestoringAutosave ? "Restoring..." : "Restore session"}
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 			<CustomNavBar 
 				disable_buttons={disable_buttons} 
 				video_width={scaling_factor_width} 
@@ -470,6 +744,12 @@ export default function MainUpload() {
 				toggleKeyCheck={toggleKeyCheck}
 				onUploadModalChange={setIsUploadModalOpen}
 				handle_visual_toggle={handle_visual_toggle}
+				onProjectNameChange={handleProjectNameChange}
+				hideUploadModal={isCheckingAutosave || Boolean(autosaveCandidate)}
+				forceUploadClosedToken={forceUploadClosedToken}
+				autosaveStatus={autosaveStatusText[autosaveStatus] || autosaveStatusText.idle}
+				lastSavedAt={lastSavedAt}
+				autosaveError={autosaveError}
 			/>
 			{save &&
 				<div className="absolute left-[100px] top-[100px] z-[100] rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-md">

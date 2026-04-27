@@ -58,6 +58,12 @@ export default function CustomNavBar(props) {
 		}
 	}, [uploadShow, props.onUploadModalChange])
 
+	useEffect(() => {
+		if(props.forceUploadClosedToken){
+			setUploadShow(false)
+		}
+	}, [props.forceUploadClosedToken])
+
 
 	const handleDownloadJSON = () => {
 		var converted_annot = new ExportingAnnotation(store.getState().frame_data.data, props.video_width, props.video_height, getMetaData(), store.getState().media_data.data[0]).get_frame_json()
@@ -90,11 +96,14 @@ export default function CustomNavBar(props) {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
-			<UploadModal
-				handleOldAnnotation={props.handleOldAnnotation}
-				handleUploadToggle={handleUploadToggle}
-				uploadShow={uploadShow}
-			/>
+			{!props.hideUploadModal &&
+				<UploadModal
+					handleOldAnnotation={props.handleOldAnnotation}
+					handleUploadToggle={handleUploadToggle}
+					uploadShow={uploadShow}
+					onProjectNameChange={props.onProjectNameChange}
+				/>
+			}
 			<header className="sticky top-0 z-50 flex items-center gap-4 bg-zinc-950 px-4 py-2 text-white">
 				<a href="#home" className="text-lg font-semibold">AVAT</a>
 				<nav className="mr-auto flex items-center gap-2">
@@ -114,6 +123,12 @@ export default function CustomNavBar(props) {
 					<span className="text-zinc-300">Tool</span>
 					<span className="font-semibold">{annotationTool.label}</span>
 					<span className="rounded bg-white/15 px-1.5 py-0.5 text-xs text-zinc-200">Add A</span>
+				</div>
+				<div className="flex max-w-[220px] items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-zinc-200" title={props.autosaveError || undefined}>
+					<span className={props.autosaveStatus === "Autosave failed" ? "font-semibold text-red-200" : "font-medium"}>{props.autosaveStatus}</span>
+					{props.lastSavedAt && props.autosaveStatus === "Saved locally" &&
+						<span className="text-zinc-400">{props.lastSavedAt.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+					}
 				</div>
 				<div className="flex items-center gap-2">
 					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
