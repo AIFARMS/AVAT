@@ -37,23 +37,29 @@ import { useSelector } from "react-redux";
 // Data imports
 import default_column from '../../static_data/basic_column_config.json'
 
-//TODO ADD DYNAMIC SOLUTION
-var scaling_factor_width = 1920;
-var scaling_factor_height = 1080;
+const NAV_HEIGHT = 48;
+const WORKSPACE_PADDING = 24;
+const WORKSPACE_GAP = 12;
+const SIDE_PANEL_WIDTH = 560;
+const VIDEO_ASPECT_RATIO = 16 / 9;
 
-//var current_screen_width = window.screen.width;
-var current_screen_height = window.screen.height;
+const getCanvasDisplaySize = (streamCount = 1) => {
+	if(typeof window === 'undefined'){
+		return { width: 1280, height: 720 }
+	}
 
-if(current_screen_height >= 1080){////Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
-  scaling_factor_width = 1280;
-  scaling_factor_height = 720;
-}else if(current_screen_height >= 1024){
-  scaling_factor_width = 1152;
-  scaling_factor_height = 648;
-}else if(current_screen_height >= 768){
-  scaling_factor_width = 1024;
-  scaling_factor_height = 576;
+	const streamTotal = Math.max(1, streamCount);
+	const isWideLayout = window.innerWidth >= 1280;
+	const panelWidth = isWideLayout ? SIDE_PANEL_WIDTH + WORKSPACE_GAP : 0;
+	const availableWidth = Math.max(640, window.innerWidth - WORKSPACE_PADDING - panelWidth);
+	const availableHeight = Math.max(360, (window.innerHeight - NAV_HEIGHT - WORKSPACE_PADDING - (WORKSPACE_GAP * (streamTotal - 1))) / streamTotal);
+	const width = Math.floor(Math.min(availableWidth, availableHeight * VIDEO_ASPECT_RATIO));
+	const height = Math.floor(width / VIDEO_ASPECT_RATIO);
+
+	return { width, height };
 }
+
+var { width: scaling_factor_width, height: scaling_factor_height } = getCanvasDisplaySize();
 
 var upload = false;
 var disable_buttons = true;
@@ -154,20 +160,9 @@ export default function MainUpload() {
 				setVisualToggle(10)
 			}
 		}
-		scaling_factor_width = 1920;
-		scaling_factor_height = 1080;
-		if(current_screen_height >= 1080){////Mappings are based off of https://en.wikipedia.org/wiki/List_of_common_resolutions make sure to use 1:1 and 16:9 aspect ratio
-			scaling_factor_width = 1280;
-			scaling_factor_height = 720;
-		  }else if(current_screen_height >= 1024){
-			scaling_factor_width = 1152;
-			scaling_factor_height = 648;
-		  }else if(current_screen_height >= 768){
-			scaling_factor_width = 1024;
-			scaling_factor_height = 576;
-		}
-		scaling_factor_height = scaling_factor_height * (1/imagedata_redux.length)
-		scaling_factor_width = scaling_factor_width * (1/imagedata_redux.length)
+		const canvasDisplaySize = getCanvasDisplaySize(imagedata_redux.length)
+		scaling_factor_width = canvasDisplaySize.width
+		scaling_factor_height = canvasDisplaySize.height
 
 
 	}, [imagedata_redux, metadata_redux.total_frames, metadata_redux.media_type])
@@ -428,7 +423,7 @@ export default function MainUpload() {
 		var fcanvas = []
 		for(var i = 0; i < imagedata_redux.length; i++){
 			let canv = (
-				<div style={{gridColumn: 1, gridRow:i+1, position: "relative",  top: 0, left: 0}}>
+				<div key={i} className="relative shrink-0 overflow-hidden bg-black shadow-sm" style={{width: scaling_factor_width, height: scaling_factor_height}}>
 					<FabricRender 
 						currentFrame={currframe_redux}
 						scaling_factor_height={scaling_factor_height}
@@ -440,7 +435,7 @@ export default function MainUpload() {
 			fcanvas.push(canv)
 		}
 		return(
-			<div>
+			<div className="flex flex-col gap-3">
 			{
 				fcanvas.map((can, _) => {
 					return (
@@ -453,7 +448,7 @@ export default function MainUpload() {
 	}
 
 	return (
-		<div>
+		<div className="min-h-screen bg-zinc-100">
 			<CustomNavBar 
 				disable_buttons={disable_buttons} 
 				video_width={scaling_factor_width} 
@@ -479,9 +474,13 @@ export default function MainUpload() {
 			}
 			{
 				upload === true && 
-				<div style={{display: "grid"}}>
-					{genFabricCanvas()}
-					<div style={{gridColumn: 2, gridRow:1, position: "relative", top: 0, left: 0}}>
+				<main className="grid min-h-[calc(100vh-48px)] grid-cols-1 gap-3 overflow-auto p-3 xl:h-[calc(100vh-48px)] xl:grid-cols-[minmax(0,1fr)_560px] xl:overflow-hidden">
+					<section className="min-h-0 overflow-auto rounded-lg bg-zinc-950 p-3 shadow-inner">
+						<div className="flex min-h-full items-start justify-center">
+							{genFabricCanvas()}
+						</div>
+					</section>
+					<aside className="min-h-[280px] overflow-hidden rounded-lg border bg-white shadow-sm xl:min-h-0">
 						<AnnotationTable
 							annotation_data={currAnnotationData}
 							change_annotation_data={handleChangeAnnot}
@@ -489,8 +488,8 @@ export default function MainUpload() {
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
 						/>
-					</div>
-				</div>
+					</aside>
+				</main>
 			}
 			{
 				upload === false &&

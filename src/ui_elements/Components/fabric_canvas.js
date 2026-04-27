@@ -194,6 +194,16 @@ export default function FabricRender(props){
 
 	useEffect(() => {
 		if(fabricCanvas){
+			fabricCanvas.setDimensions({
+				height: props.scaling_factor_height,
+				width: props.scaling_factor_width,
+			})
+			fabricCanvas.renderAll()
+		}
+	}, [fabricCanvas, props.scaling_factor_height, props.scaling_factor_width])
+
+	useEffect(() => {
+		if(fabricCanvas){
 			if(play_redux){
 				return;
 			}
@@ -205,7 +215,7 @@ export default function FabricRender(props){
 				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), INPUT_IMAGE, image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
-	}, [currFrame, fabricCanvas, play_redux, renderVideoFrame])
+	}, [currFrame, fabricCanvas, play_redux, renderVideoFrame, props.scaling_factor_height, props.scaling_factor_width])
 
 	useEffect(() => {
 		if (upload==false){
@@ -255,7 +265,7 @@ export default function FabricRender(props){
 				canvasBackgroundUpdate(getSafeFrameData(currframe_redux), metadata_redux['media_type'], image_data[currframe_redux], props.scaling_factor_width, props.scaling_factor_height, fabricCanvas)
 			}
 		}
-	}, [frame_redux, play_redux, renderVideoFrame])
+	}, [frame_redux, play_redux, renderVideoFrame, props.scaling_factor_height, props.scaling_factor_width])
 
 	
 	if(fabricCanvas != null && image_data != undefined && upload===false && play_redux===false){
