@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -23,76 +22,80 @@ import { Separator } from '@/components/ui/separator';
 import { INPUT_IMAGE, INPUT_VIDEO } from '../../static_data/const'
 import { useSelector } from "react-redux";
 
-import { initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia, setFrameRate, setMediaType, setSkipValue, getMetaData, togglePlay, setTotalFrames } from '../../processing/actions'
+import { initFrameData, initAnnotationData, initColumnData, setMedia, setFrameRate, setMediaType, setSkipValue, setTotalFrames } from '../../processing/actions'
 import { loadFrameSource } from '../../processing/frame_source_registry'
-import { init } from '../../reducer/frame_data';
-import media_data from '../../reducer/media_data';
 import default_column from '../../static_data/basic_column_config.json'
 
 export default function UploadModal(props){
-	const [show, setShow] = useState(false);
-	
-	const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
-	const [firstUpload, setFirstUpload] = useState(false)
-	const [stateFrameRate, setStateFrameRate] = useState(null)
+    const [videoFormat, setVideoFormat] = useState(INPUT_VIDEO)
+    const [firstUpload, setFirstUpload] = useState(false)
+    const [projectName, setProjectName] = useState("")
+    const [stateFrameRate, setStateFrameRate] = useState(null)
     const [stateSkipValue, setStateSkipValue] = useState(null)
     const [stateColumnData, setStateColumnData] = useState(null)
     const [uploadExistingAnnotation, setUploadExistingAnnotation] = useState(false)
     const [isProcessingVideo, setIsProcessingVideo] = useState(false)
+    const [mediaFileName, setMediaFileName] = useState("")
+    const [columnFileName, setColumnFileName] = useState("")
+    const [annotationFileName, setAnnotationFileName] = useState("")
+    const [annotationFormat, setAnnotationFormat] = useState("AVAT JSON")
 
-	const frame_count = useSelector(state => state.metadata.total_frames)
-    const frame_rate = useSelector(state => state.metadata.frame_rate)
+    const frame_count = useSelector(state => state.metadata.total_frames)
     const mediaData = useSelector(state => state.media_data.data)
 
-	const handleClose = () => setShow(false);
-	const handleShow = () => setShow(true);
-	const handleUpload = async () => {
-		setIsProcessingVideo(true)
-		try{
-		setSkipValue(parseInt(stateSkipValue))
-		if(!firstUpload && !uploadExistingAnnotation){
-            let totalFrames = -1
-            if(videoFormat === INPUT_VIDEO){
-                const uploadedFile = mediaData?.[0]?.[0]
-                if(!uploadedFile){
-                    alert("Please upload a video file.")
-                    return;
+    const hasProjectName = firstUpload || projectName.trim() !== ""
+    const hasMediaFile = Boolean(mediaFileName || mediaData?.[0]?.[0])
+    const hasSkipValue = stateSkipValue != null && stateSkipValue !== ""
+    const annotationFormatReady = !uploadExistingAnnotation || Boolean(annotationFormat)
+    const canUpload = hasProjectName && hasMediaFile && hasSkipValue && annotationFormatReady && !props.disable_buttons && !isProcessingVideo
+
+    const handleUpload = async () => {
+        setIsProcessingVideo(true)
+        try{
+            setSkipValue(parseInt(stateSkipValue))
+            if(!firstUpload && !uploadExistingAnnotation){
+                let totalFrames = -1
+                if(videoFormat === INPUT_VIDEO){
+                    const uploadedFile = mediaData?.[0]?.[0]
+                    if(!uploadedFile){
+                        alert("Please upload a video file.")
+                        return;
+                    }
+                    const frameSource = await loadFrameSource(0, uploadedFile)
+                    setFrameRate(frameSource.averageFrameRate)
+                    totalFrames = frameSource.totalFrames
+                }else {
+                    totalFrames = frame_count
                 }
-                const frameSource = await loadFrameSource(0, uploadedFile)
-                setFrameRate(frameSource.averageFrameRate)
-                totalFrames = frameSource.totalFrames
-            }else {
-                totalFrames = frame_count
-            }
-			setTotalFrames(totalFrames)
-			initFrameData(totalFrames)
-            if (stateColumnData == null) {
-                initColumnData(default_column)
-            }else{
-                initColumnData(stateColumnData)
-            }
-			initAnnotationData(totalFrames)
-			setFirstUpload(true)
-		}else if(uploadExistingAnnotation){
-            initColumnData(stateColumnData)
-            if(videoFormat === INPUT_VIDEO){
-                const uploadedFile = mediaData?.[0]?.[0]
-                if(!uploadedFile){
-                    alert("Please upload a video file.")
-                    return;
-                }
-                const frameSource = await loadFrameSource(0, uploadedFile)
-                let totalFrames = frameSource.totalFrames
                 setTotalFrames(totalFrames)
+                initFrameData(totalFrames)
+                if (stateColumnData == null) {
+                    initColumnData(default_column)
+                }else{
+                    initColumnData(stateColumnData)
+                }
+                initAnnotationData(totalFrames)
+                setFirstUpload(true)
+            }else if(uploadExistingAnnotation){
+                initColumnData(stateColumnData)
+                if(videoFormat === INPUT_VIDEO){
+                    const uploadedFile = mediaData?.[0]?.[0]
+                    if(!uploadedFile){
+                        alert("Please upload a video file.")
+                        return;
+                    }
+                    const frameSource = await loadFrameSource(0, uploadedFile)
+                    let totalFrames = frameSource.totalFrames
+                    setTotalFrames(totalFrames)
+                }
             }
+            props.handleUploadToggle()
+        }catch(error){
+            alert(error.message || "Error processing video file.")
+        }finally{
+            setIsProcessingVideo(false)
         }
-		props.handleUploadToggle()
-		}catch(error){
-			alert(error.message || "Error processing video file.")
-		}finally{
-			setIsProcessingVideo(false)
-		}
-	}
+    }
 
     const toggleUploadExistingAnnotation = (event) => {
         props.handleOldAnnotation(event)
@@ -100,192 +103,253 @@ export default function UploadModal(props){
     }
 
     const downloadColumn = (file) => {
-		return new Promise((resolve, reject) => {
-			var reader = new FileReader();
-			reader.onload = function (e) {
-				resolve((JSON.parse(e.target.result)));
-			}
-			reader.readAsText(file.target.files[0])
-		})
-	}
+        return new Promise((resolve, reject) => {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                resolve((JSON.parse(e.target.result)));
+            }
+            reader.readAsText(file.target.files[0])
+        })
+    }
 
     const handleVideoFormat = (type) => {
-		//TODO Make sure bug is resolved and simply have video format equal type
-		//type = parseInt(type)
-		if (type === INPUT_VIDEO) {
-			setVideoFormat(INPUT_VIDEO)
-			setMediaType(INPUT_VIDEO)
-		} else if (type === INPUT_IMAGE) {
-			setVideoFormat(INPUT_IMAGE)
-			setMediaType(INPUT_IMAGE)
-		} else {
-			alert("Wrong input detected - please report this bug.")
-		}
-	}
-	const handleMediaUpload = (event) => {
-		if (videoFormat == INPUT_VIDEO) {
-			setMedia(parseInt(event.target.id), event.target.files)
-		} else {
-			setMedia(parseInt(event.target.id), event.target.files)
-		}
-	}
+        //TODO Make sure bug is resolved and simply have video format equal type
+        //type = parseInt(type)
+        if (type === INPUT_VIDEO) {
+            setVideoFormat(INPUT_VIDEO)
+            setMediaType(INPUT_VIDEO)
+        } else if (type === INPUT_IMAGE) {
+            setVideoFormat(INPUT_IMAGE)
+            setMediaType(INPUT_IMAGE)
+        } else {
+            alert("Wrong input detected - please report this bug.")
+        }
+    }
 
-	const handleColumnUpload = (event) => {
-		var promise = downloadColumn(event)
-		promise.then(function (result) {
-			if (result['columns'] == undefined) {
-				alert("Error in processing columns. Please check the file and try again.")
-				return;
-			}
+    const handleMediaUpload = (event) => {
+        setMediaFileName(event.target.files?.[0]?.name || "")
+        if (videoFormat == INPUT_VIDEO) {
+            setMedia(parseInt(event.target.id), event.target.files)
+        } else {
+            setMedia(parseInt(event.target.id), event.target.files)
+        }
+    }
 
-			if (result != null) {
+    const handleColumnUpload = (event) => {
+        setColumnFileName(event.target.files?.[0]?.name || "")
+        var promise = downloadColumn(event)
+        promise.then(function (result) {
+            if (result['columns'] == undefined) {
+                alert("Error in processing columns. Please check the file and try again.")
+                return;
+            }
+
+            if (result != null) {
                 setStateColumnData(result)
-			} else {
-				alert("Error in processing columns. Please check the file and try again.")
-				return;
-			}
-		})
-	}
+            } else {
+                alert("Error in processing columns. Please check the file and try again.")
+                return;
+            }
+        })
+    }
+
+    const handleAnnotationUpload = (event) => {
+        setAnnotationFileName(event.target.files?.[0]?.name || "")
+        toggleUploadExistingAnnotation(event)
+    }
 
     const generateUploadButtons = () => {
-		var uploadButtons = []
-		for (var i = 0; i < 1; i++) {
-			let button_image = (
-				<div key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
-					<Input multiple id={i + ""} key={i} aria-label={"Image Upload"} accept="image/*" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
-				</div>
-			)
-			let button_video = (
-				<div key={i} style={{ float: "left", gridColumn: 1, gridRow: 4 }}>
-					<Input id={i + ""} key={i} aria-label={"Video Upload"} accept=".mp4" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
-				</div>
-			)
-			if (videoFormat === INPUT_IMAGE) {
-				uploadButtons.push(button_image)
-			} else if (videoFormat === INPUT_VIDEO) {
-				uploadButtons.push(button_video)
-			}
-		}
-		return (
-			<div>
-				{
-					uploadButtons.map((but, _) => {
-						return (
-							but
-						)
-					})
-				}
-			</div>
-		)
-	}
+        var uploadButtons = []
+        for (var i = 0; i < 1; i++) {
+            let button_image = (
+                <Input multiple id={i + ""} key={i} aria-label={"Image Upload"} accept="image/*" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
+            )
+            let button_video = (
+                <Input id={i + ""} key={i} aria-label={"Video Upload"} accept=".mp4" type="file" onChange={(event) => { handleMediaUpload(event) }} disabled={firstUpload} />
+            )
+            if (videoFormat === INPUT_IMAGE) {
+                uploadButtons.push(button_image)
+            } else if (videoFormat === INPUT_VIDEO) {
+                uploadButtons.push(button_video)
+            }
+        }
+        return uploadButtons.map((but) => but)
+    }
 
     return(
         <Dialog open={props.uploadShow}>
-        <DialogContent className="sm:max-w-3xl" showCloseButton={false}>
-        <DialogHeader>
-            <DialogTitle>Upload</DialogTitle>
-        </DialogHeader>
-            <div style={{ display: "grid" }}>
-                {/*onClick and onBlur events are for the sole purpose to stop the eventKeys from firing off*/}
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-
-                        <NativeSelect
-                            id="inlineFormCustomSelect"
-                            onChange={(event) => { handleVideoFormat(event.target.value) }}
-                            defaultValue={videoFormat}
-                            disabled={firstUpload}
-                        >
-                            <NativeSelectOption value={INPUT_VIDEO}>Video</NativeSelectOption>
-                            <NativeSelectOption value={INPUT_IMAGE}>Image</NativeSelectOption>
-                        </NativeSelect>
+            <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-5xl" showCloseButton={false}>
+                <DialogHeader>
+                    <div className="space-y-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">AVAT project setup</p>
+                        <DialogTitle className="text-2xl">Create an annotation project</DialogTitle>
+                        <p className="max-w-2xl text-sm text-zinc-600">
+                            Name the project, attach media, and confirm the setup needed before the workspace opens.
+                        </p>
                     </div>
-                    <div>
-                        {
-                            generateUploadButtons()
+                </DialogHeader>
+                <div className="space-y-6">
+                        {firstUpload &&
+                            <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-zinc-950">Active project session detected</p>
+                                        <p className="text-sm text-zinc-600">Keep the current setup and return to the workspace after a quick settings review.</p>
+                                    </div>
+                                </div>
+                            </div>
                         }
-                    </div>
+
+                        <section className="space-y-4">
+                            <div className="flex items-end justify-between gap-4">
+                                <div>
+                                    <h3 className="text-base font-semibold">Project identity</h3>
+                                    <p className="text-sm text-zinc-600">Required before opening the annotation workspace.</p>
+                                </div>
+                                <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">Required</span>
+                            </div>
+                            <Input
+                                aria-label="Project Name"
+                                placeholder="Project name"
+                                value={projectName}
+                                onChange={(event) => { setProjectName(event.target.value); }}
+                                disabled={props.disable_buttons || firstUpload}
+                            />
+                        </section>
+
+                        <Separator />
+
+                        <section className="space-y-4">
+                            <div>
+                                <h3 className="text-base font-semibold">Source media</h3>
+                                <p className="text-sm text-zinc-600">Choose the media type and attach the file set for this project.</p>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
+                                <NativeSelect
+                                    className="w-full"
+                                    id="inlineFormCustomSelect"
+                                    onChange={(event) => { handleVideoFormat(event.target.value); setMediaFileName(""); }}
+                                    defaultValue={videoFormat}
+                                    disabled={firstUpload}
+                                >
+                                    <NativeSelectOption value={INPUT_VIDEO}>Video</NativeSelectOption>
+                                    <NativeSelectOption value={INPUT_IMAGE}>Image sequence</NativeSelectOption>
+                                </NativeSelect>
+                                <div className="space-y-2">
+                                    {generateUploadButtons()}
+                                    <p className="text-xs text-zinc-500">
+                                        {mediaFileName ? `Selected: ${mediaFileName}` : videoFormat === INPUT_VIDEO ? "MP4 video is supported in the current workflow." : "Select the image files for the sequence."}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
+
+                        <Separator />
+
+                        <section className="space-y-4">
+                            <div>
+                                <h3 className="text-base font-semibold">Project settings</h3>
+                                <p className="text-sm text-zinc-600">Frame rate is detected from video. Skip value controls how the workspace advances.</p>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <InputGroup className="mb-3">
+                                        <InputGroupInput
+                                            type="number"
+                                            onChange={(event) => { setStateFrameRate(event.target.value ? event.target.value : 1); }}
+                                            disabled={true}
+                                            placeholder={videoFormat === INPUT_VIDEO ? "Detected automatically" : "Not used for images"}
+                                            aria-invalid={false}
+                                            defaultValue={stateFrameRate}
+                                        />
+                                        <InputGroupAddon>
+                                            <InputGroupText>Frame Rate</InputGroupText>
+                                        </InputGroupAddon>
+                                    </InputGroup>
+                                </div>
+                                <div>
+                                    <InputGroup className="mb-3">
+                                        <InputGroupInput
+                                            type='number'
+                                            onChange={(event) => { setStateSkipValue(event.target.value ? event.target.value : 1); }}
+                                            aria-invalid={stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == ""}
+                                            defaultValue={stateSkipValue}
+                                        />
+                                        <InputGroupAddon>
+                                            <InputGroupText>Skip Value</InputGroupText>
+                                        </InputGroupAddon>
+                                        {(stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == "") &&
+                                            <FieldError>
+                                                Please enter a skip value.
+                                            </FieldError>
+                                        }
+                                    </InputGroup>
+                                </div>
+                            </div>
+                        </section>
+
+                        <Separator />
+
+                        <section className="space-y-4">
+                            <div>
+                                <h3 className="text-base font-semibold">Labels and existing annotations</h3>
+                                <p className="text-sm text-zinc-600">Import columns for labels or attach existing annotations to continue prior work.</p>
+                            </div>
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium" htmlFor="column-upload">
+                                        Label columns
+                                    </label>
+                                    <Input
+                                        disabled={props.disable_buttons || firstUpload}
+                                        accept=".json"
+                                        id="column-upload"
+                                        aria-label="Column Upload"
+                                        type="file"
+                                        onChange={handleColumnUpload}
+                                    />
+                                    <p className="mt-2 text-xs text-zinc-500">
+                                        {columnFileName ? `Selected: ${columnFileName}` : "Optional. Default columns are used if none are uploaded."}
+                                    </p>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="block text-sm font-medium" htmlFor="annotation-upload">
+                                        Annotation import
+                                    </label>
+                                    <NativeSelect
+                                        className="w-full"
+                                        aria-label="Annotation Format"
+                                        value={annotationFormat}
+                                        onChange={(event) => setAnnotationFormat(event.target.value)}
+                                        disabled={props.disable_buttons || firstUpload}
+                                    >
+                                        <NativeSelectOption value="AVAT JSON">AVAT JSON</NativeSelectOption>
+                                    </NativeSelect>
+                                    <Input
+                                        accept=".json"
+                                        id="annotation-upload"
+                                        aria-label="Annotation Upload"
+                                        type="file"
+                                        onChange={handleAnnotationUpload}
+                                        disabled={props.disable_buttons || firstUpload}
+                                    />
+                                    <p className="text-xs text-zinc-500">
+                                        {annotationFileName ? `Selected: ${annotationFileName}. Annotation labels take priority.` : "Optional. Use this when continuing from an exported annotation file."}
+                                    </p>
+                                </div>
+                            </div>
+                        </section>
 
                 </div>
-
-                <Separator className="my-3" />
-
-                <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                            <InputGroup className="mb-3">
-                                <InputGroupInput
-                                    type="number"
-                                    onChange={(event) => { setStateFrameRate(event.target.value ? event.target.value : 1); }}
-                                    disabled={true}
-                                    placeholder={videoFormat === INPUT_VIDEO ? "Detected automatically" : "Not used for images"}
-                                    aria-invalid={false}
-                                    defaultValue={stateFrameRate}
-                                />
-                                <InputGroupAddon>
-                                    <InputGroupText>Frame Rate</InputGroupText>
-                                </InputGroupAddon>
-                            </InputGroup>
-                    </div>
-                    <div>
-                            <InputGroup className="mb-3">
-                                <InputGroupInput
-                                    type='number'
-                                    onChange={(event) => { setStateSkipValue(event.target.value ? event.target.value : 1) }}
-                                    aria-invalid={stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == ""}
-                                    defaultValue={stateSkipValue}
-                                />
-                                <InputGroupAddon>
-                                    <InputGroupText>Skip Value</InputGroupText>
-                                </InputGroupAddon>
-                                {(stateSkipValue == null || stateSkipValue == undefined || stateSkipValue == "") &&
-                                    <FieldError>
-                                        Please enter a skip value.
-                                    </FieldError>
-                                }
-                            </InputGroup>
-                    </div>
-                </div>
-                <Separator className="my-3" />
-				<div className="grid gap-4 md:grid-cols-2">
-					<div>
-						<label className="mb-2 block text-sm font-medium" htmlFor="column-upload">
-							Column Upload
-						</label>
-						<Input
-							disabled={props.disable_buttons || firstUpload}
-							accept=".json"
-							id="column-upload"
-							aria-label="Column Upload"
-							type="file"
-							onChange={handleColumnUpload}
-
-						/>
-					</div>
-					<div>
-						<label className="mb-2 block text-sm font-medium" htmlFor="annotation-upload">
-							Annotation Upload
-						</label>
-						<Input
-							accept=".json"
-							id="annotation-upload"
-							aria-label="Annotation Upload"
-							type="file"
-							onChange={toggleUploadExistingAnnotation}
-                            disabled={props.disable_buttons || firstUpload}
-                        />
-                    </div>
-                </div>
-                <Separator className="my-3" />
-            </div>
-        <DialogFooter>
-            <Button 
-                onClick={handleUpload}
-                disabled={(stateSkipValue == null || stateSkipValue == "") || props.disable_buttons || isProcessingVideo}
-            >
-                {isProcessingVideo ? "Processing Video..." : firstUpload ? "Save" : "Upload"}
-            </Button>
-        </DialogFooter>
-        </DialogContent>
-    </Dialog>
+                <DialogFooter>
+                    <Button
+                        onClick={handleUpload}
+                        disabled={!canUpload}
+                    >
+                        {isProcessingVideo ? "Processing video..." : firstUpload ? "Save project settings" : "Create project"}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     )
 }
