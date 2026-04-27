@@ -122,7 +122,7 @@ export default function MultiviewCustomNavBar(props){
 			/>
 		}
 		<Dialog open={show} onOpenChange={(open) => !open && handleClose()}>
-			<DialogContent className="sm:max-w-3xl">
+			<DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
 				<DialogHeader>
 					<DialogTitle>Instructions</DialogTitle>
 				</DialogHeader>
