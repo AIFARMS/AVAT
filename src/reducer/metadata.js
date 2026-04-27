@@ -2,7 +2,7 @@ import {createSlice} from '@reduxjs/toolkit'
 import {initFrameData, updateFrameData, getFrameData, initAnnotationData, updateAnnotationData, getAnnotationData, initColumnData, setMedia, initMedia} from '../processing/actions'
 
 
-const initialState = {horizontal_res: 0, vertical_res: 0, frame_rate: 1, media_type: "in_video", total_frames: 0, skip_value: null}
+const initialState = {horizontal_res: 0, vertical_res: 0, frame_rate: 1, media_type: "in_video", total_frames: 0, skip_value: 1}
 
 const metadataSlice = createSlice({
     name: 'metadata',

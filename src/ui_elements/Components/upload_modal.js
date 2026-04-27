@@ -31,7 +31,7 @@ export default function UploadModal(props){
     const [firstUpload, setFirstUpload] = useState(false)
     const [projectName, setProjectName] = useState("")
     const [stateFrameRate, setStateFrameRate] = useState(null)
-    const [stateSkipValue, setStateSkipValue] = useState(null)
+    const [stateSkipValue, setStateSkipValue] = useState(1)
     const [stateColumnData, setStateColumnData] = useState(null)
     const [uploadExistingAnnotation, setUploadExistingAnnotation] = useState(false)
     const [isProcessingVideo, setIsProcessingVideo] = useState(false)
