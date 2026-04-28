@@ -27,7 +27,8 @@
     "deploy": "gh-pages -d dist",
     "start": "vite",
     "dev": "vite",
-    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
     "reset": "rm -rf node_modules && rm package-lock.json && npm i"
   },
@@ -48,9 +49,12 @@
     "@babel/preset-env": "*",
     "@babel/preset-react": "*",
     "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.4.1",
     "babel-jest": "^24.9.0",
     "gh-pages": "^3.2.0",
+    "typescript": "^6.0.3",
     "vite": "^5.4.19"
   },
   "babel": {
