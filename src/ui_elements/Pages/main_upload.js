@@ -48,7 +48,7 @@ import default_column from '../../static_data/basic_column_config.json'
 const ANNOTATION_TOOL_DETAILS = {
 	[ANNOTATION_FRAME]: { label: "Behavior Annotation", shortcut: "1" },
 	[ANNOTATION_BBOX]: { label: "Bounding Box", shortcut: "2" },
-	[ANNOTATION_SEG]: { label: "Segmentation", shortcut: null },
+	[ANNOTATION_SEG]: { label: "Segmentation", shortcut: "3" },
 	[ANNOTATION_KEYPOINT]: { label: "Key Point", shortcut: "4" },
 }
 
@@ -59,6 +59,7 @@ const SIDE_PANEL_WIDTH = 560;
 const VIDEO_ASPECT_RATIO = 16 / 9;
 const AUTOSAVE_DEBOUNCE_MS = 1500;
 const BBOX_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
+const SEGMENT_COLORS = ["#22c55e", "#14b8a6", "#06b6d4", "#84cc16", "#10b981", "#2dd4bf", "#38bdf8", "#a3e635"];
 
 const autosaveStatusText = {
 	idle: "Autosave ready",
@@ -92,7 +93,6 @@ var toast_text = ""
 var ANNOTATION_VIDEO_NAME = ""
 var VIDEO_METADATA = {}
 var play_button_text = "Play"
-var segmentation_flag = false;
 
 const isKeybindTargetBlocked = (event) => {
 	const target = event.target
@@ -156,6 +156,7 @@ export default function MainUpload() {
 	const [autosaveError, setAutosaveError] = useState("")
 	const [forceUploadClosedToken, setForceUploadClosedToken] = useState(0)
 	const [pendingBoundingBox, setPendingBoundingBox] = useState(null)
+	const [pendingSegmentation, setPendingSegmentation] = useState(null)
 	const [deleteSelectedRequest, setDeleteSelectedRequest] = useState(0)
 	const autosaveTimeoutRef = useRef(null)
 	const autosaveReadyRef = useRef(false)
@@ -381,6 +382,9 @@ export default function MainUpload() {
 		if (annotationType === ANNOTATION_BBOX){
 			beginBoundingBoxDraw()
 			return
+		}else if(annotationType === ANNOTATION_SEG){
+			beginSegmentationDraw()
+			return
 		}else if(annotationType === ANNOTATION_FRAME){
 			//TODO Add annotation frame datapoint
 			annotation_type_txt = "f"
@@ -401,6 +405,10 @@ export default function MainUpload() {
 	}
 
 	const beginBoundingBoxDraw = () => {
+		if(pendingSegmentation){
+			showToast("Finish or cancel the current segmentation first")
+			return
+		}
 		if(pendingBoundingBox){
 			showToast("Drag on the media to finish the current bounding box")
 			return
@@ -412,6 +420,24 @@ export default function MainUpload() {
 			color: BBOX_COLORS[boxCount % BBOX_COLORS.length],
 		})
 		showToast("Drag on the media to draw bounding box " + id)
+	}
+
+	const beginSegmentationDraw = () => {
+		if(pendingBoundingBox){
+			showToast("Finish or cancel the current bounding box first")
+			return
+		}
+		if(pendingSegmentation){
+			showToast("Click the first point to finish segment " + pendingSegmentation.id)
+			return
+		}
+
+		const id = boxCount + 's'
+		setPendingSegmentation({
+			id,
+			color: SEGMENT_COLORS[boxCount % SEGMENT_COLORS.length],
+		})
+		showToast("Click points around the object. Close on the first point.")
 	}
 
 	const handleBoundingBoxCreated = (boundingBox) => {
@@ -430,6 +456,22 @@ export default function MainUpload() {
 		showToast("Bounding box cancelled")
 	}
 
+	const handleSegmentationCreated = (segmentation) => {
+		var saved_annot = getAnnotationData(getCurrentFrame())
+		var generated_annotation = create_annotation(segmentation.id)
+		saved_annot = Object.assign([], saved_annot)
+		saved_annot.push(generated_annotation)
+		updateAnnotationData(currframe_redux, saved_annot)
+		setPendingSegmentation(null)
+		setBoxCount(boxCount + 1)
+		showToast("Added segmentation " + segmentation.id)
+	}
+
+	const handleSegmentationCancelled = () => {
+		setPendingSegmentation(null)
+		showToast("Segmentation cancelled")
+	}
+
 	const handleBoundingBoxDeleted = (localId) => {
 		var curr_data = getAnnotationData(getCurrentFrame()) || []
 		var next_data = curr_data.filter((annotation) => annotation.id !== localId)
@@ -441,6 +483,11 @@ export default function MainUpload() {
 		if(pendingBoundingBox){
 			setPendingBoundingBox(null)
 			showToast("Bounding box cancelled")
+			return
+		}
+		if(pendingSegmentation){
+			setPendingSegmentation(null)
+			showToast("Segmentation cancelled")
 			return
 		}
 		setDeleteSelectedRequest((request) => request + 1)
@@ -487,10 +534,6 @@ export default function MainUpload() {
 			}
 		}
 		return leafColumns
-	}
-
-	const toggle_segmentation = (event) => {
-		segmentation_flag = !segmentation_flag
 	}
 
 	const handleOldAnnotation = (event) => {
@@ -694,8 +737,8 @@ export default function MainUpload() {
 		if(keyCheck === false){
 			return;
 		}
-		if(segmentation_flag === true){
-			alert("Please finish your current action!")
+		if((pendingBoundingBox || pendingSegmentation) && event.key !== "Escape"){
+			showToast("Finish or cancel the current drawing first")
 			return;
 		}
 		if (event.key === ANNOTATION_BBOX){
@@ -703,9 +746,7 @@ export default function MainUpload() {
 		}else if (event.key === ANNOTATION_KEYPOINT){
 			change_annotation_type(ANNOTATION_KEYPOINT)
 		}else if(event.key === ANNOTATION_SEG) {
-			// toast_text = "Mode Switch: Segmentation"
-			// changeSave(true)
-			// setAnnotationType(ANNOTATION_SEG)
+			change_annotation_type(ANNOTATION_SEG)
 		}else if(event.key === ANNOTATION_FRAME){
 			change_annotation_type(ANNOTATION_FRAME)
 		}else if (event.key === "a"){
@@ -733,6 +774,9 @@ export default function MainUpload() {
 		}else if(event.key === "Escape" && pendingBoundingBox){
 			setPendingBoundingBox(null)
 			showToast("Bounding box cancelled")
+		}else if(event.key === "Escape" && pendingSegmentation){
+			setPendingSegmentation(null)
+			showToast("Segmentation cancelled")
 		}
 	}  
 
@@ -829,7 +873,12 @@ export default function MainUpload() {
 		var fcanvas = []
 		for(var i = 0; i < imagedata_redux.length; i++){
 			let canv = (
-				<div key={i} className="relative shrink-0 overflow-hidden bg-black shadow-sm" style={{width: scaling_factor_width, height: scaling_factor_height}}>
+				<div key={i} className={(pendingSegmentation ? "ring-1 ring-emerald-400/70 " : "") + "relative shrink-0 overflow-hidden bg-black shadow-sm"} style={{width: scaling_factor_width, height: scaling_factor_height}}>
+					{pendingSegmentation &&
+						<div className="pointer-events-none absolute left-3 top-3 z-10 rounded-full border border-emerald-300/40 bg-zinc-950/75 px-3 py-1 text-xs font-medium text-emerald-50 shadow-sm backdrop-blur">
+							Click points, close on first point, Esc cancel
+						</div>
+					}
 					<FabricRender 
 						currentFrame={currframe_redux}
 						scaling_factor_height={scaling_factor_height}
@@ -838,6 +887,9 @@ export default function MainUpload() {
 						pendingBoundingBox={pendingBoundingBox}
 						onBoundingBoxCreated={handleBoundingBoxCreated}
 						onBoundingBoxCancelled={handleBoundingBoxCancelled}
+						pendingSegmentation={pendingSegmentation}
+						onSegmentationCreated={handleSegmentationCreated}
+						onSegmentationCancelled={handleSegmentationCancelled}
 						deleteSelectedRequest={deleteSelectedRequest}
 						onBoundingBoxDeleted={handleBoundingBoxDeleted}
 					/>
@@ -918,6 +970,7 @@ export default function MainUpload() {
 				autosaveStatus={autosaveStatusText[autosaveStatus] || autosaveStatusText.idle}
 				lastSavedAt={lastSavedAt}
 				autosaveError={autosaveError}
+				drawingInProgress={Boolean(pendingBoundingBox || pendingSegmentation)}
 			/>
 			{save &&
 				<div className="absolute left-[100px] top-[64px] z-[100] rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-md">

@@ -72,6 +72,53 @@ const getSafeFrameData = (frameNumber) => {
 }
 
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+const SEGMENT_CLOSE_RADIUS = 12
+
+const createSegmentationGroup = (points, id, color) => {
+	const polygon = new fabric.Polygon(points, {
+		strokeWidth: 2,
+		stroke: color,
+		fill: color,
+		opacity: 0.38,
+		scaleX: 1,
+		scaleY: 1,
+		objectCaching: false,
+		transparentCorners: false,
+		cornerColor: '#ffffff',
+		cornerStrokeColor: '#111827',
+		originX: 'center',
+		originY: 'center',
+	})
+	polygon.local_id = id
+
+	const displayText = new fabric.Text(id.toString(), {
+		fontSize: 16,
+		fontWeight: 'bold',
+		top: points[0].y + 3,
+		left: points[0].x + 4,
+		uniScaleTransform: false,
+		fill: 'white',
+		backgroundColor: 'rgba(0,0,0,0.7)',
+	})
+
+	const group = new fabric.Group([polygon, displayText], {
+		perPixelTargetFind: true,
+		hasControls: false,
+		hasBorders: false,
+		lockMovementY: true,
+		lockMovementX: true,
+	})
+	group.local_id = id
+	group.toObject = (function(toObject) {
+		return function() {
+			return fabric.util.object.extend(toObject.call(this), {
+				local_id: this.local_id
+			});
+		};
+	})(group.toObject)
+
+	return group
+}
 
 export default function FabricRender(props){
 	const [fabricCanvas, setFabricCanvas] = useState(null)
@@ -329,6 +376,207 @@ export default function FabricRender(props){
 			finishDrawingMode()
 		}
 	}, [fabricCanvas, props.pendingBoundingBox])
+
+	useEffect(() => {
+		if(!fabricCanvas || !props.pendingSegmentation){
+			return
+		}
+
+		let points = []
+		let pointMarkers = []
+		let lineMarkers = []
+		let previewLine = null
+		let previewPolygon = null
+		const previousSelection = fabricCanvas.selection
+		const previousCursor = fabricCanvas.defaultCursor
+		const previousHoverCursor = fabricCanvas.hoverCursor
+		const previousObjectState = new Map()
+
+		fabricCanvas.discardActiveObject()
+		fabricCanvas.selection = false
+		fabricCanvas.defaultCursor = 'crosshair'
+		fabricCanvas.hoverCursor = 'crosshair'
+		fabricCanvas.forEachObject((object) => {
+			previousObjectState.set(object, {
+				selectable: object.selectable,
+				evented: object.evented,
+			})
+			object.selectable = false
+			object.evented = false
+		})
+		fabricCanvas.requestRenderAll()
+
+		const removeObject = (object) => {
+			if(object){
+				fabricCanvas.remove(object)
+			}
+		}
+
+		const cleanupPreview = () => {
+			removeObject(previewLine)
+			removeObject(previewPolygon)
+			pointMarkers.forEach(removeObject)
+			lineMarkers.forEach(removeObject)
+			previewLine = null
+			previewPolygon = null
+			pointMarkers = []
+			lineMarkers = []
+		}
+
+		const finishDrawingMode = () => {
+			fabricCanvas.selection = previousSelection
+			fabricCanvas.defaultCursor = previousCursor
+			fabricCanvas.hoverCursor = previousHoverCursor
+			fabricCanvas.forEachObject((object) => {
+				const previousState = previousObjectState.get(object)
+				if(previousState){
+					object.selectable = previousState.selectable
+					object.evented = previousState.evented
+				}
+			})
+			fabricCanvas.requestRenderAll()
+		}
+
+		const distanceFromFirstPoint = (pointer) => {
+			if(points.length === 0){
+				return Infinity
+			}
+			const firstPoint = points[0]
+			return Math.hypot(pointer.x - firstPoint.x, pointer.y - firstPoint.y)
+		}
+
+		const updateFirstMarker = (isCloseTarget) => {
+			if(pointMarkers.length === 0){
+				return
+			}
+			pointMarkers[0].set({
+				radius: isCloseTarget ? 7 : 5,
+				fill: isCloseTarget ? '#f59e0b' : '#ffffff',
+				stroke: isCloseTarget ? '#ffffff' : props.pendingSegmentation.color,
+				strokeWidth: isCloseTarget ? 3 : 2,
+			})
+		}
+
+		const updatePreviewPolygon = (pointer) => {
+			removeObject(previewPolygon)
+			previewPolygon = null
+			if(points.length < 2){
+				return
+			}
+
+			previewPolygon = new fabric.Polygon(points.concat([{ x: pointer.x, y: pointer.y }]), {
+				stroke: props.pendingSegmentation.color,
+				strokeWidth: 1,
+				strokeDashArray: [5, 5],
+				fill: props.pendingSegmentation.color,
+				opacity: 0.18,
+				selectable: false,
+				evented: false,
+				objectCaching: false,
+			})
+			fabricCanvas.add(previewPolygon)
+			fabricCanvas.sendToBack(previewPolygon)
+		}
+
+		const addPoint = (pointer) => {
+			const newPoint = { x: pointer.x, y: pointer.y }
+			const previousPoint = points[points.length - 1]
+			points.push(newPoint)
+
+			if(previousPoint){
+				const line = new fabric.Line([previousPoint.x, previousPoint.y, newPoint.x, newPoint.y], {
+					stroke: props.pendingSegmentation.color,
+					strokeWidth: 2,
+					selectable: false,
+					evented: false,
+					objectCaching: false,
+				})
+				lineMarkers.push(line)
+				fabricCanvas.add(line)
+			}
+
+			const marker = new fabric.Circle({
+				left: newPoint.x,
+				top: newPoint.y,
+				radius: points.length === 1 ? 5 : 4,
+				fill: points.length === 1 ? '#ffffff' : props.pendingSegmentation.color,
+				stroke: points.length === 1 ? props.pendingSegmentation.color : '#ffffff',
+				strokeWidth: 2,
+				originX: 'center',
+				originY: 'center',
+				selectable: false,
+				evented: false,
+				objectCaching: false,
+			})
+			pointMarkers.push(marker)
+			fabricCanvas.add(marker)
+
+			removeObject(previewLine)
+			previewLine = new fabric.Line([newPoint.x, newPoint.y, newPoint.x, newPoint.y], {
+				stroke: props.pendingSegmentation.color,
+				strokeWidth: 2,
+				strokeDashArray: [4, 4],
+				selectable: false,
+				evented: false,
+				objectCaching: false,
+			})
+			fabricCanvas.add(previewLine)
+			fabricCanvas.requestRenderAll()
+		}
+
+		const completeSegmentation = () => {
+			if(points.length < 3){
+				return
+			}
+
+			const segmentPoints = points.map((point) => ({ x: point.x, y: point.y }))
+			cleanupPreview()
+			finishDrawingMode()
+			const segmentationGroup = createSegmentationGroup(segmentPoints, props.pendingSegmentation.id, props.pendingSegmentation.color)
+			fabricCanvas.add(segmentationGroup)
+			fabricCanvas.setActiveObject(segmentationGroup)
+			updateFrameData(store.getState().current_frame['data'], fabricCanvas.getObjects())
+			props.onSegmentationCreated?.(props.pendingSegmentation)
+		}
+
+		const handleMouseDown = (event) => {
+			if(event.e.altKey){
+				return
+			}
+
+			const pointer = fabricCanvas.getPointer(event.e)
+			if(points.length >= 3 && distanceFromFirstPoint(pointer) <= SEGMENT_CLOSE_RADIUS){
+				completeSegmentation()
+				return
+			}
+
+			addPoint(pointer)
+		}
+
+		const handleMouseMove = (event) => {
+			if(points.length === 0){
+				return
+			}
+
+			const pointer = fabricCanvas.getPointer(event.e)
+			if(previewLine){
+				previewLine.set({ x2: pointer.x, y2: pointer.y })
+			}
+			updateFirstMarker(points.length >= 3 && distanceFromFirstPoint(pointer) <= SEGMENT_CLOSE_RADIUS)
+			updatePreviewPolygon(pointer)
+			fabricCanvas.requestRenderAll()
+		}
+
+		fabricCanvas.on('mouse:down', handleMouseDown)
+		fabricCanvas.on('mouse:move', handleMouseMove)
+
+		return () => {
+			fabricCanvas.off('mouse:down', handleMouseDown)
+			fabricCanvas.off('mouse:move', handleMouseMove)
+			cleanupPreview()
+			finishDrawingMode()
+		}
+	}, [fabricCanvas, props.pendingSegmentation])
 
 	useEffect(() => {
 		if(!fabricCanvas || !props.deleteSelectedRequest || props.deleteSelectedRequest === lastDeleteRequestRef.current){

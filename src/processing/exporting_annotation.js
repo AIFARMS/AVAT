@@ -1,3 +1,24 @@
+import { fabric } from 'fabric';
+
+const getPolygonCanvasPoints = (polygon) => {
+    if(!polygon || !polygon.points){
+        return []
+    }
+
+    if(!polygon.calcTransformMatrix){
+        return polygon.points
+    }
+
+    const matrix = polygon.calcTransformMatrix()
+    const pathOffset = polygon.pathOffset || { x: 0, y: 0 }
+    return polygon.points.map((point) => {
+        return fabric.util.transformPoint({
+            x: point.x - pathOffset.x,
+            y: point.y - pathOffset.y,
+        }, matrix)
+    })
+}
+
 export default class ExportingAnnotation{
     constructor(annotation_data, width, height, VIDEO_METADATA, image_data){
         console.log(width)
@@ -48,7 +69,7 @@ export default class ExportingAnnotation{
                         }
                         //curr.push({"type": "bounding_box","x": x, "y": y, "width": width, "height": height, "local_id": local_id})
                     }else if (frame_objects[j]._objects[0]['type'] === "polygon"){
-                        var raw_points = frame_objects[j]._objects[0]['points']
+                        var raw_points = getPolygonCanvasPoints(frame_objects[j]._objects[0])
                         var points = []
                         console.log(this.metadata)
                         console.log(this.metadata['horizontal_res'])

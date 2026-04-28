@@ -63,7 +63,8 @@ export default function CustomNavBar(props) {
 	const currentFrame = props.currentFrame || 0
 	const totalFrames = props.totalFrames || 0
 	const hasFrames = totalFrames > 0
-	const controlsDisabled = props.disable_buttons || !hasFrames
+	const controlsDisabled = props.disable_buttons || !hasFrames || props.drawingInProgress
+	const addDisabled = props.disable_buttons || !hasFrames || props.drawingInProgress
 	const scrubberMax = Math.max(totalFrames - 1, 0)
 	const timestampText = props.mediaType === INPUT_VIDEO && props.frameRate > 0
 		? formatTimestamp(currentFrame / props.frameRate) + " / " + formatTimestamp(Math.max(totalFrames - 1, 0) / props.frameRate)
@@ -174,7 +175,10 @@ export default function CustomNavBar(props) {
 				<div className="hidden items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-sm sm:flex">
 					<span className="text-zinc-300">Tool</span>
 					<span className="font-semibold">{annotationTool.label}</span>
-					<span className="rounded bg-white/15 px-1.5 py-0.5 text-xs text-zinc-200">Add A</span>
+					<span className="rounded bg-white/15 px-1.5 py-0.5 text-xs text-zinc-200">{annotationTool.label === "Segmentation" ? "Add A, click points" : "Add A"}</span>
+					{annotationTool.shortcut &&
+						<span className="rounded bg-white/10 px-1.5 py-0.5 text-xs text-zinc-300">Shortcut {annotationTool.shortcut}</span>
+					}
 				</div>
 				<div className="flex max-w-[220px] items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs text-zinc-200" title={props.autosaveError || undefined}>
 					<span className={props.autosaveStatus === "Autosave failed" ? "font-semibold text-red-200" : "font-medium"}>{props.autosaveStatus}</span>
@@ -186,9 +190,9 @@ export default function CustomNavBar(props) {
 					<Button variant="outline" onClick={handleUploadToggle}>Settings</Button>{' '}
 					<DropdownMenu>
 						<ButtonGroup>
-							<Button variant="success" onClick={props.addToCanvas}>Add</Button>
+							<Button variant="success" disabled={addDisabled} onClick={props.addToCanvas}>Add</Button>
 							<DropdownMenuTrigger asChild>
-								<Button variant="success" aria-label="Annotation type options">v</Button>
+								<Button variant="success" disabled={addDisabled} aria-label="Annotation type options">v</Button>
 							</DropdownMenuTrigger>
 						</ButtonGroup>
 						<DropdownMenuContent align="end">
