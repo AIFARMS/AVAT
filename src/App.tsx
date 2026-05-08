@@ -6,13 +6,13 @@
  import React from "react"; 
  import './App.css';
   
- import SelectionScreen from './ui_elements/Pages/selection_screen'
+ import MainUpload from './ui_elements/Pages/main_upload'
  
  //<FrontEnd></FrontEnd>
  function App() {
    return (
      <div>
-       <SelectionScreen></SelectionScreen>    
+       <MainUpload />
      </div>
    );
  }
