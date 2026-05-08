@@ -65,6 +65,7 @@ export class WebCodecsFrameSource {
     this.totalFrames = 0;
     this.width = 0;
     this.height = 0;
+    this.duration = null;
     this.averageFrameRate = null;
   }
 
@@ -94,7 +95,8 @@ export class WebCodecsFrameSource {
     this.totalFrames = this.displaySamples.length;
     this.width = track.video?.width || track.track_width;
     this.height = track.video?.height || track.track_height;
-    this.averageFrameRate = track.duration ? this.totalFrames / (track.duration / track.timescale) : null;
+    this.duration = track.duration && track.timescale ? track.duration / track.timescale : null;
+    this.averageFrameRate = this.duration ? this.totalFrames / this.duration : null;
 
     this.config = {
       codec: track.codec,

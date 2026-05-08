@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -39,15 +39,99 @@ export default function UploadModal(props){
     const [columnFileName, setColumnFileName] = useState("")
     const [annotationFileName, setAnnotationFileName] = useState("")
     const [annotationFormat, setAnnotationFormat] = useState("AVAT JSON")
+    const [videoMetadataStatus, setVideoMetadataStatus] = useState("idle")
+    const [videoMetadata, setVideoMetadata] = useState<any>(null)
+    const [videoMetadataError, setVideoMetadataError] = useState("")
+    const [videoPreviewUrl, setVideoPreviewUrl] = useState("")
+    const metadataRequestId = useRef(0)
+    const videoPreviewUrlRef = useRef("")
 
     const frame_count = useSelector(state => state.metadata.total_frames)
     const mediaData = useSelector(state => state.media_data.data)
 
     const hasProjectName = firstUpload || projectName.trim() !== ""
-    const hasMediaFile = Boolean(mediaFileName || mediaData?.[0]?.[0])
+    const hasMediaFile = firstUpload ? Boolean(mediaFileName || mediaData?.[0]?.[0]) : Boolean(mediaFileName)
     const hasSkipValue = stateSkipValue != null && String(stateSkipValue) !== ""
     const annotationFormatReady = !uploadExistingAnnotation || Boolean(annotationFormat)
-    const canUpload = hasProjectName && hasMediaFile && hasSkipValue && annotationFormatReady && !props.disable_buttons && !isProcessingVideo
+    const videoMetadataReady = firstUpload || videoFormat !== INPUT_VIDEO || videoMetadataStatus === "ready"
+    const canUpload = hasProjectName && hasMediaFile && hasSkipValue && annotationFormatReady && videoMetadataReady && !props.disable_buttons && !isProcessingVideo
+
+    const formatDuration = (seconds) => {
+        if(seconds == null || Number.isNaN(seconds)){
+            return "Unknown"
+        }
+        const totalSeconds = Math.round(seconds)
+        const minutes = Math.floor(totalSeconds / 60)
+        const remainder = totalSeconds % 60
+        return `${minutes}:${String(remainder).padStart(2, "0")}`
+    }
+
+    const formatNumber = (value, digits = 0) => {
+        if(value == null || Number.isNaN(value)){
+            return "Unknown"
+        }
+        return Number(value).toLocaleString(undefined, {
+            maximumFractionDigits: digits,
+        })
+    }
+
+    const resetVideoMetadata = () => {
+        metadataRequestId.current += 1
+        setVideoMetadataStatus("idle")
+        setVideoMetadata(null)
+        setVideoMetadataError("")
+        setStateFrameRate(null)
+    }
+
+    const setVideoPreviewFile = (file) => {
+        if(videoPreviewUrlRef.current){
+            URL.revokeObjectURL(videoPreviewUrlRef.current)
+            videoPreviewUrlRef.current = ""
+        }
+        if(!file){
+            setVideoPreviewUrl("")
+            return
+        }
+        const objectUrl = URL.createObjectURL(file)
+        videoPreviewUrlRef.current = objectUrl
+        setVideoPreviewUrl(objectUrl)
+    }
+
+    useEffect(() => {
+        return () => {
+            if(videoPreviewUrlRef.current){
+                URL.revokeObjectURL(videoPreviewUrlRef.current)
+            }
+        }
+    }, [])
+
+    const createProjectAvailabilityText = () => {
+        if(props.disable_buttons){
+            return "Project setup is temporarily disabled."
+        }
+        if(!hasProjectName){
+            return "Enter a project name to continue."
+        }
+        if(!hasMediaFile){
+            return "Select source media to continue."
+        }
+        if(videoFormat === INPUT_VIDEO && videoMetadataStatus === "loading"){
+            return "Detecting video details. Finish detection before creating the project."
+        }
+        if(videoFormat === INPUT_VIDEO && videoMetadataStatus === "error"){
+            return "Video details could not be detected. Select a valid MP4 before creating the project."
+        }
+        if(!hasSkipValue){
+            return "Enter a skip value to continue."
+        }
+        if(!annotationFormatReady){
+            return "Choose an annotation format to continue."
+        }
+        if(canUpload){
+            return firstUpload ? "Ready to save project settings." : "Ready to create project."
+        }
+        return "Complete required setup to continue."
+    }
 
     const handleUpload = async () => {
         setIsProcessingVideo(true)
@@ -61,9 +145,12 @@ export default function UploadModal(props){
                         alert("Please upload a video file.")
                         return;
                     }
-                    const frameSource = await loadFrameSource(0, uploadedFile)
-                    setFrameRate(frameSource.averageFrameRate)
-                    totalFrames = frameSource.totalFrames
+                    if(!videoMetadata){
+                        alert("Video details are still being detected. Please wait for the metadata summary to finish.")
+                        return;
+                    }
+                    setFrameRate(videoMetadata.frameRate)
+                    totalFrames = videoMetadata.totalFrames
                 }else {
                     totalFrames = frame_count
                 }
@@ -84,8 +171,11 @@ export default function UploadModal(props){
                         alert("Please upload a video file.")
                         return;
                     }
-                    const frameSource = await loadFrameSource(0, uploadedFile)
-                    let totalFrames = frameSource.totalFrames
+                    if(!videoMetadata){
+                        alert("Video details are still being detected. Please wait for the metadata summary to finish.")
+                        return;
+                    }
+                    let totalFrames = videoMetadata.totalFrames
                     setTotalFrames(totalFrames)
                 }
             }
@@ -116,6 +206,9 @@ export default function UploadModal(props){
     }
 
     const handleVideoFormat = (type) => {
+        resetVideoMetadata()
+        setVideoPreviewFile(null)
+        setMediaFileName("")
         //TODO Make sure bug is resolved and simply have video format equal type
         //type = parseInt(type)
         if (type === INPUT_VIDEO) {
@@ -129,12 +222,49 @@ export default function UploadModal(props){
         }
     }
 
-    const handleMediaUpload = (event) => {
-        setMediaFileName(event.target.files?.[0]?.name || "")
-        if (videoFormat == INPUT_VIDEO) {
-            setMedia(parseInt(event.target.id), event.target.files)
-        } else {
-            setMedia(parseInt(event.target.id), event.target.files)
+    const handleMediaUpload = async (event) => {
+        const streamNum = parseInt(event.target.id)
+        const files = event.target.files
+        const uploadedFile = files?.[0]
+        setMediaFileName(uploadedFile?.name || "")
+        setMedia(streamNum, files)
+
+        if(videoFormat !== INPUT_VIDEO || !uploadedFile){
+            resetVideoMetadata()
+            setVideoPreviewFile(null)
+            return
+        }
+
+        setVideoPreviewFile(uploadedFile)
+
+        const requestId = metadataRequestId.current + 1
+        metadataRequestId.current = requestId
+        setVideoMetadataStatus("loading")
+        setVideoMetadata(null)
+        setVideoMetadataError("")
+        setStateFrameRate(null)
+
+        try{
+            const frameSource = await loadFrameSource(streamNum, uploadedFile)
+            if(metadataRequestId.current !== requestId){
+                return
+            }
+            const frameRate = frameSource.averageFrameRate || 1
+            setVideoMetadata({
+                duration: frameSource.duration,
+                totalFrames: frameSource.totalFrames,
+                frameRate: frameRate,
+                width: frameSource.width,
+                height: frameSource.height,
+            })
+            setStateFrameRate(Number(frameRate).toFixed(3))
+            setVideoMetadataStatus("ready")
+        }catch(error){
+            if(metadataRequestId.current !== requestId){
+                return
+            }
+            setVideoMetadataStatus("error")
+            setVideoMetadataError((error as Error).message || "Error detecting video details.")
         }
     }
 
@@ -229,9 +359,9 @@ export default function UploadModal(props){
                             </div>
                             <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
                                 <NativeSelect
-                                    className="w-full"
+                                    className="w-full self-start"
                                     id="inlineFormCustomSelect"
-                                    onChange={(event) => { handleVideoFormat(event.target.value); setMediaFileName(""); }}
+                                    onChange={(event) => { handleVideoFormat(event.target.value); }}
                                     defaultValue={videoFormat}
                                     disabled={firstUpload}
                                 >
@@ -240,11 +370,49 @@ export default function UploadModal(props){
                                 </NativeSelect>
                                 <div className="space-y-2">
                                     {generateUploadButtons()}
-                                    <p className="text-xs text-zinc-500">
-                                        {mediaFileName ? `Selected: ${mediaFileName}` : videoFormat === INPUT_VIDEO ? "MP4 video is supported in the current workflow." : "Select the image files for the sequence."}
-                                    </p>
-                                </div>
-                            </div>
+                                     <p className="text-xs text-zinc-500">
+                                         {mediaFileName ? `Selected: ${mediaFileName}` : videoFormat === INPUT_VIDEO ? "MP4 video is supported in the current workflow." : "Select the image files for the sequence."}
+                                     </p>
+                                    {videoFormat === INPUT_VIDEO && mediaFileName &&
+                                        <div className="grid gap-3 lg:grid-cols-[192px_minmax(0,1fr)]">
+                                            {videoPreviewUrl &&
+                                                <video
+                                                    className="h-28 w-full rounded-lg border border-zinc-200 bg-black object-contain"
+                                                    autoPlay
+                                                    controls
+                                                    key={videoPreviewUrl}
+                                                    muted
+                                                    playsInline
+                                                    preload="metadata"
+                                                    src={videoPreviewUrl}
+                                                />
+                                            }
+                                            <div className={`min-h-28 rounded-lg border p-3 text-sm ${videoMetadataStatus === "error" ? "border-red-200 bg-red-50 text-red-800" : videoMetadataStatus === "ready" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-zinc-200 bg-zinc-50 text-zinc-700"}`}>
+                                                {videoMetadataStatus === "loading" &&
+                                                    <p className="font-medium">Detecting video duration, frame count, and frame rate...</p>
+                                                }
+                                                {videoMetadataStatus === "error" &&
+                                                    <div className="space-y-1">
+                                                        <p className="font-medium">Video details could not be detected.</p>
+                                                        <p className="text-xs">{videoMetadataError}</p>
+                                                    </div>
+                                                }
+                                                {videoMetadataStatus === "ready" &&
+                                                    <div className="space-y-2">
+                                                        <p className="font-medium">Video details detected</p>
+                                                        <div className="grid gap-2 text-xs sm:grid-cols-2 xl:grid-cols-4">
+                                                            <span><span className="font-medium">Duration:</span> {formatDuration(videoMetadata.duration)}</span>
+                                                            <span><span className="font-medium">Frames:</span> {formatNumber(videoMetadata.totalFrames)}</span>
+                                                            <span><span className="font-medium">Frame rate:</span> {formatNumber(videoMetadata.frameRate, 3)} fps</span>
+                                                            <span><span className="font-medium">Size:</span> {videoMetadata.width} x {videoMetadata.height}</span>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                 </div>
+                             </div>
                         </section>
 
                         <Separator />
@@ -263,7 +431,7 @@ export default function UploadModal(props){
                                             disabled={true}
                                             placeholder={videoFormat === INPUT_VIDEO ? "Detected automatically" : "Not used for images"}
                                             aria-invalid={false}
-                                            defaultValue={stateFrameRate}
+                                            value={stateFrameRate || ""}
                                         />
                                         <InputGroupAddon>
                                             <InputGroupText>Frame Rate</InputGroupText>
@@ -344,7 +512,10 @@ export default function UploadModal(props){
                         </section>
 
                 </div>
-                <DialogFooter>
+                <DialogFooter className="items-start sm:items-center sm:justify-between">
+                    <p className={`text-xs ${canUpload ? "text-emerald-700" : "text-zinc-500"}`}>
+                        {createProjectAvailabilityText()}
+                    </p>
                     <Button
                         onClick={handleUpload}
                         disabled={!canUpload}
