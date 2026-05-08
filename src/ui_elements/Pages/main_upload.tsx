@@ -919,7 +919,7 @@ export default function MainUpload() {
 	}
 
 	return (
-		<div className="min-h-screen bg-zinc-100">
+		<div className="min-h-screen bg-zinc-100 [--playback-bar-height:9rem]">
 			<Dialog open={Boolean(autosaveCandidate) && !isCheckingAutosave}>
 				<DialogContent className="sm:max-w-lg" showCloseButton={false}>
 					<DialogHeader>
@@ -987,7 +987,7 @@ export default function MainUpload() {
 			}
 			{
 				upload === true && 
-				<main className="grid min-h-[calc(100vh-160px)] grid-cols-1 gap-3 overflow-auto p-3 xl:h-[calc(100vh-160px)] xl:grid-cols-[minmax(0,1fr)_560px] xl:overflow-hidden">
+				<main className="grid min-h-[calc(100vh_-_160px)] grid-cols-1 gap-3 overflow-auto p-3 pb-[calc(var(--playback-bar-height)_+_0.75rem)] xl:h-[calc(100vh_-_4rem_-_var(--playback-bar-height))] xl:grid-cols-[minmax(0,1fr)_560px] xl:overflow-hidden xl:pb-3">
 					<section className="min-h-0 overflow-auto rounded-lg bg-zinc-950 p-3 shadow-inner">
 						<div className="flex min-h-full items-start justify-center">
 							{genFabricCanvas()}
