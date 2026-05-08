@@ -74,6 +74,14 @@ const getSafeFrameData = (frameNumber) => {
 const sleep = (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 const SEGMENT_CLOSE_RADIUS = 12
 
+const getObjectAnnotationId = (object) => {
+	if(!object){
+		return null
+	}
+
+	return object.local_id || object.item?.(1)?.text || object.text || null
+}
+
 const createSegmentationGroup = (points, id, color) => {
 	const polygon = new fabric.Polygon(points, {
 		strokeWidth: 2,
@@ -237,6 +245,17 @@ export default function FabricRender(props){
 		  	width: props.scaling_factor_width,
 		  	backgroundColor : null,
 		});
+
+		const handleSelectionChange = (event) => {
+			const selectedObject = event.selected?.[0] || temp_fabricCanvas.getActiveObject()
+			props.onSelectedAnnotationChange?.(getObjectAnnotationId(selectedObject))
+		}
+
+		temp_fabricCanvas.on('selection:created', handleSelectionChange)
+		temp_fabricCanvas.on('selection:updated', handleSelectionChange)
+		temp_fabricCanvas.on('selection:cleared', function() {
+			props.onSelectedAnnotationChange?.(null)
+		})
 
 		setFabricCanvas(temp_fabricCanvas)
 	}, []);

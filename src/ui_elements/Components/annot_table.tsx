@@ -14,7 +14,8 @@ import {
 } from '@/components/ui/table'
 import { getFrameData, getAnnotationData, updateAnnotationData, updateFrameData } from '../../processing/actions'
 
-export default function AnnotTable({columns, data, select_data, current_frame, ..._props}){
+export default function AnnotTable({columns, data, select_data, current_frame, selected_annotation_id, ..._props}){
+    const rowRefs = React.useRef({})
     const tableColumns = React.useMemo(
         () => withAnnotationCells(columns || [], select_data || {}, current_frame),
         [columns, select_data, current_frame]
@@ -25,6 +26,12 @@ export default function AnnotTable({columns, data, select_data, current_frame, .
         data: data || [],
         getCoreRowModel: getCoreRowModel(),
     })
+
+    React.useEffect(() => {
+        if(selected_annotation_id && rowRefs.current[selected_annotation_id]){
+            rowRefs.current[selected_annotation_id].scrollIntoView({ block: 'nearest' })
+        }
+    }, [selected_annotation_id])
 
     if(!columns || columns.length === 0){
         return (
@@ -49,15 +56,28 @@ export default function AnnotTable({columns, data, select_data, current_frame, .
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id}>
-                            {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id}>
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
+                    {table.getRowModel().rows.map((row) => {
+                        const rowAnnotationId = (row.original as any)?.id
+                        const isSelected = selected_annotation_id && rowAnnotationId === selected_annotation_id
+                        return (
+                            <TableRow
+                                key={row.id}
+                                ref={(element) => {
+                                    if(rowAnnotationId){
+                                        rowRefs.current[rowAnnotationId] = element
+                                    }
+                                }}
+                                data-state={isSelected ? 'selected' : undefined}
+                                className={isSelected ? 'bg-amber-100 hover:bg-amber-100' : undefined}
+                            >
+                                {row.getVisibleCells().map((cell) => (
+                                    <TableCell key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        )
+                    })}
                 </TableBody>
             </Table>
         </div>

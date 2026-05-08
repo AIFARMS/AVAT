@@ -158,6 +158,7 @@ export default function MainUpload() {
 	const [pendingBoundingBox, setPendingBoundingBox] = useState(null)
 	const [pendingSegmentation, setPendingSegmentation] = useState(null)
 	const [deleteSelectedRequest, setDeleteSelectedRequest] = useState(0)
+	const [selectedAnnotationId, setSelectedAnnotationId] = useState(null)
 	const autosaveTimeoutRef = useRef(null)
 	const autosaveReadyRef = useRef(false)
 	const restoredAutosaveRef = useRef(false)
@@ -330,6 +331,7 @@ export default function MainUpload() {
 			var annot = getAnnotationData(currframe_redux)
 			setCurrAnnotationData(annot)
 		}
+		setSelectedAnnotationId(null)
 	}, [currframe_redux])
 
 	useEffect(()=>{
@@ -476,6 +478,7 @@ export default function MainUpload() {
 		var curr_data = getAnnotationData(getCurrentFrame()) || []
 		var next_data = curr_data.filter((annotation) => annotation.id !== localId)
 		updateAnnotationData(currframe_redux, next_data)
+		setSelectedAnnotationId(null)
 		showToast("Removed annotation " + localId)
 	}
 
@@ -869,6 +872,10 @@ export default function MainUpload() {
 		setCurrAnnotationData(val)
 	}
 
+	const handleSelectedAnnotationChange = (annotationId) => {
+		setSelectedAnnotationId(annotationId)
+	}
+
 	const genFabricCanvas = () => {
 		var fcanvas = []
 		for(var i = 0; i < imagedata_redux.length; i++){
@@ -892,6 +899,7 @@ export default function MainUpload() {
 						onSegmentationCancelled={handleSegmentationCancelled}
 						deleteSelectedRequest={deleteSelectedRequest}
 						onBoundingBoxDeleted={handleBoundingBoxDeleted}
+						onSelectedAnnotationChange={handleSelectedAnnotationChange}
 					/>
 				</div>
 			)
@@ -992,6 +1000,7 @@ export default function MainUpload() {
 							currentFrame={currframe_redux}
 							toggleKeyCheck={toggleKeyCheck}
 							columns={columns}
+							selectedAnnotationId={selectedAnnotationId}
 						/>
 					</aside>
 				</main>

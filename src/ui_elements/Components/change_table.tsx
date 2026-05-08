@@ -26,8 +26,8 @@ export default function AnnotationTable(props){
                     <TabsTrigger value="home">Current</TabsTrigger>
                 </TabsList>
                 <TabsContent value="home" className="min-h-0 overflow-hidden p-3">
-                    <AnnotTable columns={columns} data={annotation_data} select_data={select_data} current_frame={props.currentFrame} change_annot={props.handleChangeAnnot}/>
-                </TabsContent>
+				<AnnotTable columns={columns} data={annotation_data} select_data={select_data} current_frame={props.currentFrame} change_annot={props.handleChangeAnnot} selected_annotation_id={props.selectedAnnotationId}/>
+			</TabsContent>
 
             </Tabs>
         }   
