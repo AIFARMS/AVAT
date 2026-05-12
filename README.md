@@ -63,7 +63,6 @@ Setup a virtual environment and install the proper dependencies from ```backend/
 ### FrontEnd
 * [React](https://reactjs.org/) - Main Front-End Framework
 * [React Bootstrap](https://react-bootstrap.github.io/) - UI Library
-* [react-player](https://www.npmjs.com/package/react-player) - Video Player
 * [fabric.js](http://fabricjs.com/) - Canvas renderer
 
 ## Authors

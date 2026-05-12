@@ -19,7 +19,7 @@
       46 ./ui_elements/Components/instructions.js
       33 ./ui_elements/Components/fabric_canvas.js
       28 ./ui_elements/Components/video_player.js
-     271 ./ui_elements/Components/nav_bar_multiview.js
+     245 ./ui_elements/Components/nav_bar_multiview.js
      159 ./ui_elements/Components/fabric_setup.js
      104 ./ui_elements/Components/annot_table.js
       82 ./ui_elements/Components/process_video.js
@@ -42,11 +42,9 @@
      130 ./annotations/segmentation_edit.js
      261 ./annotations/segmentation.js
      133 ./annotations/bounding_box.js
-      56 ./tensorflow/ObjectDetection.js
-      58 ./tensorflow/SemanticSegmentation.js
      141 ./serviceWorker.js
        5 ./setupTests.js
       29 ./fabric_types/fabric_boundingbox.js
        0 ./fabric_types/fabric_segmentation.js
       29 ./App.js
-    4694 total
+    4554 total

@@ -1,0 +1,142 @@
+import {BoundingBox} from '../annotations/bounding_box'
+import { fabric } from 'fabric';
+
+export default class ExtractingAnnotation{
+    [key: string]: any;
+
+    constructor(annotation_json, width, height){
+        this.frame_data = annotation_json['annotations']
+        this.annotation_data = annotation_json['behavior_data']
+        this.width = width
+        this.height = height
+        this.metadata = annotation_json['vid_metadata']
+    }
+
+    get_frame_data(){
+        return this.scale_annotations()
+    }
+
+    get_frame_rate(){
+        try{
+            return this.metadata['frame_rate']
+        }catch (error){
+            return 1
+        }
+    }
+    
+    get_annotation_data(){
+        return this.annotation_data;
+    }
+
+    find_highest_localid(){
+        var localid = []
+        for(var i = 0; i < this.annotation_data.length; i++){
+            for(var j = 0; j < this.annotation_data[i].length; j++){
+                localid.push(parseInt(this.annotation_data[i][j]['id'].replace(/\D/g, "")))
+            }
+        }
+        return Math.max(...localid)+1
+    }
+
+    scale_annotations(){
+        var new_annotations = []
+        for(var i = 0; i < this.frame_data.length; i++){
+            var temp_data = []
+            var curr_frame = this.frame_data[i]
+            if(curr_frame == null){
+                new_annotations.push([])
+                continue;
+            }
+            for(var j = 0; j < curr_frame.length; j++){
+                if(curr_frame[j]['type'] === "bounding_box"){
+                    var x = (parseInt(curr_frame[j]['x']) / parseInt(this.metadata['horizontal_res']) * this.width) 
+                    var y = (curr_frame[j]['y'] / this.metadata['vertical_res'] * this.height)
+                    var width = ((curr_frame[j]['width']) / this.metadata['horizontal_res'] * this.width)
+                    var height = ((curr_frame[j]['height']) / this.metadata['vertical_res'] * this.height)
+
+                    var color = "#" + ((1<<24)*Math.random() | 0).toString(16)
+                    var new_bbox = new BoundingBox(y, x, width, height, color, curr_frame[j]['local_id'], "None").generate_no_behavior(this)
+                    //this.add(new_bbox)
+                    new_bbox.local_id = curr_frame[j]['local_id']
+                    temp_data.push(new_bbox)
+                }else if(curr_frame[j]['type'] === "segmentation"){
+                    var points = []
+                    var curr_points = curr_frame[j]['points']
+                    for(var k = 0; k < curr_points.length; k++){
+                        var x_scaled = (parseInt(curr_points[k]['x']) / parseInt(this.metadata['horizontal_res']) * this.width)
+                        var y_scaled = (curr_points[k]['y'] / this.metadata['vertical_res'] * this.height)
+                        points.push({x: x_scaled, y: y_scaled})
+                    }
+                    var po = new fabric.Polygon(points, {
+                        strokeWidth: 1,
+                        stroke: 'green',
+                        opacity: .5,
+                        scaleX: 1,
+                        scaleY: 1,
+                        objectCaching: false,
+                        transparentCorners: false,
+                        cornerColor: 'blue',
+                        originX: 'center',
+                        originY: 'center'
+                    });
+                    var display_text = new fabric.Text(curr_frame[j]['local_id'], {
+                        fontSize: 20,
+                        centerX: "center",
+                        top: points[0].y,
+                        left: points[0].x, 
+                        uniScaleTransform: false,
+                        fill: "white",
+                    })
+                    var grouppo = new fabric.Group([po, display_text], {perPixelTargetFind: true})
+                    grouppo.lockMovementY = true;
+                    grouppo.lockMovementX = true;
+                    grouppo.selectable = false;
+                    grouppo.local_id = curr_frame[j]['local_id']
+                    //this.add(grouppo)
+                    temp_data.push(grouppo)
+                }
+            }
+            new_annotations.push(temp_data)
+        }
+        return new_annotations
+    }
+}
+
+//This is the parser for the Multi-Camera pig tracking output JSON code. 
+/*
+class MCPT_Processing {
+    constructor(annotation_json){
+        this.objects = annotation_json['objects']
+    }
+
+    getObjects_MCPT() {
+        return this.objects
+    }
+
+    getObjectById_MCPT(id) {
+        return this.objects[id]
+    }
+    
+    getObjectByIdFrame(id, frame_num){
+        return this.objects[id][frame_num]
+    }
+
+    getAllObjectByFrame_MCPT(frame_num){
+        var i;
+        var objects_frame = []
+        for (i = 0; i < this.objects.length; i++){
+            var curr_obj = this.objects[i]
+            if(curr_obj['frames'][curr_obj['frames'].length-1]['frameNumber'] < frame_num){
+                continue;
+            }
+            var curr_obj_frames = curr_obj['frames'];
+            for (var j = 0; j < curr_obj_frames.length; j++){
+                if(curr_obj_frames[j]['frameNumber'] === frame_num){
+                    objects_frame.push(curr_obj_frames[j]);
+                    break;
+                }
+            }
+        }
+        return objects_frame;
+    }
+}*/
